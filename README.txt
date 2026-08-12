@@ -1,3 +1,1 @@
-Just testing website creation on github
-Stellar by HTML5 UP
-html5up.net | @ajlkn
+Hey there! Just a testing website! nothing else...
