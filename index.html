@@ -199,7 +199,6 @@
             <button class="close-btn" onclick="closeGame()">Exit Game</button>
         </div>
         <div class="iframe-container">
-            <!-- Eaglercraft-compatible iframe with pointer-lock and fullscreen permissions -->
             <iframe id="gameIframe" src="" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="pointer-lock; fullscreen; autoplay; keyboard-map; clipboard-read; clipboard-write"></iframe>
         </div>
     </div>
@@ -211,7 +210,8 @@
                 title: "Craft",
                 category: "Adventure",
                 image: "https://placehold.co/400x250/059669/ffffff?text=Craft", 
-                url: "craft.html" // Points to your local file on GitHub Pages
+                url: "craft.html",
+                directLink: true // <-- This tells the code NOT to use the iframe for this game
             },
             {
                 title: "2048",
@@ -283,14 +283,20 @@
             });
         }
 
-        // Function to open the game in the fullscreen modal
+        // Function to open the game
         function openGame(game) {
+            // Check if the game needs to load in the main window instead of the iframe
+            if (game.directLink) {
+                window.location.href = game.url; // This takes them off index.html directly to craft.html
+                return; // Stop the rest of the code from running
+            }
+
+            // Otherwise, load normally in the iframe modal
             modalTitle.textContent = game.title;
             iframe.src = game.url;
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
             
-            // Auto-focus the iframe after it loads so pointer-lock works immediately
             iframe.onload = () => {
                 iframe.focus();
             };
