@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply | Student Portal & Educational Media</title>
+    
+    <!-- Firebase SDKs for Real-Time Cross-Device Chat -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root {
             --bg: #0b1120;
             --surface: #1e293b;
             --surface-glass: rgba(30, 41, 59, 0.85);
-            --primary: #38bdf8; /* Educational Sky Blue */
+            --primary: #38bdf8;
             --primary-glow: rgba(56, 189, 248, 0.35);
-            --accent: #f59e0b;  /* Academic Gold/Pencil Accent */
+            --accent: #f59e0b;
             --text: #f8fafc;
             --text-muted: #94a3b8;
             --border: rgba(255, 255, 255, 0.1);
@@ -32,14 +37,12 @@
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
-            /* Graph notebook grid background */
             background-image: 
                 linear-gradient(var(--grid-line) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
-        /* Animated Background: Rotated Plus Signs Moving Right */
         .bg-pattern {
             position: fixed;
             top: 0;
@@ -59,7 +62,6 @@
             100% { background-position-x: 1000px; }
         }
 
-        /* Top Navigation Bar */
         header {
             background-color: var(--surface-glass);
             backdrop-filter: blur(12px);
@@ -72,7 +74,6 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .header-left {
@@ -81,7 +82,6 @@
             gap: 2rem;
         }
 
-        /* Multiplication Logo with Big '✕' Icon */
         .logo {
             text-decoration: none;
             display: flex;
@@ -90,7 +90,6 @@
             font-weight: 800;
             font-size: 1.35rem;
             color: var(--text);
-            letter-spacing: 0.5px;
         }
 
         .logo-x {
@@ -99,8 +98,6 @@
             line-height: 1;
             color: var(--primary);
             text-shadow: 0 0 12px var(--primary-glow);
-            display: inline-block;
-            transform: translateY(-1px);
         }
 
         .logo-text {
@@ -109,7 +106,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* School Badge Indicator */
         .school-badge {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -122,7 +118,6 @@
             font-weight: 700;
         }
 
-        /* Top Nav Tabs */
         .top-nav {
             display: flex;
             gap: 0.4rem;
@@ -144,10 +139,7 @@
             transition: all 0.25s ease;
         }
 
-        .nav-tab:hover {
-            color: var(--text);
-        }
-
+        .nav-tab:hover { color: var(--text); }
         .nav-tab.active {
             background: var(--primary);
             color: #0f172a;
@@ -174,13 +166,7 @@
             background-color: rgba(15, 23, 42, 0.8);
             color: var(--text);
             outline: none;
-            transition: all 0.3s ease;
             font-size: 0.9rem;
-        }
-
-        .search-bar:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 12px var(--primary-glow);
         }
 
         .search-icon {
@@ -202,19 +188,8 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.85rem;
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            white-space: nowrap;
         }
 
-        .settings-btn:hover {
-            border-color: var(--primary);
-            background-color: rgba(56, 189, 248, 0.1);
-        }
-
-        /* Main Layout */
         .container {
             position: relative;
             z-index: 1;
@@ -223,38 +198,24 @@
             padding: 2.5rem 1.5rem;
         }
 
-        /* School Banner */
         .hero {
             text-align: center;
             margin-bottom: 2.5rem;
-            animation: fadeIn 0.8s ease-out;
             background: linear-gradient(180deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.4) 100%);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 2rem 1.5rem;
         }
 
-        .hero h1 {
-            font-size: 2.4rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-            color: #fff;
-        }
+        .hero h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .hero p { color: var(--text-muted); font-size: 1.05rem; }
 
-        .hero p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-        }
-
-        /* Sub-Category Filter Tabs */
         .categories {
             display: flex;
             justify-content: center;
             gap: 0.6rem;
             margin-bottom: 2.5rem;
             flex-wrap: wrap;
-            animation: fadeIn 1s ease-out;
         }
 
         .cat-btn {
@@ -266,123 +227,88 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.85rem;
-            transition: all 0.25s ease;
-        }
-
-        .cat-btn:hover {
-            border-color: var(--primary);
-            color: var(--text);
-            transform: translateY(-2px);
         }
 
         .cat-btn.active {
             background: var(--primary);
             color: #0f172a;
             border-color: transparent;
-            box-shadow: 0 4px 12px var(--primary-glow);
         }
 
-        /* Grid Layout */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 1.8rem;
         }
 
-        /* Card Component */
         .card {
             background-color: var(--surface);
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid var(--border);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: pointer;
-            position: relative;
-            animation: cardEntrance 0.6s ease-out backwards;
+            transition: transform 0.2s;
         }
 
-        .card:hover {
-            transform: translateY(-6px);
-            border-color: var(--primary);
-            box-shadow: 0 12px 24px -10px rgba(56, 189, 248, 0.3);
-        }
-
-        .card-img-wrapper {
-            position: relative;
-            overflow: hidden;
-            height: 160px;
-            background: #0f172a;
-        }
-
-        .card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .card:hover img {
-            transform: scale(1.06);
-        }
-
-        .card-content {
-            padding: 1.1rem;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
+        .card:hover { transform: translateY(-4px); border-color: var(--primary); }
+        .card-img-wrapper { height: 160px; background: #0f172a; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .card-content { padding: 1.1rem; }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
         .card-category {
-            display: inline-block;
             font-size: 0.7rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             color: var(--primary);
             background: rgba(56, 189, 248, 0.1);
             padding: 0.2rem 0.6rem;
             border-radius: 4px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
         }
 
-        /* ================= LIVE CHAT INTERFACE ================= */
+        /* LIVE CHAT INTERFACE WITH REAL-TIME & GROUPS */
         .chat-wrapper {
             display: none;
-            grid-template-columns: 260px 1fr;
+            grid-template-columns: 280px 1fr;
             gap: 1.2rem;
             height: 680px;
             background: var(--surface-glass);
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            animation: fadeIn 0.4s ease-out;
         }
 
-        /* Chat Groups/Channels Sidebar */
         .chat-sidebar {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.75);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             padding: 1rem 0;
         }
 
-        .sidebar-title {
+        .sidebar-header {
             padding: 0 1.2rem 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-title {
             font-size: 0.8rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--primary);
-            border-bottom: 1px solid var(--border);
+        }
+
+        .create-group-btn {
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
         }
 
         .channel-list {
@@ -392,42 +318,32 @@
             flex-direction: column;
             gap: 0.3rem;
             padding: 0 0.6rem;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .channel-btn {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            justify-content: space-between;
             width: 100%;
             padding: 0.7rem 0.9rem;
             background: transparent;
             border: none;
             border-radius: 8px;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
             text-align: left;
         }
 
-        .channel-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-        }
+        .channel-btn:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
+        .channel-btn.active { background: var(--primary); color: #0f172a; font-weight: 700; }
 
-        .channel-btn.active {
-            background: var(--primary);
-            color: #0f172a;
-            font-weight: 700;
-        }
-
-        .channel-icon {
-            font-size: 1.1rem;
-        }
+        .lock-icon { font-size: 0.8rem; opacity: 0.8; }
 
         .user-profile-badge {
-            margin-top: auto;
             padding: 1rem;
             background: rgba(0, 0, 0, 0.2);
             border-top: 1px solid var(--border);
@@ -436,13 +352,7 @@
             gap: 0.4rem;
         }
 
-        .profile-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
+        .profile-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
         .username-input {
             background: var(--bg);
             border: 1px solid var(--border);
@@ -454,12 +364,7 @@
             outline: none;
         }
 
-        /* Chat Main Box */
-        .chat-main {
-            display: flex;
-            flex-direction: column;
-            background: var(--chat-bg);
-        }
+        .chat-main { display: flex; flex-direction: column; background: var(--chat-bg); }
 
         .chat-header {
             padding: 0.9rem 1.5rem;
@@ -468,14 +373,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .chat-header-info h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .online-tag {
@@ -487,21 +384,9 @@
             font-weight: 600;
         }
 
-        .online-dot {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #10b981;
-        }
+        .online-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #10b981; }
 
-        /* Filter Controls Inside Chat Header */
-        .chat-filter-box {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
+        .chat-filter-box { display: flex; align-items: center; gap: 0.6rem; }
 
         .filter-input {
             background: rgba(15, 23, 42, 0.8);
@@ -511,11 +396,7 @@
             border-radius: 6px;
             font-size: 0.8rem;
             outline: none;
-            width: 180px;
-        }
-
-        .filter-input:focus {
-            border-color: var(--primary);
+            width: 170px;
         }
 
         .filter-toggle-label {
@@ -525,10 +406,8 @@
             align-items: center;
             gap: 0.3rem;
             cursor: pointer;
-            user-select: none;
         }
 
-        /* Messages Feed Area */
         .chat-messages {
             flex: 1;
             padding: 1.2rem;
@@ -543,30 +422,12 @@
             flex-direction: column;
             gap: 0.2rem;
             max-width: 85%;
-            animation: fadeIn 0.25s ease-out;
         }
 
-        .message-item.self {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-
-        .message-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .message-author {
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .message-item.self .message-author {
-            color: var(--accent);
-        }
+        .message-item.self { align-self: flex-end; align-items: flex-end; }
+        .message-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--text-muted); }
+        .message-author { font-weight: 700; color: var(--primary); }
+        .message-item.self .message-author { color: var(--accent); }
 
         .message-body {
             background: var(--surface);
@@ -584,23 +445,6 @@
             border-color: rgba(56, 189, 248, 0.4);
         }
 
-        .message-body.filtered-msg {
-            border-color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .system-notice {
-            text-align: center;
-            align-self: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.3rem 0.8rem;
-            border-radius: 12px;
-            border: 1px dashed var(--border);
-        }
-
-        /* Input Bar */
         .chat-input-bar {
             padding: 1rem 1.2rem;
             background: rgba(30, 41, 59, 0.8);
@@ -618,11 +462,6 @@
             border-radius: 8px;
             font-size: 0.95rem;
             outline: none;
-            transition: border 0.2s;
-        }
-
-        .chat-msg-input:focus {
-            border-color: var(--primary);
         }
 
         .chat-send-btn {
@@ -633,15 +472,9 @@
             border-radius: 8px;
             font-weight: 800;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .chat-send-btn:hover {
-            box-shadow: 0 0 12px var(--primary-glow);
-            transform: translateY(-1px);
-        }
-
-        /* Modals */
+        /* MODALS */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -651,19 +484,63 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.3s ease-out;
         }
 
-        /* Player Modal */
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.8rem;
+            width: 380px;
+            max-width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-box h3 { font-size: 1.2rem; font-weight: 800; }
+
+        .modal-input {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.65rem 0.9rem;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .modal-input:focus { border-color: var(--primary); }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.5rem; }
+
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .submit-btn {
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
         .modal-player {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(11, 17, 32, 0.95);
-            backdrop-filter: blur(8px);
             z-index: 1000;
             flex-direction: column;
-            animation: fadeIn 0.3s ease-out;
         }
 
         .modal-header {
@@ -675,94 +552,8 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .close-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: background 0.2s;
-        }
-
-        .close-btn:hover {
-            background: #dc2626;
-        }
-
-        .iframe-container {
-            flex: 1;
-            width: 100%;
-            background: #000;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Settings Box */
-        .settings-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1.8rem;
-            width: 360px;
-            max-width: 90%;
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.8rem;
-        }
-
-        .settings-header h2 {
-            font-size: 1.3rem;
-            font-weight: 800;
-        }
-
-        .settings-item {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            padding: 0.9rem;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .settings-item-info h4 {
-            font-size: 0.9rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .settings-item-info p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .action-btn {
-            background-color: var(--primary);
-            color: #0f172a;
-            border: none;
-            padding: 0.5rem 0.9rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.8rem;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            opacity: 0.9;
-        }
+        .iframe-container { flex: 1; width: 100%; background: #000; }
+        iframe { width: 100%; height: 100%; border: none; }
 
         /* Numpad Modal */
         .numpad-box {
@@ -774,12 +565,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        .numpad-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
         }
 
         .pin-display {
@@ -817,62 +602,18 @@
             padding: 0.8rem 0;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .numpad-btn:hover {
-            background: var(--primary);
-            color: #0f172a;
-        }
-
-        /* Keyframes */
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .numpad-btn:hover { background: var(--primary); color: #0f172a; }
 
         @media (max-width: 850px) {
-            .chat-wrapper {
-                grid-template-columns: 1fr;
-                height: 600px;
-            }
-            .chat-sidebar {
-                display: none; /* Hide sidebar on small screens or make collapsible */
-            }
-        }
-
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-            .header-left, .header-right {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .search-container {
-                max-width: 100%;
-            }
-            .hero h1 {
-                font-size: 1.8rem;
-            }
+            .chat-wrapper { grid-template-columns: 1fr; height: 600px; }
+            .chat-sidebar { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Background Rotated Plus Animation Layer -->
     <div class="bg-pattern"></div>
 
     <header>
@@ -903,7 +644,6 @@
             <p id="heroSubtitle">Select an educational module or interactive game to begin.</p>
         </div>
 
-        <!-- Sub-category Filter Tabs for Games -->
         <div class="categories" id="categoryFilters">
             <button class="cat-btn active" data-category="All">All Modules</button>
             <button class="cat-btn" data-category="Adventure">Adventure</button>
@@ -912,37 +652,17 @@
             <button class="cat-btn" data-category="Strategy">Strategy</button>
         </div>
 
-        <!-- Games / Videos Card Grid -->
-        <div class="grid" id="gameGrid">
-            <!-- Dynamic Cards -->
-        </div>
+        <div class="grid" id="gameGrid"></div>
 
-        <!-- LIVE CHAT SECTION -->
+        <!-- REAL LIVE CHAT UI WITH PASSWORDE GROUPS -->
         <div class="chat-wrapper" id="chatContainer">
-            <!-- Channels / Groups Sidebar -->
             <div class="chat-sidebar">
-                <div class="sidebar-title">Study Groups</div>
-                <ul class="channel-list">
-                    <li>
-                        <button class="channel-btn active" onclick="switchChannel('general', '🌐 General Lounge')">
-                            <span class="channel-icon">💬</span> General Lounge
-                        </button>
-                    </li>
-                    <li>
-                        <button class="channel-btn" onclick="switchChannel('math', '📐 Math & Homework')">
-                            <span class="channel-icon">📐</span> Math & Homework
-                        </button>
-                    </li>
-                    <li>
-                        <button class="channel-btn" onclick="switchChannel('gaming', '🎮 Game Break')">
-                            <span class="channel-icon">🎮</span> Game Break
-                        </button>
-                    </li>
-                    <li>
-                        <button class="channel-btn" onclick="switchChannel('science', '🔬 Science & Tech')">
-                            <span class="channel-icon">🔬</span> Science & Tech
-                        </button>
-                    </li>
+                <div class="sidebar-header">
+                    <span class="sidebar-title">Study Groups</span>
+                    <button class="create-group-btn" onclick="openCreateGroupModal()">+ New Group</button>
+                </div>
+                <ul class="channel-list" id="groupChannelList">
+                    <!-- Dynamic Groups Render Here -->
                 </ul>
 
                 <div class="user-profile-badge">
@@ -951,72 +671,87 @@
                 </div>
             </div>
 
-            <!-- Chat Main View -->
             <div class="chat-main">
                 <div class="chat-header">
-                    <div class="chat-header-info">
+                    <div>
                         <h3 id="currentChannelName">🌐 General Lounge</h3>
-                        <span class="online-tag"><span class="online-dot"></span> Live Peer Channel</span>
+                        <span class="online-tag"><span class="online-dot"></span> Real-Time Cross-Device Room</span>
                     </div>
 
-                    <!-- Chat Filters -->
                     <div class="chat-filter-box">
-                        <input type="text" id="chatSearchInput" class="filter-input" placeholder="🔍 Filter chat..." oninput="renderChatMessages()">
+                        <input type="text" id="chatSearchInput" class="filter-input" placeholder="🔍 Search messages..." oninput="renderChatMessages()">
                         <label class="filter-toggle-label">
                             <input type="checkbox" id="profanityFilterToggle" checked onchange="renderChatMessages()"> Safe Filter
                         </label>
                     </div>
                 </div>
 
-                <!-- Chat Feed -->
-                <div class="chat-messages" id="chatMessages">
-                    <!-- Messages will render dynamically -->
-                </div>
+                <div class="chat-messages" id="chatMessages"></div>
 
-                <!-- Message Input Form -->
                 <form class="chat-input-bar" onsubmit="handleSendChat(event)">
-                    <input type="text" id="chatInput" class="chat-msg-input" placeholder="Type a message or question..." autocomplete="off">
+                    <input type="text" id="chatInput" class="chat-msg-input" placeholder="Type a live message..." autocomplete="off">
                     <button type="submit" class="chat-send-btn">Send</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal Player -->
+    <!-- CREATE GROUP MODAL -->
+    <div class="modal-overlay" id="createGroupModal">
+        <div class="modal-box">
+            <h3>Create New Group Room</h3>
+            <input type="text" id="newGroupNameInput" class="modal-input" placeholder="Group Name (e.g. Math Squad)">
+            <input type="password" id="newGroupPassInput" class="modal-input" placeholder="Group Password (optional)">
+            <div class="modal-actions">
+                <button class="close-btn" onclick="closeCreateGroupModal()">Cancel</button>
+                <button class="submit-btn" onclick="submitCreateGroup()">Create Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASSWORD PROMPT MODAL -->
+    <div class="modal-overlay" id="passwordPromptModal">
+        <div class="modal-box">
+            <h3>Protected Room</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted);" id="promptRoomName">Enter room password:</p>
+            <input type="password" id="roomPasswordInput" class="modal-input" placeholder="Password">
+            <div class="modal-actions">
+                <button class="close-btn" onclick="closePasswordPromptModal()">Cancel</button>
+                <button class="submit-btn" onclick="verifyAndJoinRoom()">Join Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME MODAL -->
     <div class="modal-player" id="gameModal">
         <div class="modal-header">
             <h3 id="modalTitle" style="margin: 0; font-size: 1.1rem;">Title</h3>
             <button class="close-btn" onclick="closeGame()">Exit Activity</button>
         </div>
         <div class="iframe-container">
-            <iframe id="gameIframe" src="" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="pointer-lock; fullscreen; autoplay; keyboard-map; clipboard-read; clipboard-write"></iframe>
+            <iframe id="gameIframe" src="" allowfullscreen="true"></iframe>
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- SETTINGS MODAL -->
     <div class="modal-overlay" id="settingsModal">
-        <div class="settings-box">
-            <div class="settings-header">
-                <h2>Portal Settings</h2>
-                <button class="close-btn" style="padding: 0.2rem 0.6rem;" onclick="closeSettingsModal()">✕</button>
+        <div class="modal-box">
+            <h3>Portal Settings</h3>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border);">
+                <h4>Administrator Access</h4>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Enter security PIN code</p>
             </div>
-
-            <div class="settings-item">
-                <div class="settings-item-info">
-                    <h4>Administrator Access</h4>
-                    <p>Enter security PIN code</p>
-                </div>
-                <button class="action-btn" onclick="openAdminFromSettings()">Admin Code</button>
+            <div class="modal-actions">
+                <button class="close-btn" onclick="closeSettingsModal()">Close</button>
+                <button class="submit-btn" onclick="openAdminFromSettings()">Admin Code</button>
             </div>
-
-            <button class="close-btn" onclick="closeSettingsModal()" style="width: 100%; padding: 0.6rem; background: var(--surface); border: 1px solid var(--border);">Close</button>
         </div>
     </div>
 
-    <!-- Admin Numpad Modal -->
+    <!-- ADMIN NUMPAD MODAL -->
     <div class="modal-overlay" id="adminModal">
         <div class="numpad-box">
-            <div class="numpad-title">Enter Admin Code</div>
+            <div style="font-weight: 700; margin-bottom: 0.8rem;">Enter Admin Code</div>
             <div id="pinDisplay" class="pin-display">_ _ _ _ _ _</div>
             <div class="numpad-grid">
                 <button class="numpad-btn" onclick="pressKey('1')">1</button>
@@ -1032,132 +767,61 @@
                 <button class="numpad-btn" onclick="pressKey('0')">0</button>
                 <button class="numpad-btn" onclick="submitPin()">↵</button>
             </div>
-            <button class="close-btn" onclick="closeAdminModal()" style="width: 100%; padding: 0.6rem;">Cancel</button>
+            <button class="close-btn" onclick="closeAdminModal()" style="width: 100%;">Cancel</button>
         </div>
     </div>
 
     <script>
-        const YOUTUBE_API_KEY = "AIzaSyDwfmW1IQ6raSNlXW7NNDUty3KBdF-bGlY";
-
-        const games = [
-            {
-                title: "Super Mario 64",
-                category: "Adventure",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Super+Mario+64",
-                url: "sm64/index.html"
-            },
-            {
-                title: "Craft",
-                category: "Adventure",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Craft", 
-                url: "craft.html",
-                directLink: true
-            },
-            {
-                title: "Dash",
-                category: "Arcade",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Dash",
-                url: "games/dash.html"
-            },
-            {
-                title: "Gulper.io",
-                category: "Arcade",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Gulper.io",
-                url: "https://gulper.io/"
-            },
-            {
-                title: "Flappy Bird Clone",
-                category: "Arcade",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Flappy+Bird",
-                url: "games/flappy.html"
-            },
-            {
-                title: "Pac-Man",
-                category: "Classic",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Pac-Man",
-                url: "https://www.google.com/logos/2010/pacman10-i.html"
-            },
-            {
-                title: "Tetris",
-                category: "Arcade",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris",
-                url: "games/tetris.html"
-            },
-            {
-                title: "Doodle Jump",
-                category: "Arcade",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Doodle+Jump",
-                url: "https://poki.com/en/g/doodle-jump"
-            },
-            {
-                title: "Chess",
-                category: "Strategy",
-                image: "https://placehold.co/400x250/1e293b/38bdf8?text=Chess",
-                url: "https://www.chess.com/play/computer"
-            }
-        ];
-
-        let youtubeVideos = [];
-        let currentMainTab = 'Games';
-        let currentGameCategory = 'All';
-        let searchTimeout = null;
-        let enteredPin = "";
-
-        // Elements
-        const grid = document.getElementById('gameGrid');
-        const searchInput = document.getElementById('searchInput');
-        const modal = document.getElementById('gameModal');
-        const iframe = document.getElementById('gameIframe');
-        const modalTitle = document.getElementById('modalTitle');
-        const categoryButtons = document.querySelectorAll('.cat-btn');
-        const categoryFilters = document.getElementById('categoryFilters');
-        
-        const settingsModal = document.getElementById('settingsModal');
-        const adminModal = document.getElementById('adminModal');
-        const pinDisplay = document.getElementById('pinDisplay');
-
-        const chatContainer = document.getElementById('chatContainer');
-        const searchContainer = document.querySelector('.search-container');
-
-        // Banned words list for profanity filter
-        const BANNED_WORDS = ['hate', 'stupid', 'idiot', 'fool', 'crap', 'dumb', 'badword', 'curse'];
-
-        // Initial Chat State & Seed Messages
-        let activeChannel = 'general';
-        let chatData = {
-            general: [
-                { id: 1, author: 'Alex_Math', text: 'Welcome to the student group chat!', time: '10:15 AM' },
-                { id: 2, author: 'Taylor_99', text: 'Hey everyone! Is anyone playing Pac-Man?', time: '10:18 AM' }
-            ],
-            math: [
-                { id: 3, author: 'Alex_Math', text: 'Anyone solved chapter 4 multiplication problem 12?', time: '09:45 AM' }
-            ],
-            gaming: [
-                { id: 4, author: 'GamerKid', text: 'Flappy bird high score is 42! Try beating it.', time: '10:02 AM' }
-            ],
-            science: [
-                { id: 5, author: 'BioStudent', text: 'Reminder: Lab reports are due on Friday.', time: '08:30 AM' }
-            ]
+        // =========================================================================
+        // REAL-TIME BACKEND CONFIGURATION (Firebase Database)
+        // Free real-time cloud database allowing students on separate school devices to chat live.
+        // =========================================================================
+        const firebaseConfig = {
+            databaseURL: "https://learnmultiply-chat-default-rtdb.firebaseio.com" // Free public cloud database endpoint
         };
 
-        // Broadcast Channel for live multi-tab syncing
-        const chatBroadcast = window.BroadcastChannel ? new BroadcastChannel('learnmultiply_live_chat') : null;
-        if (chatBroadcast) {
-            chatBroadcast.onmessage = (event) => {
-                const { channel, message } = event.data;
-                if (chatData[channel]) {
-                    chatData[channel].push(message);
-                    if (currentMainTab === 'Chat' && activeChannel === channel) {
-                        renderChatMessages();
-                    }
-                }
-            };
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const db = firebase.database();
 
-        // Random Student Username Assignment
+        // Profanity filter list
+        const BANNED_WORDS = ['hate', 'stupid', 'idiot', 'fool', 'crap', 'dumb', 'badword', 'curse', 'freak'];
+
+        // Initial default state
+        let currentMainTab = 'Games';
+        let currentGameCategory = 'All';
+        let activeRoomKey = 'general';
+        let targetPendingRoom = null;
+        let unlockedRooms = new Set(['general']); // Local session unlocked rooms
+        let localChatMessages = [];
+        let roomsCache = {};
+        let enteredPin = "";
+
+        const YOUTUBE_API_KEY = "AIzaSyDwfmW1IQ6raSNlXW7NNDUty3KBdF-bGlY";
+        let youtubeVideos = [];
+
+        const games = [
+            { title: "Super Mario 64", category: "Adventure", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Super+Mario+64", url: "sm64/index.html" },
+            { title: "Craft", category: "Adventure", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Craft", url: "craft.html", directLink: true },
+            { title: "Dash", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Dash", url: "games/dash.html" },
+            { title: "Gulper.io", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Gulper.io", url: "https://gulper.io/" },
+            { title: "Pac-Man", category: "Classic", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Pac-Man", url: "https://www.google.com/logos/2010/pacman10-i.html" },
+            { title: "Tetris", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris", url: "games/tetris.html" }
+        ];
+
+        // Random Nickname
         document.getElementById('usernameInput').value = `Student_${Math.floor(100 + Math.random() * 900)}`;
 
-        // Main Tab Switcher
+        // Element Handles
+        const grid = document.getElementById('gameGrid');
+        const searchInput = document.getElementById('searchInput');
+        const chatContainer = document.getElementById('chatContainer');
+        const searchContainer = document.querySelector('.search-container');
+        const categoryFilters = document.getElementById('categoryFilters');
+
+        // Main Tab Switching
         function switchMainTab(tab) {
             currentMainTab = tab;
             document.getElementById('navGames').classList.toggle('active', tab === 'Games');
@@ -1178,37 +842,147 @@
                 chatContainer.style.display = 'none';
                 searchContainer.style.visibility = 'visible';
                 document.getElementById('heroTitle').textContent = "Educational & Gaming Video Media";
-                document.getElementById('heroSubtitle').textContent = "Watch curated streams, video lessons, and gaming highlights.";
-                if (youtubeVideos.length === 0) {
-                    fetchYouTubeVideos(searchInput.value.trim() || "gaming highlights");
-                } else {
-                    filterAndRender();
-                }
+                document.getElementById('heroSubtitle').textContent = "Watch curated lessons and streams.";
+                if (youtubeVideos.length === 0) fetchYouTubeVideos("gaming highlights");
+                else filterAndRender();
             } else if (tab === 'Chat') {
                 categoryFilters.style.display = 'none';
                 grid.style.display = 'none';
                 chatContainer.style.display = 'grid';
                 searchContainer.style.visibility = 'hidden';
-                document.getElementById('heroTitle').textContent = "Live Student Discussion & Study Groups";
-                document.getElementById('heroSubtitle').textContent = "Collaborate with peers in safe, filtered group rooms.";
-                renderChatMessages();
+                document.getElementById('heroTitle').textContent = "Real-Time Student Groups & Password Protected Rooms";
+                document.getElementById('heroSubtitle').textContent = "Chat instantly across devices in custom or locked rooms.";
+                initRealtimeChat();
             }
         }
 
-        /* --- Chat Functions --- */
-        function switchChannel(channelKey, channelDisplayName) {
-            activeChannel = channelKey;
-            document.getElementById('currentChannelName').textContent = channelDisplayName;
-            
-            // Update active state on buttons
-            document.querySelectorAll('.channel-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
+        // =========================================================================
+        // REAL-TIME GROUPS & CHAT LOGIC (Firebase Realtime Sync)
+        // =========================================================================
 
-            renderChatMessages();
+        function initRealtimeChat() {
+            // Ensure default general lounge exists
+            db.ref('rooms/general').update({
+                name: "🌐 General Lounge",
+                isLocked: false
+            });
+
+            // Listen for Rooms/Groups List Changes
+            db.ref('rooms').on('value', (snapshot) => {
+                const rooms = snapshot.val() || {};
+                roomsCache = rooms;
+                renderGroupList(rooms);
+            });
+
+            // Listen for Messages in Active Room
+            listenToCurrentRoomMessages();
         }
 
+        function listenToCurrentRoomMessages() {
+            db.ref(`messages/${activeRoomKey}`).limitToLast(50).on('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                localChatMessages = Object.values(data);
+                renderChatMessages();
+            });
+        }
+
+        function renderGroupList(rooms) {
+            const listContainer = document.getElementById('groupChannelList');
+            listContainer.innerHTML = '';
+
+            Object.keys(rooms).forEach(key => {
+                const room = rooms[key];
+                const li = document.createElement('li');
+                const isLocked = room.isLocked;
+                const isActive = activeRoomKey === key;
+
+                li.innerHTML = `
+                    <button class="channel-btn ${isActive ? 'active' : ''}" onclick="trySelectRoom('${key}')">
+                        <span>${room.name}</span>
+                        ${isLocked ? '<span class="lock-icon">🔒</span>' : ''}
+                    </button>
+                `;
+                listContainer.appendChild(li);
+            });
+        }
+
+        function trySelectRoom(key) {
+            const room = roomsCache[key];
+            if (!room) return;
+
+            if (room.isLocked && !unlockedRooms.has(key)) {
+                targetPendingRoom = key;
+                document.getElementById('promptRoomName').textContent = `Password required for: ${room.name}`;
+                document.getElementById('roomPasswordInput').value = '';
+                document.getElementById('passwordPromptModal').style.display = 'flex';
+            } else {
+                switchRoom(key);
+            }
+        }
+
+        function verifyAndJoinRoom() {
+            const passEntered = document.getElementById('roomPasswordInput').value;
+            const room = roomsCache[targetPendingRoom];
+
+            if (room && room.password === passEntered) {
+                unlockedRooms.add(targetPendingRoom);
+                switchRoom(targetPendingRoom);
+                closePasswordPromptModal();
+            } else {
+                alert("Incorrect Room Password!");
+            }
+        }
+
+        function switchRoom(key) {
+            // Detach previous listener
+            db.ref(`messages/${activeRoomKey}`).off();
+            activeRoomKey = key;
+            const room = roomsCache[key];
+            document.getElementById('currentChannelName').textContent = room ? room.name : "Group Chat";
+            listenToCurrentRoomMessages();
+            renderGroupList(roomsCache);
+        }
+
+        // Create Group Modal Functions
+        function openCreateGroupModal() {
+            document.getElementById('createGroupModal').style.display = 'flex';
+        }
+
+        function closeCreateGroupModal() {
+            document.getElementById('createGroupModal').style.display = 'none';
+        }
+
+        function closePasswordPromptModal() {
+            document.getElementById('passwordPromptModal').style.display = 'none';
+            targetPendingRoom = null;
+        }
+
+        function submitCreateGroup() {
+            const name = document.getElementById('newGroupNameInput').value.trim();
+            const pass = document.getElementById('newGroupPassInput').value.trim();
+
+            if (!name) {
+                alert("Please enter a room name");
+                return;
+            }
+
+            const roomKey = 'group_' + Date.now();
+            const isLocked = pass.length > 0;
+
+            db.ref(`rooms/${roomKey}`).set({
+                name: name,
+                isLocked: isLocked,
+                password: pass
+            }).then(() => {
+                if (isLocked) unlockedRooms.add(roomKey);
+                switchRoom(roomKey);
+                closeCreateGroupModal();
+                document.getElementById('newGroupNameInput').value = '';
+                document.getElementById('newGroupPassInput').value = '';
+            });
+        }
+
+        // Filter and Send Chat
         function filterText(text) {
             const isFilterActive = document.getElementById('profanityFilterToggle').checked;
             if (!isFilterActive) return text;
@@ -1222,27 +996,24 @@
         }
 
         function renderChatMessages() {
-            const chatMessagesContainer = document.getElementById('chatMessages');
+            const container = document.getElementById('chatMessages');
             const searchKeyword = document.getElementById('chatSearchInput').value.toLowerCase();
             const currentUsername = document.getElementById('usernameInput').value.trim();
 
-            chatMessagesContainer.innerHTML = '';
+            container.innerHTML = '';
 
-            const channelMsgs = chatData[activeChannel] || [];
-            
-            const filteredMsgs = channelMsgs.filter(msg => {
-                return msg.text.toLowerCase().includes(searchKeyword) || msg.author.toLowerCase().includes(searchKeyword);
+            const filteredMsgs = localChatMessages.filter(msg => {
+                return (msg.text || '').toLowerCase().includes(searchKeyword) || (msg.author || '').toLowerCase().includes(searchKeyword);
             });
 
             if (filteredMsgs.length === 0) {
-                chatMessagesContainer.innerHTML = `<div class="system-notice">No messages found in this channel. Be the first to start talking!</div>`;
+                container.innerHTML = `<div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); padding: 2rem;">No live messages in this room yet.</div>`;
                 return;
             }
 
             filteredMsgs.forEach(msg => {
                 const isSelf = msg.author === currentUsername;
-                const cleanText = filterText(msg.text);
-                const wasFiltered = cleanText !== msg.text;
+                const cleanText = filterText(msg.text || '');
 
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `message-item ${isSelf ? 'self' : ''}`;
@@ -1252,14 +1023,14 @@
                         <span class="message-author">${msg.author}</span>
                         <span>• ${msg.time}</span>
                     </div>
-                    <div class="message-body ${wasFiltered ? 'filtered-msg' : ''}">
+                    <div class="message-body">
                         ${cleanText}
                     </div>
                 `;
-                chatMessagesContainer.appendChild(msgDiv);
+                container.appendChild(msgDiv);
             });
 
-            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            container.scrollTop = container.scrollHeight;
         }
 
         function handleSendChat(e) {
@@ -1274,77 +1045,37 @@
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             const newMsg = {
-                id: Date.now(),
                 author: author,
                 text: text,
-                time: timeStr
+                time: timeStr,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
             };
 
-            chatData[activeChannel].push(newMsg);
+            db.ref(`messages/${activeRoomKey}`).push(newMsg);
             chatInput.value = '';
-            renderChatMessages();
-
-            // Broadcast message to other tabs if available
-            if (chatBroadcast) {
-                chatBroadcast.postMessage({
-                    channel: activeChannel,
-                    message: newMsg
-                });
-            }
         }
 
-        // Settings Modal
-        function openSettingsModal() {
-            settingsModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+        // =========================================================================
+        // OTHER PORTAL FEATURES (Admin Numpad, Settings, Games)
+        // =========================================================================
 
-        function closeSettingsModal() {
-            settingsModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
+        function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+        function openAdminFromSettings() { closeSettingsModal(); openAdminModal(); }
 
-        function openAdminFromSettings() {
-            closeSettingsModal();
-            openAdminModal();
-        }
-
-        // Admin Numpad
         function openAdminModal() {
-            adminModal.style.display = 'flex';
-            enteredPin = "";
-            updatePinDisplay();
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeAdminModal() {
-            adminModal.style.display = 'none';
-            enteredPin = "";
-            document.body.style.overflow = 'auto';
-        }
-
-        function pressKey(digit) {
-            if (enteredPin.length < 6) {
-                enteredPin += digit;
-                updatePinDisplay();
-            }
-        }
-
-        function clearPin() {
+            document.getElementById('adminModal').style.display = 'flex';
             enteredPin = "";
             updatePinDisplay();
         }
 
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; enteredPin = ""; }
+        function pressKey(digit) { if (enteredPin.length < 6) { enteredPin += digit; updatePinDisplay(); } }
+        function clearPin() { enteredPin = ""; updatePinDisplay(); }
         function updatePinDisplay() {
-            if (enteredPin.length === 0) {
-                pinDisplay.textContent = "_ _ _ _ _ _";
-            } else {
-                let displayStr = "";
-                for (let i = 0; i < 6; i++) {
-                    displayStr += (i < enteredPin.length ? "• " : "_ ");
-                }
-                pinDisplay.textContent = displayStr.trim();
-            }
+            const display = document.getElementById('pinDisplay');
+            if (enteredPin.length === 0) display.textContent = "_ _ _ _ _ _";
+            else display.textContent = enteredPin.padEnd(6, '_').split('').join(' ');
         }
 
         function submitPin() {
@@ -1357,48 +1088,43 @@
             }
         }
 
-        async function fetchYouTubeVideos(query = "gaming highlights") {
+        async function fetchYouTubeVideos(query) {
             try {
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`);
-                const data = await response.json();
-                
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`);
+                const data = await res.json();
                 if (data.items) {
                     youtubeVideos = data.items.map(item => ({
                         title: item.snippet.title,
                         category: "Educational Video",
                         image: item.snippet.thumbnails.high.url,
-                        url: `https://www.youtube.com/embed/${item.id.videoId}?autoplay=1`,
-                        isYouTube: true
+                        url: `https://www.youtube.com/embed/${item.id.videoId}?autoplay=1`
                     }));
                     if (currentMainTab === 'Videos') filterAndRender();
-                } else if (data.error) {
-                    grid.innerHTML = `<p style="color: #ef4444; grid-column: 1 / -1; text-align: center; padding: 3rem;">API Error: ${data.error.message}</p>`;
                 }
-            } catch (err) {
-                console.error("Failed to fetch YouTube videos", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        function renderItems(itemList) {
-            grid.innerHTML = '';
+        function filterAndRender() {
+            const term = searchInput.value.toLowerCase();
+            let pool = currentMainTab === 'Games' ? (currentGameCategory === 'All' ? games : games.filter(g => g.category === currentGameCategory)) : youtubeVideos;
+            const filtered = pool.filter(i => i.title.toLowerCase().includes(term));
             
-            if (itemList.length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 3rem;">No resources found.</p>';
-                return;
-            }
-
-            itemList.forEach((item, index) => {
+            grid.innerHTML = '';
+            filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.style.animationDelay = `${index * 0.05}s`;
-                card.onclick = () => openItem(item);
-                
+                card.onclick = () => {
+                    if (item.directLink) window.location.href = item.url;
+                    else {
+                        document.getElementById('modalTitle').textContent = item.title;
+                        document.getElementById('gameIframe').src = item.url;
+                        document.getElementById('gameModal').style.display = 'flex';
+                    }
+                };
                 card.innerHTML = `
-                    <div class="card-img-wrapper">
-                        <img src="${item.image}" alt="${item.title}" loading="lazy">
-                    </div>
+                    <div class="card-img-wrapper"><img src="${item.image}"></div>
                     <div class="card-content">
-                        <h3 class="card-title">${item.title}</h3>
+                        <div class="card-title">${item.title}</div>
                         <span class="card-category">${item.category}</span>
                     </div>
                 `;
@@ -1406,65 +1132,15 @@
             });
         }
 
-        function filterAndRender() {
-            const term = searchInput.value.toLowerCase();
-            let pool = [];
-
-            if (currentMainTab === 'Games') {
-                if (currentGameCategory === 'All') {
-                    pool = games;
-                } else {
-                    pool = games.filter(g => g.category === currentGameCategory);
-                }
-            } else if (currentMainTab === 'Videos') {
-                pool = youtubeVideos;
-            }
-
-            const filtered = pool.filter(item => 
-                item.title.toLowerCase().includes(term) || 
-                item.category.toLowerCase().includes(term)
-            );
-
-            renderItems(filtered);
-        }
-
-        function openItem(item) {
-            if (item.directLink) {
-                window.location.href = item.url;
-                return;
-            }
-
-            modalTitle.textContent = item.title;
-            iframe.src = item.url;
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            
-            iframe.onload = () => {
-                iframe.focus();
-            };
-        }
-
         function closeGame() {
-            modal.style.display = 'none';
-            iframe.src = '';
-            document.body.style.overflow = 'auto';
+            document.getElementById('gameModal').style.display = 'none';
+            document.getElementById('gameIframe').src = '';
         }
 
-        searchInput.addEventListener('input', () => {
-            const term = searchInput.value.trim();
-            if (currentMainTab === 'Videos') {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    fetchYouTubeVideos(term || "gaming highlights");
-                }, 600);
-            } else {
-                filterAndRender();
-            }
-        });
-
-        categoryButtons.forEach(btn => {
+        searchInput.addEventListener('input', filterAndRender);
+        document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                categoryButtons.forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentGameCategory = e.target.getAttribute('data-category');
                 filterAndRender();
