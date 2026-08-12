@@ -1,184 +1,310 @@
-<!DOCTYPE HTML>
-<!--
-	Stellar by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-		<title>Stellar by HTML5 UP</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
-	<body class="is-preload">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Arcade | Unblocked Games</title>
+    <style>
+        /* CSS Variables for easy theme changing */
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
 
-		<!-- Wrapper -->
-			<div id="wrapper">
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+        }
 
-				<!-- Header -->
-					<header id="header" class="alt">
-						<span class="logo"><img src="images/logo.svg" alt="" /></span>
-						<h1>Stellar</h1>
-						<p>Just another free, fully responsive site template<br />
-						built by <a href="https://twitter.com/ajlkn">@ajlkn</a> for <a href="https://html5up.net">HTML5 UP</a>.</p>
-					</header>
+        /* Navigation Bar */
+        header {
+            background-color: var(--surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-				<!-- Nav -->
-					<nav id="nav">
-						<ul>
-							<li><a href="#intro" class="active">Introduction</a></li>
-							<li><a href="#first">First Section</a></li>
-							<li><a href="#second">Second Section</a></li>
-							<li><a href="#cta">Get Started</a></li>
-						</ul>
-					</nav>
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
 
-				<!-- Main -->
-					<div id="main">
+        .search-bar {
+            padding: 0.6rem 1.2rem;
+            border-radius: 9999px;
+            border: 1px solid #334155;
+            background-color: var(--bg);
+            color: var(--text);
+            width: 100%;
+            max-width: 350px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
 
-						<!-- Introduction -->
-							<section id="intro" class="main">
-								<div class="spotlight">
-									<div class="content">
-										<header class="major">
-											<h2>Ipsum sed adipiscing</h2>
-										</header>
-										<p>Sed lorem ipsum dolor sit amet nullam consequat feugiat consequat magna
-										adipiscing magna etiam amet veroeros. Lorem ipsum dolor tempus sit cursus.
-										Tempus nisl et nullam lorem ipsum dolor sit amet aliquam.</p>
-										<ul class="actions">
-											<li><a href="generic.html" class="button">Learn More</a></li>
-										</ul>
-									</div>
-									<span class="image"><img src="images/pic01.jpg" alt="" /></span>
-								</div>
-							</section>
+        .search-bar:focus {
+            border-color: var(--primary);
+        }
 
-						<!-- First Section -->
-							<section id="first" class="main special">
-								<header class="major">
-									<h2>Magna veroeros</h2>
-								</header>
-								<ul class="features">
-									<li>
-										<span class="icon solid major style1 fa-code"></span>
-										<h3>Ipsum consequat</h3>
-										<p>Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.</p>
-									</li>
-									<li>
-										<span class="icon major style3 fa-copy"></span>
-										<h3>Amed sed feugiat</h3>
-										<p>Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.</p>
-									</li>
-									<li>
-										<span class="icon major style5 fa-gem"></span>
-										<h3>Dolor nullam</h3>
-										<p>Sed lorem amet ipsum dolor et amet nullam consequat a feugiat consequat tempus veroeros sed consequat.</p>
-									</li>
-								</ul>
-								<footer class="major">
-									<ul class="actions special">
-										<li><a href="generic.html" class="button">Learn More</a></li>
-									</ul>
-								</footer>
-							</section>
+        /* Main Content Grid */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
 
-						<!-- Second Section -->
-							<section id="second" class="main special">
-								<header class="major">
-									<h2>Ipsum consequat</h2>
-									<p>Donec imperdiet consequat consequat. Suspendisse feugiat congue<br />
-									posuere. Nulla massa urna, fermentum eget quam aliquet.</p>
-								</header>
-								<ul class="statistics">
-									<li class="style1">
-										<span class="icon solid fa-code-branch"></span>
-										<strong>5,120</strong> Etiam
-									</li>
-									<li class="style2">
-										<span class="icon fa-folder-open"></span>
-										<strong>8,192</strong> Magna
-									</li>
-									<li class="style3">
-										<span class="icon solid fa-signal"></span>
-										<strong>2,048</strong> Tempus
-									</li>
-									<li class="style4">
-										<span class="icon solid fa-laptop"></span>
-										<strong>4,096</strong> Aliquam
-									</li>
-									<li class="style5">
-										<span class="icon fa-gem"></span>
-										<strong>1,024</strong> Nullam
-									</li>
-								</ul>
-								<p class="content">Nam elementum nisl et mi a commodo porttitor. Morbi sit amet nisl eu arcu faucibus hendrerit vel a risus. Nam a orci mi, elementum ac arcu sit amet, fermentum pellentesque et purus. Integer maximus varius lorem, sed convallis diam accumsan sed. Etiam porttitor placerat sapien, sed eleifend a enim pulvinar faucibus semper quis ut arcu. Ut non nisl a mollis est efficitur vestibulum. Integer eget purus nec nulla mattis et accumsan ut magna libero. Morbi auctor iaculis porttitor. Sed ut magna ac risus et hendrerit scelerisque. Praesent eleifend lacus in lectus aliquam porta. Cras eu ornare dui curabitur lacinia.</p>
-								<footer class="major">
-									<ul class="actions special">
-										<li><a href="generic.html" class="button">Learn More</a></li>
-									</ul>
-								</footer>
-							</section>
+        .container h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
 
-						<!-- Get Started -->
-							<section id="cta" class="main special">
-								<header class="major">
-									<h2>Congue imperdiet</h2>
-									<p>Donec imperdiet consequat consequat. Suspendisse feugiat congue<br />
-									posuere. Nulla massa urna, fermentum eget quam aliquet.</p>
-								</header>
-								<footer class="major">
-									<ul class="actions special">
-										<li><a href="generic.html" class="button primary">Get Started</a></li>
-										<li><a href="generic.html" class="button">Learn More</a></li>
-									</ul>
-								</footer>
-							</section>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
 
-					</div>
+        /* Game Cards */
+        .card {
+            background-color: var(--surface);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
 
-				<!-- Footer -->
-					<footer id="footer">
-						<section>
-							<h2>Aliquam sed mauris</h2>
-							<p>Sed lorem ipsum dolor sit amet et nullam consequat feugiat consequat magna adipiscing tempus etiam dolore veroeros. eget dapibus mauris. Cras aliquet, nisl ut viverra sollicitudin, ligula erat egestas velit, vitae tincidunt odio.</p>
-							<ul class="actions">
-								<li><a href="generic.html" class="button">Learn More</a></li>
-							</ul>
-						</section>
-						<section>
-							<h2>Etiam feugiat</h2>
-							<dl class="alt">
-								<dt>Address</dt>
-								<dd>1234 Somewhere Road &bull; Nashville, TN 00000 &bull; USA</dd>
-								<dt>Phone</dt>
-								<dd>(000) 000-0000 x 0000</dd>
-								<dt>Email</dt>
-								<dd><a href="#">information@untitled.tld</a></dd>
-							</dl>
-							<ul class="icons">
-								<li><a href="#" class="icon brands fa-twitter alt"><span class="label">Twitter</span></a></li>
-								<li><a href="#" class="icon brands fa-facebook-f alt"><span class="label">Facebook</span></a></li>
-								<li><a href="#" class="icon brands fa-instagram alt"><span class="label">Instagram</span></a></li>
-								<li><a href="#" class="icon brands fa-github alt"><span class="label">GitHub</span></a></li>
-								<li><a href="#" class="icon brands fa-dribbble alt"><span class="label">Dribbble</span></a></li>
-							</ul>
-						</section>
-						<p class="copyright">&copy; Untitled. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
-					</footer>
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            border-color: var(--primary);
+        }
 
-			</div>
+        .card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-bottom: 3px solid var(--primary);
+        }
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.scrollex.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
+        .card-content {
+            padding: 1.2rem;
+        }
 
-	</body>
+        .card-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+
+        .card-category {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+        }
+
+        /* Fullscreen Game Player Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            border-bottom: 1px solid #334155;
+        }
+
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #dc2626;
+        }
+
+        .iframe-container {
+            flex: 1;
+            width: 100%;
+            background: #000;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .search-bar {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" class="logo">🎮 Nova Arcade</a>
+        <input type="text" id="searchInput" class="search-bar" placeholder="Search games...">
+    </header>
+
+    <div class="container">
+        <h2>Popular Games</h2>
+        <div class="grid" id="gameGrid">
+            <!-- Games will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Game Player Modal -->
+    <div class="modal" id="gameModal">
+        <div class="modal-header">
+            <h3 id="modalTitle" style="margin: 0;">Game Title</h3>
+            <button class="close-btn" onclick="closeGame()">Exit Game</button>
+        </div>
+        <div class="iframe-container">
+            <iframe id="gameIframe" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Game Database
+        // To add a new game, just copy a block below and change the details.
+        // The 'url' is the web address of the HTML5 game you want to embed.
+        const games = [
+            {
+                title: "2048",
+                category: "Puzzle",
+                image: "https://placehold.co/400x250/2563eb/ffffff?text=2048",
+                url: "https://play2048.co/"
+            },
+            {
+                title: "Flappy Bird Clone",
+                category: "Arcade",
+                image: "https://placehold.co/400x250/16a34a/ffffff?text=Flappy+Bird",
+                url: "https://flappybird.io/"
+            },
+            {
+                title: "Pac-Man",
+                category: "Classic",
+                image: "https://placehold.co/400x250/eab308/000000?text=Pac-Man",
+                url: "https://freepacman.org/"
+            },
+            {
+                title: "Tetris Clone",
+                category: "Puzzle",
+                image: "https://placehold.co/400x250/8b5cf6/ffffff?text=Tetris",
+                url: "https://tetris.com/play-tetris" // Note: Some major sites block iframe embedding
+            },
+            {
+                title: "Doodle Jump",
+                category: "Arcade",
+                image: "https://placehold.co/400x250/ec4899/ffffff?text=Doodle+Jump",
+                url: "https://poki.com/en/g/doodle-jump"
+            },
+            {
+                title: "Chess",
+                category: "Strategy",
+                image: "https://placehold.co/400x250/52525b/ffffff?text=Chess",
+                url: "https://www.chess.com/play/computer"
+            }
+        ];
+
+        // DOM Elements
+        const grid = document.getElementById('gameGrid');
+        const searchInput = document.getElementById('searchInput');
+        const modal = document.getElementById('gameModal');
+        const iframe = document.getElementById('gameIframe');
+        const modalTitle = document.getElementById('modalTitle');
+
+        // Function to render games to the grid
+        function renderGames(gameList) {
+            grid.innerHTML = ''; // Clear current grid
+            
+            if (gameList.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1;">No games found.</p>';
+                return;
+            }
+
+            gameList.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openGame(game);
+                
+                card.innerHTML = `
+                    <img src="${game.image}" alt="${game.title}">
+                    <div class="card-content">
+                        <h3 class="card-title">${game.title}</h3>
+                        <span class="card-category">${game.category}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Function to open the game in the fullscreen modal
+        function openGame(game) {
+            modalTitle.textContent = game.title;
+            iframe.src = game.url;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        // Function to close the game
+        function closeGame() {
+            modal.style.display = 'none';
+            iframe.src = ''; // Clear the iframe source so audio stops playing
+            document.body.style.overflow = 'auto'; // Restore background scrolling
+        }
+
+        // Search filtering logic
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filteredGames = games.filter(game => 
+                game.title.toLowerCase().includes(term) || 
+                game.category.toLowerCase().includes(term)
+            );
+            renderGames(filteredGames);
+        });
+
+        // Initialize the page by rendering all games
+        renderGames(games);
+    </script>
+</body>
 </html>
