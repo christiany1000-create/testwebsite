@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply | Student Portal & Educational Media</title>
     
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Zero-Setup Live Messaging (MQTT over WebSockets) -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <!-- Encryption for Password-Protected Groups -->
@@ -156,7 +158,7 @@
         .search-container {
             position: relative;
             width: 100%;
-            max-width: 240px;
+            max-width: 220px;
         }
 
         .search-bar {
@@ -178,6 +180,45 @@
             color: var(--text-muted);
             pointer-events: none;
             font-size: 0.85rem;
+        }
+
+        /* GOOGLE USER BADGE IN HEADER */
+        .user-header-profile {
+            display: none;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.7rem 0.3rem 0.4rem;
+            border-radius: 20px;
+        }
+
+        .user-header-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--primary);
+        }
+
+        .user-header-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text);
+            max-width: 110px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: 0.2rem;
         }
 
         .settings-btn {
@@ -636,6 +677,24 @@
                 <span class="search-icon">🔍</span>
                 <input type="text" id="searchInput" class="search-bar" placeholder="Search resources...">
             </div>
+
+            <!-- GOOGLE LOGIN CONTAINER -->
+            <div id="googleSignInWrapper">
+                <div id="g_id_onload"
+                     data-client_id="787259726635-ldace8nm63t3ehiog8189pekts6138dc.apps.googleusercontent.com"
+                     data-callback="handleGoogleLogin"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" data-type="icon" data-shape="circle" data-theme="dark"></div>
+            </div>
+
+            <!-- GOOGLE USER PROFILE BADGE (SHOWN WHEN LOGGED IN) -->
+            <div id="googleUserBadge" class="user-header-profile">
+                <img id="userHeaderAvatar" class="user-header-avatar" src="" alt="Avatar">
+                <span id="userHeaderName" class="user-header-name">Student</span>
+                <button class="logout-btn" onclick="handleLogout()" title="Log Out">✕</button>
+            </div>
+
             <button class="settings-btn" onclick="openSettingsModal()">⚙️ Settings</button>
         </div>
     </header>
@@ -656,7 +715,7 @@
 
         <div class="grid" id="gameGrid"></div>
 
-        <!-- REAL LIVE CHAT UI WITH PASSWORDE GROUPS -->
+        <!-- REAL LIVE CHAT UI WITH PASSWORD GROUPS -->
         <div class="chat-wrapper" id="chatContainer">
             <div class="chat-sidebar">
                 <div class="sidebar-header">
@@ -775,8 +834,63 @@
 
     <script>
         // =========================================================================
+        // GOOGLE AUTHENTICATION INTEGRATION
+        // =========================================================================
+        function handleGoogleLogin(response) {
+            const payload = parseJwt(response.credential);
+            const userData = {
+                name: payload.name,
+                email: payload.email,
+                picture: payload.picture
+            };
+
+            // Save user session
+            localStorage.setItem('googleUser', JSON.stringify(userData));
+            applyUserProfile(userData);
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        function applyUserProfile(user) {
+            // Update Header Profile Badge
+            document.getElementById('googleSignInWrapper').style.display = 'none';
+            document.getElementById('googleUserBadge').style.display = 'flex';
+            document.getElementById('userHeaderAvatar').src = user.picture;
+            document.getElementById('userHeaderName').textContent = user.name;
+
+            // Auto-set chat nickname
+            const usernameInput = document.getElementById('usernameInput');
+            if (usernameInput) {
+                usernameInput.value = user.name;
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('googleUser');
+            document.getElementById('googleSignInWrapper').style.display = 'block';
+            document.getElementById('googleUserBadge').style.display = 'none';
+            document.getElementById('usernameInput').value = `Student_${Math.floor(100 + Math.random() * 900)}`;
+        }
+
+        function checkExistingLogin() {
+            const stored = localStorage.getItem('googleUser');
+            if (stored) {
+                try {
+                    const user = JSON.parse(stored);
+                    applyUserProfile(user);
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        // =========================================================================
         // REAL-TIME ZERO-SETUP WEBSOCKET BACKEND (MQTT)
-        // Public server - works instantly across devices anywhere in the school!
         // =========================================================================
         const MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
         const TOPIC_PREFIX = "learnmultiply/v2/";
@@ -785,20 +899,17 @@
         let mqttClient = null;
         let isConnected = false;
 
-        // Profanity filter list
         const BANNED_WORDS = ['hate', 'stupid', 'idiot', 'fool', 'crap', 'dumb', 'badword', 'curse', 'freak'];
 
-        // Initial default state
         let currentMainTab = 'Games';
         let currentGameCategory = 'All';
         let activeRoomKey = 'general';
         let targetPendingRoom = null;
         
-        // Default Lounge
         let roomsCache = {
             'general': { name: "🌐 General Lounge", isLocked: false, pass: "" }
         };
-        let roomPasswords = {}; // Passwords stored locally per user once unlocked
+        let roomPasswords = {};
         let roomMessages = { 'general': [] };
 
         let enteredPin = "";
@@ -814,17 +925,15 @@
             { title: "Tetris", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris", url: "games/tetris.html" }
         ];
 
-        // Random Nickname
+        // Random Nickname default
         document.getElementById('usernameInput').value = `Student_${Math.floor(100 + Math.random() * 900)}`;
 
-        // Element Handles
         const grid = document.getElementById('gameGrid');
         const searchInput = document.getElementById('searchInput');
         const chatContainer = document.getElementById('chatContainer');
         const searchContainer = document.querySelector('.search-container');
         const categoryFilters = document.getElementById('categoryFilters');
 
-        // Main Tab Switching
         function switchMainTab(tab) {
             currentMainTab = tab;
             document.getElementById('navGames').classList.toggle('active', tab === 'Games');
@@ -859,12 +968,8 @@
             }
         }
 
-        // =========================================================================
-        // REAL-TIME ZERO-CONFIG CHAT CORE
-        // =========================================================================
-
         function initRealtimeChat() {
-            if (mqttClient) return; // Already initialized
+            if (mqttClient) return;
 
             const clientId = 'student_' + Math.random().toString(16).substr(2, 8);
             mqttClient = mqtt.connect(MQTT_BROKER, {
@@ -878,11 +983,9 @@
                 document.getElementById('connectionDot').classList.remove('offline');
                 document.getElementById('connectionStatusText').textContent = "Connected to Live Server";
 
-                // Subscribe to Room Discovery & General Channel
                 mqttClient.subscribe(GLOBAL_DISCOVERY_TOPIC);
                 mqttClient.subscribe(TOPIC_PREFIX + "chat/general");
 
-                // Announce existence to pull other online rooms
                 announceRoom(roomsCache['general']);
             });
 
@@ -898,7 +1001,6 @@
                     const data = JSON.parse(messageStr);
 
                     if (topic === GLOBAL_DISCOVERY_TOPIC) {
-                        // Room list synchronization
                         if (data.key && !roomsCache[data.key]) {
                             roomsCache[data.key] = {
                                 name: data.name,
@@ -908,13 +1010,10 @@
                             renderGroupList();
                         }
                     } else if (topic.startsWith(TOPIC_PREFIX + "chat/")) {
-                        // Incoming chat message
                         const roomKey = topic.replace(TOPIC_PREFIX + "chat/", "");
                         handleIncomingChatMessage(roomKey, data);
                     }
-                } catch (e) {
-                    console.error("Malformed message:", e);
-                }
+                } catch (e) { console.error("Malformed message:", e); }
             });
 
             renderGroupList();
@@ -969,7 +1068,6 @@
             const key = targetPendingRoom;
 
             if (key) {
-                // Save password locally to decrypt room messages
                 roomPasswords[key] = passEntered;
                 switchRoom(key);
                 closePasswordPromptModal();
@@ -1015,7 +1113,6 @@
             roomMessages[roomKey] = [];
             if (isLocked) roomPasswords[roomKey] = pass;
 
-            // Broadcast room discovery
             if (mqttClient && isConnected) {
                 mqttClient.publish(GLOBAL_DISCOVERY_TOPIC, JSON.stringify(roomData), { retain: true });
                 mqttClient.subscribe(TOPIC_PREFIX + "chat/" + roomKey);
@@ -1041,7 +1138,6 @@
             const room = roomsCache[activeRoomKey];
             let payloadText = text;
 
-            // If room is locked, ENCRYPT text with room password!
             if (room && room.isLocked) {
                 const secret = roomPasswords[activeRoomKey] || "";
                 payloadText = "ENC:" + CryptoJS.AES.encrypt(text, secret).toString();
@@ -1062,7 +1158,6 @@
 
             let displayText = data.text;
 
-            // Decrypt if encrypted
             if (displayText.startsWith("ENC:")) {
                 const encryptedHex = displayText.replace("ENC:", "");
                 const secret = roomPasswords[roomKey] || "";
@@ -1138,7 +1233,7 @@
         }
 
         // =========================================================================
-        // SETTINGS, ADMIN & GAMES PORTAL FUNCTIONS
+        // SETTINGS & ADMIN FUNCTIONS
         // =========================================================================
 
         function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
@@ -1229,6 +1324,8 @@
             });
         });
 
+        // Initialize view & check login
+        checkExistingLogin();
         filterAndRender();
     </script>
 </body>
