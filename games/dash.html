@@ -19,12 +19,14 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 10px;
       overflow: hidden;
     }
     #game-container {
       position: relative;
-      width: 800px;
-      height: 450px;
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 16 / 9;
       box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
       border: 3px solid #00ffcc;
       border-radius: 8px;
@@ -54,7 +56,7 @@
       display: none !important;
     }
     h1 {
-      font-size: 3rem;
+      font-size: clamp(1.8rem, 4vw, 3rem);
       text-transform: uppercase;
       letter-spacing: 3px;
       color: #00ffcc;
@@ -62,7 +64,7 @@
       margin-bottom: 20px;
     }
     h2 {
-      font-size: 2rem;
+      font-size: clamp(1.4rem, 3vw, 2rem);
       margin-bottom: 15px;
       color: #ff0055;
       text-shadow: 0 0 10px #ff0055;
@@ -72,8 +74,8 @@
       gap: 15px;
     }
     button {
-      padding: 12px 28px;
-      font-size: 1.1rem;
+      padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 28px);
+      font-size: clamp(0.85rem, 1.5vw, 1.1rem);
       font-weight: bold;
       text-transform: uppercase;
       color: #fff;
@@ -93,10 +95,10 @@
     }
     button.secondary {
       background: linear-gradient(135deg, #ff0055, #ff5588);
-      box-shadow: 0 4px 12px rgba(ff, 0, 85, 0.4);
+      box-shadow: 0 4px 12px rgba(255, 0, 85, 0.4);
     }
     button.secondary:hover {
-      box-shadow: 0 6px 16px rgba(ff, 0, 85, 0.6);
+      box-shadow: 0 6px 16px rgba(255, 0, 85, 0.6);
     }
     #hud {
       position: absolute;
@@ -126,7 +128,7 @@
     }
     .attempts-count {
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 1.5vw, 1.1rem);
       text-shadow: 0 0 5px #000;
     }
   </style>
@@ -155,7 +157,7 @@
     <!-- Level Select Overlay -->
     <div id="level-overlay" class="overlay hidden">
       <h1>Select Level</h1>
-      <div class="btn-group" style="flex-direction: column; width: 220px;">
+      <div class="btn-group" style="flex-direction: column; width: clamp(160px, 30vw, 220px);">
         <button onclick="startLevel(0)">1. Stereo Tech</button>
         <button onclick="startLevel(1)">2. Cyber Pulse</button>
         <button class="secondary" onclick="showMainMenu()">Back</button>
@@ -202,6 +204,11 @@
     let currentLevelIndex = 0;
     let attempts = 1;
     let animationFrameId = null;
+
+    // --- 60 FPS TIMING CONTROLLER ---
+    let lastTime = 0;
+    const TARGET_FPS = 60;
+    const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
     // --- AUDIO SYNTHESIZER (Web Audio API) ---
     class AudioEngine {
@@ -252,8 +259,8 @@
         this.stopMusic();
 
         const notes = levelIdx === 0 
-          ? [110, 110, 146.83, 110, 164.81, 110, 146.83, 130.81] // Bass synth line 1
-          : [130.81, 164.81, 196.00, 164.81, 220.00, 196.00, 164.81, 146.83]; // Bass synth line 2
+          ? [110, 110, 146.83, 110, 164.81, 110, 146.83, 130.81]
+          : [130.81, 164.81, 196.00, 164.81, 220.00, 196.00, 164.81, 146.83];
 
         let noteIdx = 0;
         const stepTime = (60 / this.tempo) / 2 * 1000;
@@ -288,7 +295,6 @@
     const audio = new AudioEngine();
 
     // --- LEVEL DATA ---
-    // Legend: 0 = Empty, 1 = Block, 2 = Spike, 3 = Pad
     const LEVELS = [
       {
         name: "Stereo Tech",
@@ -367,24 +373,19 @@
       update(inputActive) {
         if (this.isDead) return;
 
-        // Auto-jump if holding input on ground
         if (inputActive && this.isGrounded) {
           this.jump();
         }
 
-        // Gravity application
         this.vy += this.gravity;
         this.y += this.vy;
 
-        // Rotation logic
         if (!this.isGrounded) {
           this.rotation += 8;
         } else {
-          // Snap rotation to nearest 90 degrees when grounded
           this.rotation = Math.round(this.rotation / 90) * 90;
         }
 
-        // Ground collision
         if (this.y >= GROUND_Y - this.size) {
           this.y = GROUND_Y - this.size;
           this.vy = 0;
@@ -400,13 +401,11 @@
         ctx.translate(drawX, drawY);
         ctx.rotate((this.rotation * Math.PI) / 180);
 
-        // Player Outer Box
         ctx.fillStyle = color;
         ctx.shadowColor = color;
         ctx.shadowBlur = 10;
         ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
 
-        // Player Inner Eyes
         ctx.fillStyle = "#000";
         ctx.shadowBlur = 0;
         ctx.fillRect(-this.size / 4, -this.size / 4, 8, 8);
@@ -433,7 +432,7 @@
         const y = GROUND_Y - BLOCK_SIZE;
 
         levelObjects.push({
-          type: type, // 1: Block, 2: Spike, 3: Pad
+          type: type,
           x: x,
           y: y,
           width: BLOCK_SIZE,
@@ -453,7 +452,6 @@
       };
 
       for (let obj of levelObjects) {
-        // Broad phase camera check
         if (obj.x + obj.width < cameraX || obj.x > cameraX + GAME_WIDTH) continue;
 
         const oBox = {
@@ -463,27 +461,23 @@
           bottom: obj.y + obj.height
         };
 
-        // AABB check
         if (
           pBox.right > oBox.left &&
           pBox.left < oBox.right &&
           pBox.bottom > oBox.top &&
           pBox.top < oBox.bottom
         ) {
-          if (obj.type === 1) { // Block
-            // Check top collision (landing)
+          if (obj.type === 1) {
             const prevBottom = player.y - player.vy + player.size;
             if (prevBottom <= oBox.top + 8 && player.vy >= 0) {
               player.y = oBox.top - player.size;
               player.vy = 0;
               player.isGrounded = true;
             } else {
-              // Side or bottom collision -> death
               triggerGameOver();
               return;
             }
-          } else if (obj.type === 2) { // Spike
-            // Slightly smaller hitbox for forgiving triangular spike collisions
+          } else if (obj.type === 2) {
             if (
               pBox.right > oBox.left + 8 &&
               pBox.left < oBox.right - 8 &&
@@ -492,7 +486,7 @@
               triggerGameOver();
               return;
             }
-          } else if (obj.type === 3) { // Jump Pad
+          } else if (obj.type === 3) {
             player.hitPad();
           }
         }
@@ -518,15 +512,15 @@
       cameraX = 0;
       gameState = 'PLAYING';
 
-      // UI
       hideAllOverlays();
       hud.classList.remove('hidden');
       attemptsText.innerText = `Attempt ${attempts}`;
 
       audio.startMusic(currentLevelIndex);
 
+      lastTime = 0; // Reset frame timer
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      gameLoop();
+      animationFrameId = requestAnimationFrame(gameLoop);
     }
 
     function triggerGameOver() {
@@ -547,33 +541,37 @@
       winOverlay.classList.remove('hidden');
     }
 
-    function gameLoop() {
-      if (gameState === 'PLAYING') {
-        const level = LEVELS[currentLevelIndex];
-
-        // Player Forward Movement
-        player.x += level.speed;
-        cameraX = player.x - 120;
-
-        // Player Physics & Logic
-        player.update(inputActive);
-        checkCollisions();
-
-        // Check Victory
-        if (player.x >= levelLengthPixels) {
-          triggerWin();
-          return;
-        }
-
-        // Update HUD
-        const progress = Math.min(100, Math.max(0, (player.x / levelLengthPixels) * 100));
-        progressFill.style.width = `${progress}%`;
-      }
-
-      render();
-
+    // Fixed 60 FPS Throttle Game Loop
+    function gameLoop(timestamp) {
       if (gameState === 'PLAYING' || gameState === 'GAMEOVER') {
         animationFrameId = requestAnimationFrame(gameLoop);
+      }
+
+      if (!lastTime) lastTime = timestamp;
+      const elapsed = timestamp - lastTime;
+
+      if (elapsed > FRAME_INTERVAL) {
+        lastTime = timestamp - (elapsed % FRAME_INTERVAL);
+
+        if (gameState === 'PLAYING') {
+          const level = LEVELS[currentLevelIndex];
+
+          player.x += level.speed;
+          cameraX = player.x - 120;
+
+          player.update(inputActive);
+          checkCollisions();
+
+          if (player.x >= levelLengthPixels) {
+            triggerWin();
+            return;
+          }
+
+          const progress = Math.min(100, Math.max(0, (player.x / levelLengthPixels) * 100));
+          progressFill.style.width = `${progress}%`;
+        }
+
+        render();
       }
     }
 
@@ -581,11 +579,9 @@
     function render() {
       const level = LEVELS[currentLevelIndex] || LEVELS[0];
 
-      // Clear & Background
       ctx.fillStyle = level.bgPrimary;
       ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-      // Grid Pattern
       ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
       ctx.lineWidth = 1;
       const gridSize = 40;
@@ -598,7 +594,6 @@
         ctx.stroke();
       }
 
-      // Ground Render
       ctx.fillStyle = "#090a10";
       ctx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
       ctx.strokeStyle = level.color;
@@ -608,18 +603,17 @@
       ctx.lineTo(GAME_WIDTH, GROUND_Y);
       ctx.stroke();
 
-      // Render Level Objects
       levelObjects.forEach(obj => {
         if (obj.x + obj.width < cameraX || obj.x > cameraX + GAME_WIDTH) return;
         const screenX = obj.x - cameraX;
 
-        if (obj.type === 1) { // Block
+        if (obj.type === 1) {
           ctx.fillStyle = "#111";
           ctx.strokeStyle = level.color;
           ctx.lineWidth = 2;
           ctx.fillRect(screenX, obj.y, obj.width, obj.height);
           ctx.strokeRect(screenX, obj.y, obj.width, obj.height);
-        } else if (obj.type === 2) { // Spike
+        } else if (obj.type === 2) {
           ctx.fillStyle = "#ff0055";
           ctx.strokeStyle = "#ffffff";
           ctx.lineWidth = 1.5;
@@ -630,7 +624,7 @@
           ctx.closePath();
           ctx.fill();
           ctx.stroke();
-        } else if (obj.type === 3) { // Pad
+        } else if (obj.type === 3) {
           ctx.fillStyle = "#ffcc00";
           ctx.shadowColor = "#ffcc00";
           ctx.shadowBlur = 8;
@@ -639,7 +633,6 @@
         }
       });
 
-      // Render Player
       player.draw(cameraX, level.color);
     }
 
@@ -690,7 +683,6 @@
       render();
     }
 
-    // Initial render call for background
     render();
   </script>
 </body>
