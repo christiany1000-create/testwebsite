@@ -13,25 +13,32 @@
     }
 
     body {
-      background-color: #1a1a1a;
+      background-color: #121212;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       color: #fff;
+      overflow: hidden;
     }
 
+    /* Resizable Container maintaining 9:16 aspect ratio */
     #game-container {
       position: relative;
-      width: 360px;
-      height: 640px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      width: 100%;
+      max-width: 500px;
+      height: 95vh;
+      max-height: 900px;
+      aspect-ratio: 9 / 16;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
       border-radius: 12px;
       overflow: hidden;
     }
 
     canvas {
+      width: 100%;
+      height: 100%;
       display: block;
       background-color: #70c5ce;
     }
@@ -51,7 +58,6 @@
       gap: 15px;
       padding: 20px;
       text-align: center;
-      transition: opacity 0.2s ease;
     }
 
     .hidden {
@@ -59,7 +65,7 @@
     }
 
     h1 {
-      font-size: 2.2rem;
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
       color: #f4c430;
       text-shadow: 2px 2px #000;
       letter-spacing: 2px;
@@ -67,7 +73,7 @@
     }
 
     h2 {
-      font-size: 1.5rem;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
       color: #fff;
       margin-bottom: 10px;
     }
@@ -77,13 +83,14 @@
       color: white;
       border: none;
       padding: 12px 28px;
-      font-size: 1rem;
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
       font-weight: bold;
       border-radius: 25px;
       cursor: pointer;
       box-shadow: 0 4px 0 #d35400;
       transition: transform 0.1s, background-color 0.2s;
-      width: 200px;
+      width: 80%;
+      max-width: 220px;
     }
 
     .btn:hover {
@@ -96,11 +103,11 @@
     }
 
     .score-badge {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       background: rgba(255, 255, 255, 0.1);
       padding: 10px 20px;
       border-radius: 10px;
-      width: 100%;
+      width: 80%;
       max-width: 220px;
       display: flex;
       justify-content: space-between;
@@ -110,7 +117,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      width: 100%;
+      width: 80%;
       max-width: 220px;
     }
 
@@ -125,10 +132,9 @@
       outline: none;
     }
 
-    /* Leaderboard Table */
     .leaderboard-table {
-      width: 100%;
-      max-width: 260px;
+      width: 90%;
+      max-width: 280px;
       border-collapse: collapse;
       margin-bottom: 10px;
     }
@@ -224,19 +230,18 @@
     const noScoresEl = document.getElementById('no-scores');
 
     // Game Variables
-    let state = 'MENU'; // MENU, PLAYING, GAMEOVER, LEADERBOARD
+    let state = 'MENU';
     let frames = 0;
     let score = 0;
-    let animationId;
 
-    // Bird Object
+    // Adjusted Bird Physics (Lower Gravity & Floatier Jump)
     const bird = {
       x: 60,
       y: 250,
       radius: 12,
       velocity: 0,
-      gravity: 0.25,
-      jump: -5.5,
+      gravity: 0.18,  // Reduced from 0.25
+      jump: -4.6,     // Adjusted from -5.5
       rotation: 0,
 
       draw() {
@@ -280,11 +285,11 @@
         this.velocity += this.gravity;
         this.y += this.velocity;
 
-        // Rotation dynamic based on velocity
+        // Dynamic angle calculation
         if (this.velocity < 0) {
-          this.rotation = -0.3;
+          this.rotation = -0.25;
         } else {
-          this.rotation = Math.min(Math.PI / 2, this.rotation + 0.05);
+          this.rotation = Math.min(Math.PI / 2, this.rotation + 0.04);
         }
 
         // Floor collision
@@ -311,7 +316,7 @@
     const pipes = {
       items: [],
       width: 52,
-      gap: 120,
+      gap: 130, // Slightly wider gap for smoother gameplay
       dx: 2,
 
       draw() {
@@ -377,7 +382,6 @@
       }
     };
 
-    // Foreground / Ground
     function drawGround() {
       ctx.fillStyle = '#ded895';
       ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
@@ -390,7 +394,6 @@
       ctx.stroke();
     }
 
-    // Score HUD during gameplay
     function drawScore() {
       if (state === 'PLAYING') {
         ctx.fillStyle = '#fff';
@@ -403,7 +406,6 @@
       }
     }
 
-    // Main Game Loop
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -418,12 +420,12 @@
       bird.draw();
       drawScore();
 
-      animationId = requestAnimationFrame(gameLoop);
+      requestAnimationFrame(gameLoop);
     }
 
-    // Input Handling
+    // Controls
     window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && state === 'PLAYING') {
+      if ((e.code === 'Space' || e.code === 'ArrowUp') && state === 'PLAYING') {
         bird.flap();
       }
     });
@@ -434,7 +436,6 @@
       }
     });
 
-    // Screen State Management
     function showMenu() {
       state = 'MENU';
       hideOverlays();
@@ -482,7 +483,6 @@
       frames = 0;
     }
 
-    // LocalStorage Leaderboard Logic
     function getLeaderboard() {
       const data = localStorage.getItem('flappy_leaderboard');
       return data ? JSON.parse(data) : [];
@@ -494,7 +494,7 @@
 
       leaderboard.push({ name, score });
       leaderboard.sort((a, b) => b.score - a.score);
-      leaderboard.splice(10); // Keep top 10
+      leaderboard.splice(10);
 
       localStorage.setItem('flappy_leaderboard', JSON.stringify(leaderboard));
       saveScoreSection.classList.add('hidden');
@@ -530,7 +530,6 @@
       );
     }
 
-    // Start engine loop
     gameLoop();
   </script>
 </body>
