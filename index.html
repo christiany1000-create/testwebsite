@@ -16,6 +16,7 @@
             --text-muted: #94a3b8;
             --border: rgba(255, 255, 255, 0.1);
             --grid-line: rgba(255, 255, 255, 0.03);
+            --chat-bg: #0f172a;
         }
 
         * {
@@ -351,6 +352,295 @@
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
 
+        /* ================= LIVE CHAT INTERFACE ================= */
+        .chat-wrapper {
+            display: none;
+            grid-template-columns: 260px 1fr;
+            gap: 1.2rem;
+            height: 680px;
+            background: var(--surface-glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* Chat Groups/Channels Sidebar */
+        .chat-sidebar {
+            background: rgba(15, 23, 42, 0.7);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+        }
+
+        .sidebar-title {
+            padding: 0 1.2rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .channel-list {
+            list-style: none;
+            margin-top: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            padding: 0 0.6rem;
+        }
+
+        .channel-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .channel-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+        }
+
+        .channel-btn.active {
+            background: var(--primary);
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .channel-icon {
+            font-size: 1.1rem;
+        }
+
+        .user-profile-badge {
+            margin-top: auto;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .profile-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .username-input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--primary);
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            outline: none;
+        }
+
+        /* Chat Main Box */
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: var(--chat-bg);
+        }
+
+        .chat-header {
+            padding: 0.9rem 1.5rem;
+            background: rgba(30, 41, 59, 0.6);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header-info h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .online-tag {
+            font-size: 0.75rem;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 600;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        /* Filter Controls Inside Chat Header */
+        .chat-filter-box {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .filter-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            outline: none;
+            width: 180px;
+        }
+
+        .filter-input:focus {
+            border-color: var(--primary);
+        }
+
+        .filter-toggle-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Messages Feed Area */
+        .chat-messages {
+            flex: 1;
+            padding: 1.2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            max-width: 85%;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .message-item.self {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .message-author {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .message-item.self .message-author {
+            color: var(--accent);
+        }
+
+        .message-body {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0.7rem 1rem;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            line-height: 1.4;
+            color: var(--text);
+            word-break: break-word;
+        }
+
+        .message-item.self .message-body {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.4);
+        }
+
+        .message-body.filtered-msg {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .system-notice {
+            text-align: center;
+            align-self: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        /* Input Bar */
+        .chat-input-bar {
+            padding: 1rem 1.2rem;
+            background: rgba(30, 41, 59, 0.8);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .chat-msg-input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .chat-msg-input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-send-btn {
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-send-btn:hover {
+            box-shadow: 0 0 12px var(--primary-glow);
+            transform: translateY(-1px);
+        }
+
         /* Modals */
         .modal-overlay {
             display: none;
@@ -551,6 +841,16 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @media (max-width: 850px) {
+            .chat-wrapper {
+                grid-template-columns: 1fr;
+                height: 600px;
+            }
+            .chat-sidebar {
+                display: none; /* Hide sidebar on small screens or make collapsible */
+            }
+        }
+
         @media (max-width: 768px) {
             header {
                 flex-direction: column;
@@ -585,6 +885,7 @@
             <div class="top-nav">
                 <button class="nav-tab active" id="navGames" onclick="switchMainTab('Games')">Games</button>
                 <button class="nav-tab" id="navVideos" onclick="switchMainTab('Videos')">Videos</button>
+                <button class="nav-tab" id="navChat" onclick="switchMainTab('Chat')">Live Chat</button>
             </div>
         </div>
         <div class="header-right">
@@ -597,7 +898,7 @@
     </header>
 
     <div class="container">
-        <div class="hero">
+        <div class="hero" id="heroHeader">
             <h1 id="heroTitle">Interactive Learning & Study Break Portal</h1>
             <p id="heroSubtitle">Select an educational module or interactive game to begin.</p>
         </div>
@@ -611,8 +912,73 @@
             <button class="cat-btn" data-category="Strategy">Strategy</button>
         </div>
 
+        <!-- Games / Videos Card Grid -->
         <div class="grid" id="gameGrid">
             <!-- Dynamic Cards -->
+        </div>
+
+        <!-- LIVE CHAT SECTION -->
+        <div class="chat-wrapper" id="chatContainer">
+            <!-- Channels / Groups Sidebar -->
+            <div class="chat-sidebar">
+                <div class="sidebar-title">Study Groups</div>
+                <ul class="channel-list">
+                    <li>
+                        <button class="channel-btn active" onclick="switchChannel('general', '🌐 General Lounge')">
+                            <span class="channel-icon">💬</span> General Lounge
+                        </button>
+                    </li>
+                    <li>
+                        <button class="channel-btn" onclick="switchChannel('math', '📐 Math & Homework')">
+                            <span class="channel-icon">📐</span> Math & Homework
+                        </button>
+                    </li>
+                    <li>
+                        <button class="channel-btn" onclick="switchChannel('gaming', '🎮 Game Break')">
+                            <span class="channel-icon">🎮</span> Game Break
+                        </button>
+                    </li>
+                    <li>
+                        <button class="channel-btn" onclick="switchChannel('science', '🔬 Science & Tech')">
+                            <span class="channel-icon">🔬</span> Science & Tech
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="user-profile-badge">
+                    <span class="profile-label">Your Nickname</span>
+                    <input type="text" id="usernameInput" class="username-input" value="Student_1" placeholder="Enter name...">
+                </div>
+            </div>
+
+            <!-- Chat Main View -->
+            <div class="chat-main">
+                <div class="chat-header">
+                    <div class="chat-header-info">
+                        <h3 id="currentChannelName">🌐 General Lounge</h3>
+                        <span class="online-tag"><span class="online-dot"></span> Live Peer Channel</span>
+                    </div>
+
+                    <!-- Chat Filters -->
+                    <div class="chat-filter-box">
+                        <input type="text" id="chatSearchInput" class="filter-input" placeholder="🔍 Filter chat..." oninput="renderChatMessages()">
+                        <label class="filter-toggle-label">
+                            <input type="checkbox" id="profanityFilterToggle" checked onchange="renderChatMessages()"> Safe Filter
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Chat Feed -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will render dynamically -->
+                </div>
+
+                <!-- Message Input Form -->
+                <form class="chat-input-bar" onsubmit="handleSendChat(event)">
+                    <input type="text" id="chatInput" class="chat-msg-input" placeholder="Type a message or question..." autocomplete="off">
+                    <button type="submit" class="chat-send-btn">Send</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -737,6 +1103,7 @@
         let searchTimeout = null;
         let enteredPin = "";
 
+        // Elements
         const grid = document.getElementById('gameGrid');
         const searchInput = document.getElementById('searchInput');
         const modal = document.getElementById('gameModal');
@@ -749,19 +1116,67 @@
         const adminModal = document.getElementById('adminModal');
         const pinDisplay = document.getElementById('pinDisplay');
 
+        const chatContainer = document.getElementById('chatContainer');
+        const searchContainer = document.querySelector('.search-container');
+
+        // Banned words list for profanity filter
+        const BANNED_WORDS = ['hate', 'stupid', 'idiot', 'fool', 'crap', 'dumb', 'badword', 'curse'];
+
+        // Initial Chat State & Seed Messages
+        let activeChannel = 'general';
+        let chatData = {
+            general: [
+                { id: 1, author: 'Alex_Math', text: 'Welcome to the student group chat!', time: '10:15 AM' },
+                { id: 2, author: 'Taylor_99', text: 'Hey everyone! Is anyone playing Pac-Man?', time: '10:18 AM' }
+            ],
+            math: [
+                { id: 3, author: 'Alex_Math', text: 'Anyone solved chapter 4 multiplication problem 12?', time: '09:45 AM' }
+            ],
+            gaming: [
+                { id: 4, author: 'GamerKid', text: 'Flappy bird high score is 42! Try beating it.', time: '10:02 AM' }
+            ],
+            science: [
+                { id: 5, author: 'BioStudent', text: 'Reminder: Lab reports are due on Friday.', time: '08:30 AM' }
+            ]
+        };
+
+        // Broadcast Channel for live multi-tab syncing
+        const chatBroadcast = window.BroadcastChannel ? new BroadcastChannel('learnmultiply_live_chat') : null;
+        if (chatBroadcast) {
+            chatBroadcast.onmessage = (event) => {
+                const { channel, message } = event.data;
+                if (chatData[channel]) {
+                    chatData[channel].push(message);
+                    if (currentMainTab === 'Chat' && activeChannel === channel) {
+                        renderChatMessages();
+                    }
+                }
+            };
+        }
+
+        // Random Student Username Assignment
+        document.getElementById('usernameInput').value = `Student_${Math.floor(100 + Math.random() * 900)}`;
+
         // Main Tab Switcher
         function switchMainTab(tab) {
             currentMainTab = tab;
             document.getElementById('navGames').classList.toggle('active', tab === 'Games');
             document.getElementById('navVideos').classList.toggle('active', tab === 'Videos');
+            document.getElementById('navChat').classList.toggle('active', tab === 'Chat');
 
             if (tab === 'Games') {
                 categoryFilters.style.display = 'flex';
+                grid.style.display = 'grid';
+                chatContainer.style.display = 'none';
+                searchContainer.style.visibility = 'visible';
                 document.getElementById('heroTitle').textContent = "Interactive Learning & Study Break Portal";
                 document.getElementById('heroSubtitle').textContent = "Select an educational module or interactive game to begin.";
                 filterAndRender();
             } else if (tab === 'Videos') {
                 categoryFilters.style.display = 'none';
+                grid.style.display = 'grid';
+                chatContainer.style.display = 'none';
+                searchContainer.style.visibility = 'visible';
                 document.getElementById('heroTitle').textContent = "Educational & Gaming Video Media";
                 document.getElementById('heroSubtitle').textContent = "Watch curated streams, video lessons, and gaming highlights.";
                 if (youtubeVideos.length === 0) {
@@ -769,6 +1184,112 @@
                 } else {
                     filterAndRender();
                 }
+            } else if (tab === 'Chat') {
+                categoryFilters.style.display = 'none';
+                grid.style.display = 'none';
+                chatContainer.style.display = 'grid';
+                searchContainer.style.visibility = 'hidden';
+                document.getElementById('heroTitle').textContent = "Live Student Discussion & Study Groups";
+                document.getElementById('heroSubtitle').textContent = "Collaborate with peers in safe, filtered group rooms.";
+                renderChatMessages();
+            }
+        }
+
+        /* --- Chat Functions --- */
+        function switchChannel(channelKey, channelDisplayName) {
+            activeChannel = channelKey;
+            document.getElementById('currentChannelName').textContent = channelDisplayName;
+            
+            // Update active state on buttons
+            document.querySelectorAll('.channel-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            renderChatMessages();
+        }
+
+        function filterText(text) {
+            const isFilterActive = document.getElementById('profanityFilterToggle').checked;
+            if (!isFilterActive) return text;
+
+            let filtered = text;
+            BANNED_WORDS.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                filtered = filtered.replace(regex, '***');
+            });
+            return filtered;
+        }
+
+        function renderChatMessages() {
+            const chatMessagesContainer = document.getElementById('chatMessages');
+            const searchKeyword = document.getElementById('chatSearchInput').value.toLowerCase();
+            const currentUsername = document.getElementById('usernameInput').value.trim();
+
+            chatMessagesContainer.innerHTML = '';
+
+            const channelMsgs = chatData[activeChannel] || [];
+            
+            const filteredMsgs = channelMsgs.filter(msg => {
+                return msg.text.toLowerCase().includes(searchKeyword) || msg.author.toLowerCase().includes(searchKeyword);
+            });
+
+            if (filteredMsgs.length === 0) {
+                chatMessagesContainer.innerHTML = `<div class="system-notice">No messages found in this channel. Be the first to start talking!</div>`;
+                return;
+            }
+
+            filteredMsgs.forEach(msg => {
+                const isSelf = msg.author === currentUsername;
+                const cleanText = filterText(msg.text);
+                const wasFiltered = cleanText !== msg.text;
+
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message-item ${isSelf ? 'self' : ''}`;
+
+                msgDiv.innerHTML = `
+                    <div class="message-meta">
+                        <span class="message-author">${msg.author}</span>
+                        <span>• ${msg.time}</span>
+                    </div>
+                    <div class="message-body ${wasFiltered ? 'filtered-msg' : ''}">
+                        ${cleanText}
+                    </div>
+                `;
+                chatMessagesContainer.appendChild(msgDiv);
+            });
+
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        }
+
+        function handleSendChat(e) {
+            e.preventDefault();
+            const chatInput = document.getElementById('chatInput');
+            const text = chatInput.value.trim();
+            const author = document.getElementById('usernameInput').value.trim() || 'Anonymous';
+
+            if (!text) return;
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const newMsg = {
+                id: Date.now(),
+                author: author,
+                text: text,
+                time: timeStr
+            };
+
+            chatData[activeChannel].push(newMsg);
+            chatInput.value = '';
+            renderChatMessages();
+
+            // Broadcast message to other tabs if available
+            if (chatBroadcast) {
+                chatBroadcast.postMessage({
+                    channel: activeChannel,
+                    message: newMsg
+                });
             }
         }
 
@@ -895,7 +1416,7 @@
                 } else {
                     pool = games.filter(g => g.category === currentGameCategory);
                 }
-            } else {
+            } else if (currentMainTab === 'Videos') {
                 pool = youtubeVideos;
             }
 
