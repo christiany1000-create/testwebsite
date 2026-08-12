@@ -703,338 +703,27 @@
             .chat-wrapper { grid-template-columns: 1fr; height: 600px; }
             .chat-sidebar { display: none; }
         }
+    
+        /* ADMIN ACCOUNT BADGE */
+        .admin-chat-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.12rem 0.4rem;
+            border-radius: 999px;
+            background: rgba(245, 158, 11, 0.16);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #f59e0b;
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: .5px;
+        }
+
+        .admin-account-indicator {
+            color: #f59e0b;
+            font-weight: 800;
+        }
+
     </style>
-
-<style id="clean-modern-theme">
-/* ===== Clean Modern UI Refresh ===== */
-:root {
-    --bg: #f6f8fb;
-    --surface: #ffffff;
-    --surface-glass: rgba(255,255,255,.92);
-    --primary: #2563eb;
-    --primary-glow: rgba(37,99,235,.18);
-    --accent: #f59e0b;
-    --text: #172033;
-    --text-muted: #64748b;
-    --border: #e5eaf1;
-    --grid-line: rgba(37,99,235,.035);
-    --chat-bg: #f8fafc;
-}
-
-/* Background */
-body {
-    font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: var(--bg);
-    background-image:
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 32px 32px;
-    color: var(--text);
-}
-
-.bg-pattern { opacity: .06; }
-
-/* Header */
-header {
-    background: rgba(255,255,255,.88);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 2px 14px rgba(15,23,42,.05);
-    padding: .75rem clamp(1rem, 3vw, 2.25rem);
-}
-
-.header-left { gap: 1.25rem; }
-.logo { font-size: 1.2rem; }
-.logo-x { font-size: 1.9rem; }
-.logo-text {
-    background: linear-gradient(135deg, #172033, #2563eb);
-}
-.school-badge {
-    background: #eff6ff;
-    border-color: #dbeafe;
-    color: #2563eb;
-    border-radius: 999px;
-    padding: .3rem .65rem;
-}
-
-.top-nav {
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-}
-.nav-tab {
-    color: #64748b;
-    border-radius: 7px;
-    padding: .5rem .95rem;
-}
-.nav-tab.active {
-    background: #fff;
-    color: #2563eb;
-    box-shadow: 0 1px 5px rgba(15,23,42,.09);
-}
-
-.search-bar {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    color: var(--text);
-}
-.search-bar:focus {
-    border-color: #93c5fd;
-    box-shadow: 0 0 0 3px rgba(37,99,235,.08);
-}
-
-.user-header-profile {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-    border-radius: 999px;
-}
-.user-header-avatar { border-color: #bfdbfe; }
-
-.settings-btn {
-    background: #fff;
-    border-color: #e2e8f0;
-    border-radius: 9px;
-    transition: .2s ease;
-}
-.settings-btn:hover {
-    border-color: #bfdbfe;
-    background: #eff6ff;
-}
-
-/* Main content */
-.container {
-    max-width: 1240px;
-    padding: clamp(1.5rem, 4vw, 3rem) 1.25rem;
-}
-.hero {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    box-shadow: 0 8px 30px rgba(15,23,42,.045);
-    padding: clamp(1.5rem, 4vw, 2.5rem);
-}
-.hero h1 {
-    letter-spacing: -.035em;
-    color: #111827;
-}
-.hero p { color: #64748b; }
-
-.categories { margin-bottom: 2rem; }
-.cat-btn {
-    background: #fff;
-    border-color: #e2e8f0;
-    color: #64748b;
-    border-radius: 999px;
-    padding: .55rem 1rem;
-    transition: .2s ease;
-}
-.cat-btn:hover {
-    border-color: #bfdbfe;
-    color: #2563eb;
-}
-.cat-btn.active {
-    background: #2563eb;
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(37,99,235,.18);
-}
-
-/* Cards */
-.grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1.25rem;
-}
-.card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(15,23,42,.045);
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-}
-.card:hover {
-    transform: translateY(-3px);
-    border-color: #bfdbfe;
-    box-shadow: 0 12px 28px rgba(15,23,42,.09);
-}
-.card-img-wrapper {
-    height: 150px;
-    background: #f1f5f9;
-}
-.card img { transition: transform .25s ease; }
-.card:hover img { transform: scale(1.025); }
-.card-content { padding: 1rem; }
-.card-title { color: #172033; }
-.card-category {
-    background: #eff6ff;
-    color: #2563eb;
-    border-radius: 999px;
-}
-
-/* Chat */
-.chat-wrapper {
-    background: #fff;
-    border-color: var(--border);
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(15,23,42,.06);
-}
-.chat-sidebar {
-    background: #f8fafc;
-    border-right-color: var(--border);
-}
-.sidebar-header {
-    border-bottom-color: var(--border);
-}
-.sidebar-title { color: #2563eb; }
-.create-group-btn {
-    border-radius: 8px;
-    box-shadow: 0 3px 8px rgba(37,99,235,.15);
-}
-.channel-btn { color: #64748b; }
-.channel-btn:hover {
-    background: #eef4ff;
-    color: #1d4ed8;
-}
-.channel-btn.active {
-    background: #2563eb;
-    color: #fff;
-}
-.user-profile-badge {
-    background: #fff;
-    border-top-color: var(--border);
-}
-.username-input {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-    color: #2563eb;
-}
-.chat-main { background: #f8fafc; }
-.chat-header {
-    background: #fff;
-    border-bottom-color: var(--border);
-}
-.filter-input {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-}
-.chat-messages { padding: 1.4rem; }
-.message-body {
-    background: #fff;
-    border-color: #e2e8f0;
-    box-shadow: 0 2px 8px rgba(15,23,42,.035);
-}
-.message-item.self .message-body {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-}
-.chat-input-bar {
-    background: #fff;
-    border-top-color: var(--border);
-}
-.chat-msg-input {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-}
-.chat-msg-input:focus,
-.filter-input:focus,
-.username-input:focus {
-    border-color: #93c5fd;
-    box-shadow: 0 0 0 3px rgba(37,99,235,.08);
-}
-.chat-send-btn {
-    border-radius: 9px;
-    box-shadow: 0 3px 10px rgba(37,99,235,.15);
-}
-
-/* Modals */
-.modal-overlay {
-    background: rgba(15,23,42,.42);
-    backdrop-filter: blur(5px);
-}
-.modal-box,
-.numpad-box {
-    background: #fff;
-    border-color: var(--border);
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(15,23,42,.18);
-}
-.modal-input {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-    color: var(--text);
-    border-radius: 9px;
-}
-.modal-input:focus {
-    border-color: #93c5fd;
-    box-shadow: 0 0 0 3px rgba(37,99,235,.08);
-}
-.close-btn {
-    border-radius: 8px;
-}
-.submit-btn {
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgba(37,99,235,.15);
-}
-.numpad-btn {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-    color: var(--text);
-    border-radius: 9px;
-}
-.numpad-btn:hover {
-    background: #2563eb;
-    color: #fff;
-}
-.pin-display {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-}
-
-/* Login screen */
-.auth-gate-overlay {
-    background: rgba(246,248,251,.96);
-}
-.auth-gate-card {
-    background: #fff;
-    border-color: var(--border);
-    box-shadow: 0 20px 60px rgba(15,23,42,.12);
-    border-radius: 18px;
-}
-.auth-gate-card h2 { color: #111827; }
-
-/* Game/video player */
-.modal-player {
-    background: rgba(15,23,42,.96);
-}
-.modal-header {
-    background: #fff;
-    color: #172033;
-    border-bottom-color: var(--border);
-}
-
-/* Small-screen cleanup */
-@media (max-width: 900px) {
-    .header-left { gap: .75rem; }
-    .school-badge { display: none; }
-    .header-right { gap: .5rem; }
-}
-@media (max-width: 650px) {
-    header {
-        position: relative;
-        flex-wrap: wrap;
-        gap: .75rem;
-    }
-    .header-left, .header-right {
-        width: 100%;
-        justify-content: space-between;
-    }
-    .top-nav { order: 3; width: 100%; }
-    .nav-tab { flex: 1; }
-    .search-container { max-width: none; flex: 1; }
-    .settings-btn { white-space: nowrap; }
-    .hero h1 { font-size: 1.8rem; }
-    .grid { grid-template-columns: 1fr; }
-}
-</style>
-
 </head>
 <body class="locked">
 
@@ -1208,9 +897,9 @@ header {
     <!-- ADMIN NUMPAD MODAL -->
     <div class="modal-overlay" id="adminModal">
         <div class="numpad-box">
-            <div style="font-weight: 700; margin-bottom: 0.8rem;">Enter Admin Code</div>
-            <div id="pinDisplay" class="pin-display">_ _ _ _ _ _</div>
-            <div class="numpad-grid">
+            <div style="font-weight: 700; margin-bottom: 0.8rem;">Administrator Access</div>
+            <div id="pinDisplay" class="pin-display">Use your signed-in Google account</div>
+            <div class="numpad-grid" style="display:none;">
                 <button class="numpad-btn" onclick="pressKey('1')">1</button>
                 <button class="numpad-btn" onclick="pressKey('2')">2</button>
                 <button class="numpad-btn" onclick="pressKey('3')">3</button>
@@ -1243,6 +932,7 @@ header {
             // Save session
             localStorage.setItem('googleUser', JSON.stringify(userData));
             applyUserProfile(userData);
+            updateAdminUI(userData);
         }
 
         function parseJwt(token) {
@@ -1261,7 +951,9 @@ header {
 
             // Update Header Profile Badge
             document.getElementById('userHeaderAvatar').src = user.picture;
-            document.getElementById('userHeaderName').textContent = user.name;
+            document.getElementById('userHeaderName').textContent =
+                isAdminUser(user) ? "👑 " + user.name : user.name;
+            updateAdminUI(user);
 
             // Auto-set chat nickname
             const usernameInput = document.getElementById('usernameInput');
@@ -1283,6 +975,7 @@ header {
                 try {
                     const user = JSON.parse(stored);
                     applyUserProfile(user);
+                    updateAdminUI(user);
                 } catch (e) { 
                     console.error(e);
                     document.getElementById('authGate').style.display = 'flex';
@@ -1548,7 +1241,8 @@ header {
             const messageObject = {
                 author: author,
                 text: payloadText,
-                time: timeStr
+                time: timeStr,
+                isAdmin: currentUserIsAdmin
             };
 
             mqttClient.publish(TOPIC_PREFIX + "chat/" + activeRoomKey, JSON.stringify(messageObject));
@@ -1575,7 +1269,8 @@ header {
             roomMessages[roomKey].push({
                 author: data.author,
                 text: displayText,
-                time: data.time
+                time: data.time,
+                isAdmin: data.isAdmin === true
             });
 
             if (roomKey === activeRoomKey) {
@@ -1622,6 +1317,7 @@ header {
                 msgDiv.innerHTML = `
                     <div class="message-meta">
                         <span class="message-author">${msg.author}</span>
+                        ${msg.isAdmin ? '<span class="admin-chat-badge">ADMIN</span>' : ''}
                         <span>• ${msg.time}</span>
                     </div>
                     <div class="message-body">
@@ -1657,12 +1353,70 @@ header {
             else display.textContent = enteredPin.padEnd(6, '_').split('').join(' ');
         }
 
+        // =========================================================================
+        // ADMIN ACCOUNT SYSTEM
+        // =========================================================================
+        // IMPORTANT:
+        // This browser-only demo identifies the admin by Google account email.
+        // For real security, verify the Google ID token on a backend and store
+        // the user's Google "sub" identifier server-side. Never trust this
+        // client-side value for bans or other security-sensitive actions.
+
+        const ADMIN_EMAILS = [
+            "YOUR_GOOGLE_EMAIL_HERE"
+        ];
+
+        let currentUserIsAdmin = false;
+
+        function isAdminUser(user) {
+            return !!user && ADMIN_EMAILS.some(
+                email => email.toLowerCase() === (user.email || "").toLowerCase()
+            );
+        }
+
+        function updateAdminUI(user) {
+            currentUserIsAdmin = isAdminUser(user);
+
+            const nameEl = document.getElementById("userHeaderName");
+            if (nameEl) {
+                nameEl.textContent = currentUserIsAdmin
+                    ? "👑 " + user.name
+                    : user.name;
+                nameEl.title = currentUserIsAdmin ? "Administrator" : "";
+            }
+
+            const usernameInput = document.getElementById("usernameInput");
+            if (usernameInput && currentUserIsAdmin) {
+                usernameInput.dataset.admin = "true";
+            } else if (usernameInput) {
+                delete usernameInput.dataset.admin;
+            }
+        }
+
         function submitPin() {
-            if (enteredPin === "370018") {
-                alert("This Website is by Christian");
+            // The old hard-coded PIN has intentionally been removed.
+            // Administrator access is tied to the signed-in Google account.
+            const stored = localStorage.getItem("googleUser");
+
+            if (!stored) {
+                alert("Please sign in with your Google account first.");
                 closeAdminModal();
-            } else {
-                alert("Incorrect Code");
+                return;
+            }
+
+            try {
+                const user = JSON.parse(stored);
+
+                if (isAdminUser(user)) {
+                    alert("Administrator access granted.");
+                    updateAdminUI(user);
+                    closeAdminModal();
+                } else {
+                    alert("This Google account is not an administrator.");
+                    clearPin();
+                }
+            } catch (e) {
+                alert("Your login session could not be verified.");
                 clearPin();
             }
         }
