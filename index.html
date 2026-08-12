@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply | Student Portal & Educational Media</title>
     
-    <!-- Firebase SDKs for Real-Time Cross-Device Chat -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Zero-Setup Live Messaging (MQTT over WebSockets) -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <!-- Encryption for Password-Protected Groups -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
         :root {
@@ -264,7 +265,7 @@
             border-radius: 4px;
         }
 
-        /* LIVE CHAT INTERFACE WITH REAL-TIME & GROUPS */
+        /* LIVE CHAT INTERFACE */
         .chat-wrapper {
             display: none;
             grid-template-columns: 280px 1fr;
@@ -385,6 +386,7 @@
         }
 
         .online-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #10b981; }
+        .online-dot.offline { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
 
         .chat-filter-box { display: flex; align-items: center; gap: 0.6rem; }
 
@@ -675,7 +677,7 @@
                 <div class="chat-header">
                     <div>
                         <h3 id="currentChannelName">🌐 General Lounge</h3>
-                        <span class="online-tag"><span class="online-dot"></span> Real-Time Cross-Device Room</span>
+                        <span class="online-tag"><span class="online-dot" id="connectionDot"></span> <span id="connectionStatusText">Connecting...</span></span>
                     </div>
 
                     <div class="chat-filter-box">
@@ -773,18 +775,15 @@
 
     <script>
         // =========================================================================
-        // REAL-TIME BACKEND CONFIGURATION (Firebase Database)
-        // Free real-time cloud database allowing students on separate school devices to chat live.
+        // REAL-TIME ZERO-SETUP WEBSOCKET BACKEND (MQTT)
+        // Public server - works instantly across devices anywhere in the school!
         // =========================================================================
-        const firebaseConfig = {
-            databaseURL: "https://learnmultiply-chat-default-rtdb.firebaseio.com" // Free public cloud database endpoint
-        };
+        const MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
+        const TOPIC_PREFIX = "learnmultiply/v2/";
+        const GLOBAL_DISCOVERY_TOPIC = TOPIC_PREFIX + "system/room_discovery";
 
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.database();
+        let mqttClient = null;
+        let isConnected = false;
 
         // Profanity filter list
         const BANNED_WORDS = ['hate', 'stupid', 'idiot', 'fool', 'crap', 'dumb', 'badword', 'curse', 'freak'];
@@ -794,11 +793,15 @@
         let currentGameCategory = 'All';
         let activeRoomKey = 'general';
         let targetPendingRoom = null;
-        let unlockedRooms = new Set(['general']); // Local session unlocked rooms
-        let localChatMessages = [];
-        let roomsCache = {};
-        let enteredPin = "";
+        
+        // Default Lounge
+        let roomsCache = {
+            'general': { name: "🌐 General Lounge", isLocked: false, pass: "" }
+        };
+        let roomPasswords = {}; // Passwords stored locally per user once unlocked
+        let roomMessages = { 'general': [] };
 
+        let enteredPin = "";
         const YOUTUBE_API_KEY = "AIzaSyDwfmW1IQ6raSNlXW7NNDUty3KBdF-bGlY";
         let youtubeVideos = [];
 
@@ -857,41 +860,82 @@
         }
 
         // =========================================================================
-        // REAL-TIME GROUPS & CHAT LOGIC (Firebase Realtime Sync)
+        // REAL-TIME ZERO-CONFIG CHAT CORE
         // =========================================================================
 
         function initRealtimeChat() {
-            // Ensure default general lounge exists
-            db.ref('rooms/general').update({
-                name: "🌐 General Lounge",
-                isLocked: false
+            if (mqttClient) return; // Already initialized
+
+            const clientId = 'student_' + Math.random().toString(16).substr(2, 8);
+            mqttClient = mqtt.connect(MQTT_BROKER, {
+                clientId: clientId,
+                keepalive: 60,
+                clean: true
             });
 
-            // Listen for Rooms/Groups List Changes
-            db.ref('rooms').on('value', (snapshot) => {
-                const rooms = snapshot.val() || {};
-                roomsCache = rooms;
-                renderGroupList(rooms);
+            mqttClient.on('connect', () => {
+                isConnected = true;
+                document.getElementById('connectionDot').classList.remove('offline');
+                document.getElementById('connectionStatusText').textContent = "Connected to Live Server";
+
+                // Subscribe to Room Discovery & General Channel
+                mqttClient.subscribe(GLOBAL_DISCOVERY_TOPIC);
+                mqttClient.subscribe(TOPIC_PREFIX + "chat/general");
+
+                // Announce existence to pull other online rooms
+                announceRoom(roomsCache['general']);
             });
 
-            // Listen for Messages in Active Room
-            listenToCurrentRoomMessages();
+            mqttClient.on('offline', () => {
+                isConnected = false;
+                document.getElementById('connectionDot').classList.add('offline');
+                document.getElementById('connectionStatusText').textContent = "Reconnecting...";
+            });
+
+            mqttClient.on('message', (topic, payload) => {
+                try {
+                    const messageStr = payload.toString();
+                    const data = JSON.parse(messageStr);
+
+                    if (topic === GLOBAL_DISCOVERY_TOPIC) {
+                        // Room list synchronization
+                        if (data.key && !roomsCache[data.key]) {
+                            roomsCache[data.key] = {
+                                name: data.name,
+                                isLocked: data.isLocked
+                            };
+                            if (!roomMessages[data.key]) roomMessages[data.key] = [];
+                            renderGroupList();
+                        }
+                    } else if (topic.startsWith(TOPIC_PREFIX + "chat/")) {
+                        // Incoming chat message
+                        const roomKey = topic.replace(TOPIC_PREFIX + "chat/", "");
+                        handleIncomingChatMessage(roomKey, data);
+                    }
+                } catch (e) {
+                    console.error("Malformed message:", e);
+                }
+            });
+
+            renderGroupList();
+            renderChatMessages();
         }
 
-        function listenToCurrentRoomMessages() {
-            db.ref(`messages/${activeRoomKey}`).limitToLast(50).on('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                localChatMessages = Object.values(data);
-                renderChatMessages();
-            });
+        function announceRoom(roomData) {
+            if (!mqttClient || !isConnected) return;
+            mqttClient.publish(GLOBAL_DISCOVERY_TOPIC, JSON.stringify({
+                key: activeRoomKey,
+                name: roomData.name,
+                isLocked: roomData.isLocked
+            }), { retain: true });
         }
 
-        function renderGroupList(rooms) {
+        function renderGroupList() {
             const listContainer = document.getElementById('groupChannelList');
             listContainer.innerHTML = '';
 
-            Object.keys(rooms).forEach(key => {
-                const room = rooms[key];
+            Object.keys(roomsCache).forEach(key => {
+                const room = roomsCache[key];
                 const li = document.createElement('li');
                 const isLocked = room.isLocked;
                 const isActive = activeRoomKey === key;
@@ -910,7 +954,7 @@
             const room = roomsCache[key];
             if (!room) return;
 
-            if (room.isLocked && !unlockedRooms.has(key)) {
+            if (room.isLocked && !roomPasswords[key]) {
                 targetPendingRoom = key;
                 document.getElementById('promptRoomName').textContent = `Password required for: ${room.name}`;
                 document.getElementById('roomPasswordInput').value = '';
@@ -922,40 +966,32 @@
 
         function verifyAndJoinRoom() {
             const passEntered = document.getElementById('roomPasswordInput').value;
-            const room = roomsCache[targetPendingRoom];
+            const key = targetPendingRoom;
 
-            if (room && room.password === passEntered) {
-                unlockedRooms.add(targetPendingRoom);
-                switchRoom(targetPendingRoom);
+            if (key) {
+                // Save password locally to decrypt room messages
+                roomPasswords[key] = passEntered;
+                switchRoom(key);
                 closePasswordPromptModal();
-            } else {
-                alert("Incorrect Room Password!");
             }
         }
 
         function switchRoom(key) {
-            // Detach previous listener
-            db.ref(`messages/${activeRoomKey}`).off();
             activeRoomKey = key;
             const room = roomsCache[key];
             document.getElementById('currentChannelName').textContent = room ? room.name : "Group Chat";
-            listenToCurrentRoomMessages();
-            renderGroupList(roomsCache);
+
+            if (mqttClient && isConnected) {
+                mqttClient.subscribe(TOPIC_PREFIX + "chat/" + key);
+            }
+
+            renderGroupList();
+            renderChatMessages();
         }
 
-        // Create Group Modal Functions
-        function openCreateGroupModal() {
-            document.getElementById('createGroupModal').style.display = 'flex';
-        }
-
-        function closeCreateGroupModal() {
-            document.getElementById('createGroupModal').style.display = 'none';
-        }
-
-        function closePasswordPromptModal() {
-            document.getElementById('passwordPromptModal').style.display = 'none';
-            targetPendingRoom = null;
-        }
+        function openCreateGroupModal() { document.getElementById('createGroupModal').style.display = 'flex'; }
+        function closeCreateGroupModal() { document.getElementById('createGroupModal').style.display = 'none'; }
+        function closePasswordPromptModal() { document.getElementById('passwordPromptModal').style.display = 'none'; targetPendingRoom = null; }
 
         function submitCreateGroup() {
             const name = document.getElementById('newGroupNameInput').value.trim();
@@ -966,23 +1002,90 @@
                 return;
             }
 
-            const roomKey = 'group_' + Date.now();
+            const roomKey = 'group_' + Date.now().toString(36);
             const isLocked = pass.length > 0;
 
-            db.ref(`rooms/${roomKey}`).set({
+            const roomData = {
+                key: roomKey,
                 name: name,
-                isLocked: isLocked,
-                password: pass
-            }).then(() => {
-                if (isLocked) unlockedRooms.add(roomKey);
-                switchRoom(roomKey);
-                closeCreateGroupModal();
-                document.getElementById('newGroupNameInput').value = '';
-                document.getElementById('newGroupPassInput').value = '';
-            });
+                isLocked: isLocked
+            };
+
+            roomsCache[roomKey] = roomData;
+            roomMessages[roomKey] = [];
+            if (isLocked) roomPasswords[roomKey] = pass;
+
+            // Broadcast room discovery
+            if (mqttClient && isConnected) {
+                mqttClient.publish(GLOBAL_DISCOVERY_TOPIC, JSON.stringify(roomData), { retain: true });
+                mqttClient.subscribe(TOPIC_PREFIX + "chat/" + roomKey);
+            }
+
+            switchRoom(roomKey);
+            closeCreateGroupModal();
+            document.getElementById('newGroupNameInput').value = '';
+            document.getElementById('newGroupPassInput').value = '';
         }
 
-        // Filter and Send Chat
+        function handleSendChat(e) {
+            e.preventDefault();
+            const chatInput = document.getElementById('chatInput');
+            const text = chatInput.value.trim();
+            const author = document.getElementById('usernameInput').value.trim() || 'Anonymous';
+
+            if (!text || !mqttClient || !isConnected) return;
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const room = roomsCache[activeRoomKey];
+            let payloadText = text;
+
+            // If room is locked, ENCRYPT text with room password!
+            if (room && room.isLocked) {
+                const secret = roomPasswords[activeRoomKey] || "";
+                payloadText = "ENC:" + CryptoJS.AES.encrypt(text, secret).toString();
+            }
+
+            const messageObject = {
+                author: author,
+                text: payloadText,
+                time: timeStr
+            };
+
+            mqttClient.publish(TOPIC_PREFIX + "chat/" + activeRoomKey, JSON.stringify(messageObject));
+            chatInput.value = '';
+        }
+
+        function handleIncomingChatMessage(roomKey, data) {
+            if (!roomMessages[roomKey]) roomMessages[roomKey] = [];
+
+            let displayText = data.text;
+
+            // Decrypt if encrypted
+            if (displayText.startsWith("ENC:")) {
+                const encryptedHex = displayText.replace("ENC:", "");
+                const secret = roomPasswords[roomKey] || "";
+                try {
+                    const decryptedBytes = CryptoJS.AES.decrypt(encryptedHex, secret);
+                    const originalText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+                    displayText = originalText ? originalText : "🔒 [Encrypted Message - Invalid Password]";
+                } catch (e) {
+                    displayText = "🔒 [Encrypted Message - Decryption Failed]";
+                }
+            }
+
+            roomMessages[roomKey].push({
+                author: data.author,
+                text: displayText,
+                time: data.time
+            });
+
+            if (roomKey === activeRoomKey) {
+                renderChatMessages();
+            }
+        }
+
         function filterText(text) {
             const isFilterActive = document.getElementById('profanityFilterToggle').checked;
             if (!isFilterActive) return text;
@@ -1001,13 +1104,14 @@
             const currentUsername = document.getElementById('usernameInput').value.trim();
 
             container.innerHTML = '';
+            const msgs = roomMessages[activeRoomKey] || [];
 
-            const filteredMsgs = localChatMessages.filter(msg => {
+            const filteredMsgs = msgs.filter(msg => {
                 return (msg.text || '').toLowerCase().includes(searchKeyword) || (msg.author || '').toLowerCase().includes(searchKeyword);
             });
 
             if (filteredMsgs.length === 0) {
-                container.innerHTML = `<div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); padding: 2rem;">No live messages in this room yet.</div>`;
+                container.innerHTML = `<div style="text-align: center; font-size: 0.85rem; color: var(--text-muted); padding: 2rem;">No live messages in this group yet. Send a message below!</div>`;
                 return;
             }
 
@@ -1033,30 +1137,8 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function handleSendChat(e) {
-            e.preventDefault();
-            const chatInput = document.getElementById('chatInput');
-            const text = chatInput.value.trim();
-            const author = document.getElementById('usernameInput').value.trim() || 'Anonymous';
-
-            if (!text) return;
-
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            const newMsg = {
-                author: author,
-                text: text,
-                time: timeStr,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            };
-
-            db.ref(`messages/${activeRoomKey}`).push(newMsg);
-            chatInput.value = '';
-        }
-
         // =========================================================================
-        // OTHER PORTAL FEATURES (Admin Numpad, Settings, Games)
+        // SETTINGS, ADMIN & GAMES PORTAL FUNCTIONS
         // =========================================================================
 
         function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
