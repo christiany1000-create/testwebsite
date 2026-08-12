@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Arcade | Ultimate Unblocked Games</title>
+    <title>Nova Arcade | Ultimate Unblocked Games & Media</title>
     <style>
         :root {
             --bg: #090d16;
@@ -208,6 +208,10 @@
             font-size: 1.15rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .card-category {
@@ -309,22 +313,23 @@
         <a href="#" class="logo">⚡ Nova Arcade</a>
         <div class="search-container">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search games...">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Search games or videos...">
         </div>
     </header>
 
     <div class="container">
         <div class="hero">
             <h1>Level Up Your Break</h1>
-            <p>The ultimate collection of high-performance unblocked games.</p>
+            <p>The ultimate collection of high-performance unblocked games & media.</p>
         </div>
 
         <div class="categories" id="categoryFilters">
-            <button class="cat-btn active" data-category="All">All Games</button>
+            <button class="cat-btn active" data-category="All">All Items</button>
             <button class="cat-btn" data-category="Adventure">Adventure</button>
             <button class="cat-btn" data-category="Arcade">Arcade</button>
             <button class="cat-btn" data-category="Classic">Classic</button>
             <button class="cat-btn" data-category="Strategy">Strategy</button>
+            <button class="cat-btn" data-category="YouTube">📺 YouTube Videos</button>
         </div>
 
         <div class="grid" id="gameGrid">
@@ -335,8 +340,8 @@
     <!-- Modal Player -->
     <div class="modal" id="gameModal">
         <div class="modal-header">
-            <h3 id="modalTitle" style="margin: 0; font-size: 1.2rem;">Game Title</h3>
-            <button class="close-btn" onclick="closeGame()">Exit Game</button>
+            <h3 id="modalTitle" style="margin: 0; font-size: 1.2rem;">Title</h3>
+            <button class="close-btn" onclick="closeGame()">Close Player</button>
         </div>
         <div class="iframe-container">
             <iframe id="gameIframe" src="" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="pointer-lock; fullscreen; autoplay; keyboard-map; clipboard-read; clipboard-write"></iframe>
@@ -344,6 +349,9 @@
     </div>
 
     <script>
+        // REPLACE THIS WITH YOUR ACTUAL YOUTUBE API KEY
+        const YOUTUBE_API_KEY = "YOUR_API_KEY_HERE";
+
         const games = [
             {
                 title: "Craft",
@@ -390,6 +398,9 @@
             }
         ];
 
+        let youtubeVideos = [];
+        let currentCategory = 'All';
+
         const grid = document.getElementById('gameGrid');
         const searchInput = document.getElementById('searchInput');
         const modal = document.getElementById('gameModal');
@@ -397,29 +408,55 @@
         const modalTitle = document.getElementById('modalTitle');
         const categoryButtons = document.querySelectorAll('.cat-btn');
 
-        let currentCategory = 'All';
-
-        function renderGames(gameList) {
-            grid.innerHTML = '';
-            
-            if (gameList.length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 3rem;">No games found.</p>';
+        // Fetch YouTube Videos using your API Key
+        async function fetchYouTubeVideos(query = "gaming highlights") {
+            if (YOUTUBE_API_KEY === "YOUR_API_KEY_HERE" || !YOUTUBE_API_KEY) {
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 3rem;">Please enter your YouTube API Key in the script code to load videos!</p>';
                 return;
             }
 
-            gameList.forEach((game, index) => {
+            try {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`);
+                const data = await response.json();
+                
+                if (data.items) {
+                    youtubeVideos = data.items.map(item => ({
+                        title: item.snippet.title,
+                        category: "YouTube",
+                        image: item.snippet.thumbnails.high.url,
+                        url: `https://www.youtube.com/embed/${item.id.videoId}?autoplay=1`,
+                        isYouTube: true
+                    }));
+                    filterAndRender();
+                } else if (data.error) {
+                    grid.innerHTML = `<p style="color: #ef4444; grid-column: 1 / -1; text-align: center; padding: 3rem;">API Error: ${data.error.message}</p>`;
+                }
+            } catch (err) {
+                console.error("Failed to fetch YouTube videos", err);
+            }
+        }
+
+        function renderItems(itemList) {
+            grid.innerHTML = '';
+            
+            if (itemList.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 3rem;">No items found.</p>';
+                return;
+            }
+
+            itemList.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.style.animationDelay = `${index * 0.08}s`;
-                card.onclick = () => openGame(game);
+                card.style.animationDelay = `${index * 0.05}s`;
+                card.onclick = () => openItem(item);
                 
                 card.innerHTML = `
                     <div class="card-img-wrapper">
-                        <img src="${game.image}" alt="${game.title}" loading="lazy">
+                        <img src="${item.image}" alt="${item.title}" loading="lazy">
                     </div>
                     <div class="card-content">
-                        <h3 class="card-title">${game.title}</h3>
-                        <span class="card-category">${game.category}</span>
+                        <h3 class="card-title">${item.title}</h3>
+                        <span class="card-category">${item.category}</span>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -428,22 +465,33 @@
 
         function filterAndRender() {
             const term = searchInput.value.toLowerCase();
-            const filtered = games.filter(game => {
-                const matchesCategory = currentCategory === 'All' || game.category === currentCategory;
-                const matchesSearch = game.title.toLowerCase().includes(term) || game.category.toLowerCase().includes(term);
-                return matchesCategory && matchesSearch;
-            });
-            renderGames(filtered);
+            
+            // Combine games and youtube videos based on selected category
+            let pool = [];
+            if (currentCategory === 'All') {
+                pool = [...games, ...youtubeVideos];
+            } else if (currentCategory === 'YouTube') {
+                pool = youtubeVideos;
+            } else {
+                pool = games.filter(g => g.category === currentCategory);
+            }
+
+            const filtered = pool.filter(item => 
+                item.title.toLowerCase().includes(term) || 
+                item.category.toLowerCase().includes(term)
+            );
+
+            renderItems(filtered);
         }
 
-        function openGame(game) {
-            if (game.directLink) {
-                window.location.href = game.url;
+        function openItem(item) {
+            if (item.directLink) {
+                window.location.href = item.url;
                 return;
             }
 
-            modalTitle.textContent = game.title;
-            iframe.src = game.url;
+            modalTitle.textContent = item.title;
+            iframe.src = item.url;
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
@@ -458,18 +506,31 @@
             document.body.style.overflow = 'auto';
         }
 
-        searchInput.addEventListener('input', filterAndRender);
+        searchInput.addEventListener('input', () => {
+            // If user is searching while in YouTube tab or All tab, query YouTube dynamically if needed
+            filterAndRender();
+        });
 
         categoryButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 categoryButtons.forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentCategory = e.target.getAttribute('data-category');
-                filterAndRender();
+                
+                if (currentCategory === 'YouTube' && youtubeVideos.length === 0) {
+                    fetchYouTubeVideos();
+                } else {
+                    filterAndRender();
+                }
             });
         });
 
-        renderGames(games);
+        // Pre-fetch some initial YouTube videos silently on load
+        if (YOUTUBE_API_KEY !== "AIzaSyDwfmW1IQ6raSNlXW7NNDUty3KBdF-bGlY") {
+            fetchYouTubeVideos();
+        } else {
+            renderItems(games);
+        }
     </script>
 </body>
 </html>
