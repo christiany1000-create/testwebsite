@@ -703,26 +703,6 @@
             .chat-wrapper { grid-template-columns: 1fr; height: 600px; }
             .chat-sidebar { display: none; }
         }
-    
-        /* ADMIN ACCOUNT BADGE */
-        .admin-chat-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.12rem 0.4rem;
-            border-radius: 999px;
-            background: rgba(245, 158, 11, 0.16);
-            border: 1px solid rgba(245, 158, 11, 0.35);
-            color: #f59e0b;
-            font-size: 0.62rem;
-            font-weight: 900;
-            letter-spacing: .5px;
-        }
-
-        .admin-account-indicator {
-            color: #f59e0b;
-            font-weight: 800;
-        }
-
     </style>
 </head>
 <body class="locked">
@@ -897,9 +877,9 @@
     <!-- ADMIN NUMPAD MODAL -->
     <div class="modal-overlay" id="adminModal">
         <div class="numpad-box">
-            <div style="font-weight: 700; margin-bottom: 0.8rem;">Administrator Access</div>
-            <div id="pinDisplay" class="pin-display">Use your signed-in Google account</div>
-            <div class="numpad-grid" style="display:none;">
+            <div style="font-weight: 700; margin-bottom: 0.8rem;">Enter Admin Code</div>
+            <div id="pinDisplay" class="pin-display">_ _ _ _ _ _</div>
+            <div class="numpad-grid">
                 <button class="numpad-btn" onclick="pressKey('1')">1</button>
                 <button class="numpad-btn" onclick="pressKey('2')">2</button>
                 <button class="numpad-btn" onclick="pressKey('3')">3</button>
@@ -932,7 +912,6 @@
             // Save session
             localStorage.setItem('googleUser', JSON.stringify(userData));
             applyUserProfile(userData);
-            updateAdminUI(userData);
         }
 
         function parseJwt(token) {
@@ -951,9 +930,7 @@
 
             // Update Header Profile Badge
             document.getElementById('userHeaderAvatar').src = user.picture;
-            document.getElementById('userHeaderName').textContent =
-                isAdminUser(user) ? "👑 " + user.name : user.name;
-            updateAdminUI(user);
+            document.getElementById('userHeaderName').textContent = user.name;
 
             // Auto-set chat nickname
             const usernameInput = document.getElementById('usernameInput');
@@ -975,7 +952,6 @@
                 try {
                     const user = JSON.parse(stored);
                     applyUserProfile(user);
-                    updateAdminUI(user);
                 } catch (e) { 
                     console.error(e);
                     document.getElementById('authGate').style.display = 'flex';
@@ -1241,8 +1217,7 @@
             const messageObject = {
                 author: author,
                 text: payloadText,
-                time: timeStr,
-                isAdmin: currentUserIsAdmin
+                time: timeStr
             };
 
             mqttClient.publish(TOPIC_PREFIX + "chat/" + activeRoomKey, JSON.stringify(messageObject));
@@ -1269,8 +1244,7 @@
             roomMessages[roomKey].push({
                 author: data.author,
                 text: displayText,
-                time: data.time,
-                isAdmin: data.isAdmin === true
+                time: data.time
             });
 
             if (roomKey === activeRoomKey) {
@@ -1317,7 +1291,6 @@
                 msgDiv.innerHTML = `
                     <div class="message-meta">
                         <span class="message-author">${msg.author}</span>
-                        ${msg.isAdmin ? '<span class="admin-chat-badge">ADMIN</span>' : ''}
                         <span>• ${msg.time}</span>
                     </div>
                     <div class="message-body">
@@ -1353,70 +1326,12 @@
             else display.textContent = enteredPin.padEnd(6, '_').split('').join(' ');
         }
 
-        // =========================================================================
-        // ADMIN ACCOUNT SYSTEM
-        // =========================================================================
-        // IMPORTANT:
-        // This browser-only demo identifies the admin by Google account email.
-        // For real security, verify the Google ID token on a backend and store
-        // the user's Google "sub" identifier server-side. Never trust this
-        // client-side value for bans or other security-sensitive actions.
-
-        const ADMIN_EMAILS = [
-            "YOUR_GOOGLE_EMAIL_HERE"
-        ];
-
-        let currentUserIsAdmin = false;
-
-        function isAdminUser(user) {
-            return !!user && ADMIN_EMAILS.some(
-                email => email.toLowerCase() === (user.email || "").toLowerCase()
-            );
-        }
-
-        function updateAdminUI(user) {
-            currentUserIsAdmin = isAdminUser(user);
-
-            const nameEl = document.getElementById("userHeaderName");
-            if (nameEl) {
-                nameEl.textContent = currentUserIsAdmin
-                    ? "👑 " + user.name
-                    : user.name;
-                nameEl.title = currentUserIsAdmin ? "Administrator" : "";
-            }
-
-            const usernameInput = document.getElementById("usernameInput");
-            if (usernameInput && currentUserIsAdmin) {
-                usernameInput.dataset.admin = "true";
-            } else if (usernameInput) {
-                delete usernameInput.dataset.admin;
-            }
-        }
-
         function submitPin() {
-            // The old hard-coded PIN has intentionally been removed.
-            // Administrator access is tied to the signed-in Google account.
-            const stored = localStorage.getItem("googleUser");
-
-            if (!stored) {
-                alert("Please sign in with your Google account first.");
+            if (enteredPin === "370018") {
+                alert("This Website is by Christian");
                 closeAdminModal();
-                return;
-            }
-
-            try {
-                const user = JSON.parse(stored);
-
-                if (isAdminUser(user)) {
-                    alert("Administrator access granted.");
-                    updateAdminUI(user);
-                    closeAdminModal();
-                } else {
-                    alert("This Google account is not an administrator.");
-                    clearPin();
-                }
-            } catch (e) {
-                alert("Your login session could not be verified.");
+            } else {
+                alert("Incorrect Code");
                 clearPin();
             }
         }
