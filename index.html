@@ -46,6 +46,57 @@
             background-size: 30px 30px;
         }
 
+        body.locked {
+            overflow: hidden !important;
+        }
+
+        /* MANDATORY AUTH GATEWAY OVERLAY */
+        .auth-gate-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(11, 17, 32, 0.96);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .auth-gate-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px var(--primary-glow);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .auth-gate-card .logo {
+            font-size: 1.8rem;
+        }
+
+        .auth-gate-card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .auth-gate-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
         .bg-pattern {
             position: fixed;
             top: 0;
@@ -182,9 +233,8 @@
             font-size: 0.85rem;
         }
 
-        /* GOOGLE USER BADGE IN HEADER */
         .user-header-profile {
-            display: none;
+            display: flex;
             align-items: center;
             gap: 0.6rem;
             background: rgba(15, 23, 42, 0.8);
@@ -655,7 +705,32 @@
         }
     </style>
 </head>
-<body>
+<body class="locked">
+
+    <!-- MANDATORY LOGIN GATEWAY SCREEN -->
+    <div id="authGate" class="auth-gate-overlay">
+        <div class="auth-gate-card">
+            <div class="logo">
+                <span class="logo-x">✕</span>
+                <span class="logo-text">LearnMultiply</span>
+            </div>
+            <h2>Authentication Required</h2>
+            <p>Please sign in with your Google Account to access games, study materials, and live student groups.</p>
+
+            <div id="g_id_onload"
+                 data-client_id="787259726635-ldace8nm63t3ehiog8189pekts6138dc.apps.googleusercontent.com"
+                 data-callback="handleGoogleLogin"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" 
+                 data-type="standard" 
+                 data-shape="pill" 
+                 data-theme="filled_blue" 
+                 data-size="large" 
+                 data-logo_alignment="left">
+            </div>
+        </div>
+    </div>
 
     <div class="bg-pattern"></div>
 
@@ -678,17 +753,7 @@
                 <input type="text" id="searchInput" class="search-bar" placeholder="Search resources...">
             </div>
 
-            <!-- GOOGLE LOGIN CONTAINER -->
-            <div id="googleSignInWrapper">
-                <div id="g_id_onload"
-                     data-client_id="787259726635-ldace8nm63t3ehiog8189pekts6138dc.apps.googleusercontent.com"
-                     data-callback="handleGoogleLogin"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin" data-type="icon" data-shape="circle" data-theme="dark"></div>
-            </div>
-
-            <!-- GOOGLE USER PROFILE BADGE (SHOWN WHEN LOGGED IN) -->
+            <!-- GOOGLE USER PROFILE BADGE IN HEADER -->
             <div id="googleUserBadge" class="user-header-profile">
                 <img id="userHeaderAvatar" class="user-header-avatar" src="" alt="Avatar">
                 <span id="userHeaderName" class="user-header-name">Student</span>
@@ -834,7 +899,7 @@
 
     <script>
         // =========================================================================
-        // GOOGLE AUTHENTICATION INTEGRATION
+        // GOOGLE AUTHENTICATION & GATEKEEPER
         // =========================================================================
         function handleGoogleLogin(response) {
             const payload = parseJwt(response.credential);
@@ -844,7 +909,7 @@
                 picture: payload.picture
             };
 
-            // Save user session
+            // Save session
             localStorage.setItem('googleUser', JSON.stringify(userData));
             applyUserProfile(userData);
         }
@@ -859,9 +924,11 @@
         }
 
         function applyUserProfile(user) {
+            // Unlock Website
+            document.getElementById('authGate').style.display = 'none';
+            document.body.classList.remove('locked');
+
             // Update Header Profile Badge
-            document.getElementById('googleSignInWrapper').style.display = 'none';
-            document.getElementById('googleUserBadge').style.display = 'flex';
             document.getElementById('userHeaderAvatar').src = user.picture;
             document.getElementById('userHeaderName').textContent = user.name;
 
@@ -874,8 +941,8 @@
 
         function handleLogout() {
             localStorage.removeItem('googleUser');
-            document.getElementById('googleSignInWrapper').style.display = 'block';
-            document.getElementById('googleUserBadge').style.display = 'none';
+            document.getElementById('authGate').style.display = 'flex';
+            document.body.classList.add('locked');
             document.getElementById('usernameInput').value = `Student_${Math.floor(100 + Math.random() * 900)}`;
         }
 
@@ -885,7 +952,12 @@
                 try {
                     const user = JSON.parse(stored);
                     applyUserProfile(user);
-                } catch (e) { console.error(e); }
+                } catch (e) { 
+                    console.error(e);
+                    document.getElementById('authGate').style.display = 'flex';
+                }
+            } else {
+                document.getElementById('authGate').style.display = 'flex';
             }
         }
 
@@ -925,7 +997,6 @@
             { title: "Tetris", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris", url: "games/tetris.html" }
         ];
 
-        // Random Nickname default
         document.getElementById('usernameInput').value = `Student_${Math.floor(100 + Math.random() * 900)}`;
 
         const grid = document.getElementById('gameGrid');
@@ -1324,7 +1395,7 @@
             });
         });
 
-        // Initialize view & check login
+        // Check authentication requirement immediately on load
         checkExistingLogin();
         filterAndRender();
     </script>
