@@ -399,6 +399,7 @@
 
         let youtubeVideos = [];
         let currentCategory = 'All';
+        let searchTimeout = null;
 
         const grid = document.getElementById('gameGrid');
         const searchInput = document.getElementById('searchInput');
@@ -499,7 +500,15 @@
         }
 
         searchInput.addEventListener('input', () => {
-            filterAndRender();
+            const term = searchInput.value.trim();
+            if (currentCategory === 'YouTube') {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    fetchYouTubeVideos(term || "gaming highlights");
+                }, 600);
+            } else {
+                filterAndRender();
+            }
         });
 
         categoryButtons.forEach(btn => {
@@ -509,7 +518,7 @@
                 currentCategory = e.target.getAttribute('data-category');
                 
                 if (currentCategory === 'YouTube' && youtubeVideos.length === 0) {
-                    fetchYouTubeVideos();
+                    fetchYouTubeVideos(searchInput.value.trim() || "gaming highlights");
                 } else {
                     filterAndRender();
                 }
