@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flappy Bird HTML5 - Fullscreen Desktop & Mobile</title>
+  <title>Flappy Bird HTML5</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,26 +12,33 @@
       user-select: none;
     }
 
-    body, html {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #1a1a1a;
+    body {
+      background-color: #0f172a;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
       color: #fff;
+      overflow: hidden;
     }
 
+    /* Container maintaining 9:16 aspect ratio on Desktop & Mobile */
     #game-container {
       position: relative;
-      width: 100vw;
-      height: 100vh;
+      height: 92vh;
+      aspect-ratio: 9 / 16;
+      max-width: 95vw;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      border-radius: 16px;
       overflow: hidden;
+      border: 2px solid #334155;
     }
 
     canvas {
-      display: block;
       width: 100%;
       height: 100%;
+      display: block;
       background-color: #70c5ce;
     }
 
@@ -41,7 +48,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(6px);
       display: flex;
       flex-direction: column;
@@ -58,50 +65,50 @@
     }
 
     h1 {
-      font-size: clamp(2rem, 6vw, 3.5rem);
-      color: #f4c430;
-      text-shadow: 3px 3px #000;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      color: #f59e0b;
+      text-shadow: 3px 3px 0px #000;
       letter-spacing: 2px;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
     h2 {
-      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-size: clamp(1.2rem, 3.5vw, 1.8rem);
       color: #fff;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
     .btn {
-      background-color: #e67e22;
+      background-color: #ea580c;
       color: white;
       border: none;
-      padding: 14px 32px;
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      padding: 12px 24px;
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
       font-weight: bold;
-      border-radius: 30px;
+      border-radius: 25px;
       cursor: pointer;
-      box-shadow: 0 4px 0 #d35400;
+      box-shadow: 0 4px 0 #9a3412;
       transition: transform 0.1s, background-color 0.2s;
-      width: 90%;
-      max-width: 260px;
+      width: 80%;
+      max-width: 220px;
     }
 
     .btn:hover {
-      background-color: #f39c12;
+      background-color: #f97316;
     }
 
     .btn:active {
       transform: translateY(3px);
-      box-shadow: 0 1px 0 #d35400;
+      box-shadow: 0 1px 0 #9a3412;
     }
 
     .score-badge {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       background: rgba(255, 255, 255, 0.1);
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 12px;
-      width: 90%;
-      max-width: 260px;
+      width: 80%;
+      max-width: 220px;
       display: flex;
       justify-content: space-between;
     }
@@ -109,38 +116,38 @@
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      width: 90%;
-      max-width: 260px;
+      gap: 8px;
+      width: 80%;
+      max-width: 220px;
     }
 
     input[type="text"] {
-      padding: 12px;
-      border-radius: 10px;
-      border: 2px solid #e67e22;
-      background: #2c3e50;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #ea580c;
+      background: #1e293b;
       color: white;
       text-align: center;
-      font-size: 1.1rem;
+      font-size: 1rem;
       outline: none;
     }
 
     .leaderboard-table {
       width: 90%;
-      max-width: 340px;
+      max-width: 280px;
       border-collapse: collapse;
       margin-bottom: 10px;
     }
 
     .leaderboard-table th, .leaderboard-table td {
-      padding: 10px;
+      padding: 8px;
       text-align: left;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
     }
 
     .leaderboard-table th {
-      border-bottom: 2px solid #f4c430;
-      color: #f4c430;
+      border-bottom: 2px solid #f59e0b;
+      color: #f59e0b;
     }
 
     .leaderboard-table td:last-child {
@@ -149,7 +156,7 @@
     }
 
     .leaderboard-empty {
-      color: #aaa;
+      color: #94a3b8;
       font-style: italic;
       margin: 15px 0;
     }
@@ -158,7 +165,8 @@
 <body>
 
   <div id="game-container">
-    <canvas id="canvas"></canvas>
+    <!-- Fixed internal virtual resolution (360x640) for 100% consistent physics across all devices -->
+    <canvas id="canvas" width="360" height="640"></canvas>
 
     <!-- Main Menu -->
     <div id="main-menu" class="overlay">
@@ -222,36 +230,21 @@
     const leaderboardBody = document.getElementById('leaderboard-body');
     const noScoresEl = document.getElementById('no-scores');
 
-    // State Variables
+    // Game Variables
     let state = 'MENU';
     let score = 0;
     let lastTime = 0;
     let pipeSpawnTimer = 0;
+    const groundHeight = 50;
 
-    // Responsive Canvas Sizing
-    let scale = 1;
-    let groundHeight = 60;
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      
-      // Scaling baseline (height: 640px)
-      scale = canvas.height / 640;
-      groundHeight = 60 * scale;
-
-      // Adjust bird positioning on resize
-      bird.x = Math.max(80 * scale, 100);
-      bird.radius = 14 * scale;
-    }
-    window.addEventListener('resize', resizeCanvas);
-
-    // Dynamic Bird Mechanics
+    // --- FLOATY PHYSICS CONFIGURATION ---
     const bird = {
-      x: 100,
-      y: 250,
-      radius: 14,
+      x: 80,
+      y: 280,
+      radius: 13,
       velocity: 0,
+      gravity: 0.115,  // Very light gravity pull
+      jump: -3.8,      // Smooth, floaty hop
       rotation: 0,
 
       draw() {
@@ -260,49 +253,46 @@
         ctx.rotate(this.rotation);
 
         // Body
-        ctx.fillStyle = '#f4c430';
+        ctx.fillStyle = '#f59e0b';
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = '#000';
-        ctx.lineWidth = Math.max(2, 2 * scale);
+        ctx.lineWidth = 2;
         ctx.stroke();
 
         // Eye
         ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(this.radius * 0.35, -this.radius * 0.3, this.radius * 0.35, 0, Math.PI * 2);
+        ctx.arc(4, -4, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#000';
         ctx.beginPath();
-        ctx.arc(this.radius * 0.45, -this.radius * 0.3, this.radius * 0.15, 0, Math.PI * 2);
+        ctx.arc(5, -4, 1.5, 0, Math.PI * 2);
         ctx.fill();
 
         // Beak
-        ctx.fillStyle = '#e67e22';
+        ctx.fillStyle = '#ea580c';
         ctx.beginPath();
-        ctx.arc(this.radius * 0.5, this.radius * 0.15, this.radius * 0.4, 0, Math.PI);
+        ctx.arc(6, 2, 5, 0, Math.PI);
         ctx.fill();
 
         ctx.restore();
       },
 
       flap() {
-        // Tuned floaty jump force
-        this.velocity = -4.2 * scale;
+        this.velocity = this.jump;
       },
 
       update(dt) {
-        // Softened gravity scaling
-        const gravity = 0.13 * scale;
-        this.velocity += gravity * dt;
+        this.velocity += this.gravity * dt;
         this.y += this.velocity * dt;
 
-        // Dynamic Angle Rotation
+        // Angle Rotation based on speed
         if (this.velocity < 0) {
           this.rotation = -0.25;
         } else {
-          this.rotation = Math.min(Math.PI / 2, this.rotation + 0.04 * dt);
+          this.rotation = Math.min(Math.PI / 2, this.rotation + 0.035 * dt);
         }
 
         // Floor Collision
@@ -319,7 +309,7 @@
       },
 
       reset() {
-        this.y = canvas.height / 2;
+        this.y = 280;
         this.velocity = 0;
         this.rotation = 0;
       }
@@ -328,40 +318,37 @@
     // Pipes Manager
     const pipes = {
       items: [],
+      width: 52,
+      gap: 135,       // Generous gap for comfortable navigation
+      speed: 1.6,     // Relaxed scroll speed
 
       draw() {
         for (let p of this.items) {
-          ctx.fillStyle = '#73bf2e';
-          ctx.strokeStyle = '#2d5a0e';
-          ctx.lineWidth = Math.max(2, 2 * scale);
+          ctx.fillStyle = '#22c55e';
+          ctx.strokeStyle = '#15803d';
+          ctx.lineWidth = 2;
 
           // Top Pipe
-          ctx.fillRect(p.x, 0, p.width, p.top);
-          ctx.strokeRect(p.x, 0, p.width, p.top);
+          ctx.fillRect(p.x, 0, this.width, p.top);
+          ctx.strokeRect(p.x, 0, this.width, p.top);
 
           // Bottom Pipe
-          ctx.fillRect(p.x, p.bottom, p.width, canvas.height - groundHeight - p.bottom);
-          ctx.strokeRect(p.x, p.bottom, p.width, canvas.height - groundHeight - p.bottom);
+          ctx.fillRect(p.x, p.bottom, this.width, canvas.height - groundHeight - p.bottom);
+          ctx.strokeRect(p.x, p.bottom, this.width, canvas.height - groundHeight - p.bottom);
         }
       },
 
       update(dt) {
-        const pipeWidth = Math.max(60, 75 * scale);
-        const pipeGap = Math.max(140, 165 * scale);
-        const speed = 2.4 * scale * dt;
-
-        // Spawn interval based on time
         pipeSpawnTimer += dt;
-        if (pipeSpawnTimer >= 110) {
+        if (pipeSpawnTimer >= 115) {
           pipeSpawnTimer = 0;
-          const minTop = 50 * scale;
-          const maxTop = canvas.height - groundHeight - pipeGap - (50 * scale);
+          const minTop = 40;
+          const maxTop = canvas.height - groundHeight - this.gap - 40;
           const top = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
-          const bottom = top + pipeGap;
+          const bottom = top + this.gap;
 
           this.items.push({
             x: canvas.width,
-            width: pipeWidth,
             top: top,
             bottom: bottom,
             passed: false
@@ -370,25 +357,25 @@
 
         for (let i = 0; i < this.items.length; i++) {
           let p = this.items[i];
-          p.x -= speed;
+          p.x -= this.speed * dt;
 
-          // Collision Box
+          // Collision Detection
           if (
             bird.x + bird.radius > p.x &&
-            bird.x - bird.radius < p.x + p.width &&
+            bird.x - bird.radius < p.x + this.width &&
             (bird.y - bird.radius < p.top || bird.y + bird.radius > p.bottom)
           ) {
             endGame();
           }
 
           // Score Increment
-          if (p.x + p.width < bird.x && !p.passed) {
+          if (p.x + this.width < bird.x && !p.passed) {
             score++;
             p.passed = true;
           }
 
           // Remove Offscreen Pipes
-          if (p.x + p.width < 0) {
+          if (p.x + this.width < 0) {
             this.items.splice(i, 1);
             i--;
           }
@@ -402,11 +389,11 @@
     };
 
     function drawGround() {
-      ctx.fillStyle = '#ded895';
+      ctx.fillStyle = '#e2e8f0';
       ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
-      ctx.fillStyle = '#73bf2e';
-      ctx.fillRect(0, canvas.height - groundHeight, canvas.width, 14 * scale);
-      ctx.strokeStyle = '#000';
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(0, canvas.height - groundHeight, canvas.width, 12);
+      ctx.strokeStyle = '#0f172a';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(0, canvas.height - groundHeight);
@@ -416,21 +403,20 @@
 
     function drawScore() {
       if (state === 'PLAYING') {
-        const fontSize = Math.max(32, Math.floor(42 * scale));
         ctx.fillStyle = '#fff';
         ctx.strokeStyle = '#000';
-        ctx.lineWidth = Math.max(3, 4 * scale);
-        ctx.font = `bold ${fontSize}px sans-serif`;
+        ctx.lineWidth = 4;
+        ctx.font = 'bold 36px sans-serif';
         ctx.textAlign = 'center';
-        ctx.strokeText(score, canvas.width / 2, 70 * scale);
-        ctx.fillText(score, canvas.width / 2, 70 * scale);
+        ctx.strokeText(score, canvas.width / 2, 60);
+        ctx.fillText(score, canvas.width / 2, 60);
       }
     }
 
-    // Delta-Time Normalized Game Loop
+    // Delta-Time Frame Normalization Loop (Fixes 60Hz / 144Hz differences)
     function gameLoop(timestamp) {
       if (!lastTime) lastTime = timestamp;
-      const dt = Math.min((timestamp - lastTime) / 16.666, 3); // Normalize to 60 FPS baseline
+      const dt = Math.min((timestamp - lastTime) / 16.666, 2.5);
       lastTime = timestamp;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -451,12 +437,7 @@
     // Controls
     window.addEventListener('keydown', (e) => {
       if ((e.code === 'Space' || e.code === 'ArrowUp') && state === 'PLAYING') {
-        bird.flap();
-      }
-    });
-
-    window.addEventListener('touchstart', (e) => {
-      if (state === 'PLAYING' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
         bird.flap();
       }
     });
@@ -467,7 +448,13 @@
       }
     });
 
-    // Navigation & UI Logic
+    window.addEventListener('touchstart', (e) => {
+      if (state === 'PLAYING' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+        bird.flap();
+      }
+    }, { passive: true });
+
+    // Menu Navigation
     function showMenu() {
       state = 'MENU';
       hideOverlays();
@@ -514,7 +501,7 @@
       score = 0;
     }
 
-    // Leaderboard Storage
+    // Local Storage Leaderboard
     function getLeaderboard() {
       const data = localStorage.getItem('flappy_leaderboard');
       return data ? JSON.parse(data) : [];
@@ -562,8 +549,7 @@
       );
     }
 
-    // Init
-    resizeCanvas();
+    // Run Engine
     requestAnimationFrame(gameLoop);
   </script>
 </body>
