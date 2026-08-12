@@ -188,9 +188,9 @@ header {
     background: rgba(2,6,23,.92); backdrop-filter: blur(10px);
 }
 .modal-box {
-    width: 100%; max-width: 520px; padding: 25px; background: var(--surface2);
+    width: 100%; max-width: 640px; padding: 25px; background: var(--surface2);
     border: 1px solid var(--border); border-radius: 14px;
-    box-shadow: 0 25px 70px rgba(0,0,0,.6); max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 25px 70px rgba(0,0,0,.6); max-height: 92vh; overflow-y: auto;
 }
 .modal-box h3 { margin-bottom: 18px; }
 .modal-input {
@@ -201,34 +201,44 @@ header {
 .close-btn { padding: 9px 14px; color: white; background: var(--danger); border-radius: 7px; }
 .admin-btn { padding: 9px 14px; color: #06111a; background: var(--primary); border-radius: 7px; }
 
-/* ADMIN PANEL (in-page settings) */
+/* ADMIN PANEL */
 .admin-panel { display: none; }
 .admin-section { margin-bottom: 22px; }
 .admin-section h4 { margin-bottom: 8px; }
 .admin-section p { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
-.ban-row { display: flex; gap: 8px; }
+.ban-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .ban-row input {
-    flex: 1; padding: 10px; color: var(--text); background: #080d18;
+    flex: 1; min-width: 140px; padding: 10px; color: var(--text); background: #080d18;
     border: 1px solid var(--border); border-radius: 7px;
 }
-.ban-list, .online-list { display: flex; flex-direction: column; gap: 6px; }
-.banned-user, .online-user {
+.ban-list, .online-list, .monitor-list { display: flex; flex-direction: column; gap: 6px; }
+.banned-user, .online-user, .monitor-item {
     display: flex; justify-content: space-between; align-items: center; gap: 8px;
     padding: 9px; background: #080d18; border: 1px solid var(--border);
     border-radius: 7px; font-size: 13px; flex-wrap: wrap;
 }
-.online-user .info { flex: 1; min-width: 180px; }
+.online-user .info, .monitor-item .info { flex: 1; min-width: 180px; }
 .online-user .actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .small-btn {
     padding: 5px 9px; font-size: 11px; border-radius: 5px; border: 0; cursor: pointer; font-weight: 700;
 }
-.btn-ban-email { background: var(--danger); color: white; }
-.btn-ban-ip { background: #b45309; color: white; }
+.btn-ban { background: var(--danger); color: white; }
+.btn-temp { background: #b45309; color: white; }
+.btn-mute { background: #7c3aed; color: white; }
+.btn-admin { background: var(--accent); color: #111; }
 .btn-copy { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-unban { background: var(--success); color: #042f2e; }
 .warning-box {
     background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.35);
     padding: 10px 12px; border-radius: 8px; font-size: 12px; color: #fca5a5; margin-bottom: 14px;
 }
+.monitor-box {
+    max-height: 220px; overflow-y: auto; background: #080d18;
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px;
+    font-size: 12px; line-height: 1.45;
+}
+.monitor-line { margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.06); padding-bottom: 4px; }
+.monitor-line .meta { color: var(--muted); font-size: 11px; }
 
 /* PLAYER */
 .player { display: none; position: fixed; inset: 0; z-index: 4000; flex-direction: column; background: #000; }
@@ -294,9 +304,6 @@ header {
             <button class="logout" onclick="logout()">✕</button>
         </div>
         <button class="settings-btn" onclick="openSettings()">⚙ Settings</button>
-        <button class="settings-btn" id="adminPanelBtn" style="display:none;" onclick="goToAdminPanel()">
-            🛡 Admin Panel
-        </button>
     </div>
 </header>
 
@@ -344,7 +351,7 @@ header {
     </section>
 </main>
 
-<!-- SETTINGS / ADMIN -->
+<!-- SETTINGS + FULL ADMIN PANEL -->
 <div class="modal" id="settingsModal">
     <div class="modal-box">
         <h3>Portal Settings</h3>
@@ -355,51 +362,59 @@ header {
 
         <div id="adminSettings" class="admin-panel">
             <div class="warning-box">
-                <strong>Prototype only.</strong> Bans and the online-user list are enforced only in the browser and over a public MQTT broker. Anyone can bypass them. For real school use, move bans + IP logging to a server. Shared school Wi-Fi means one public IP is used by many students.
+                <strong>Prototype only.</strong> All bans, mutes, and admin grants are stored in this browser only and can be bypassed. For real school use you need a backend.
             </div>
 
-            <div class="admin-section">
-                <h4>🛡 Administrator</h4>
-                <p>You have administrator permissions. Use the separate Admin Panel button for the double-checked page.</p>
-            </div>
-
-            <!-- ONLINE USERS -->
+            <!-- ONLINE USERS + QUICK ACTIONS -->
             <div class="admin-section">
                 <h4>Online Users <span id="onlineCount" style="color:var(--muted);font-weight:400;"></span></h4>
-                <p>Live presence (name, email, self-reported public IP). Use “Copy report” if you need to send details to school IT.</p>
+                <p>Live presence. Use the buttons to ban, temp-ban, mute, or promote.</p>
                 <div class="online-list" id="onlineList">
                     <span style="color:var(--muted);font-size:12px;">Waiting for presence data…</span>
                 </div>
             </div>
 
-            <!-- EMAIL BAN -->
+            <!-- CHAT MONITOR -->
             <div class="admin-section">
-                <h4>Ban by Email</h4>
-                <p>Enter the Google email address to ban.</p>
-                <div class="ban-row">
-                    <input id="banEmail" type="email" placeholder="user@gmail.com">
-                    <button class="close-btn" onclick="banUser()">Ban Email</button>
+                <h4>Chat Monitor</h4>
+                <p>Recent messages seen by this client (subscribe to rooms to see more).</p>
+                <div class="monitor-box" id="chatMonitor">
+                    <div style="color:var(--muted);">No messages captured yet.</div>
                 </div>
             </div>
 
-            <!-- IP BAN -->
+            <!-- MANUAL ACTIONS -->
             <div class="admin-section">
-                <h4>Ban by IP (self-reported)</h4>
-                <p>Enter a public IP address. This is weak on shared networks.</p>
-                <div class="ban-row">
-                    <input id="banIP" type="text" placeholder="203.0.113.45">
-                    <button class="close-btn" onclick="banIP()">Ban IP</button>
+                <h4>Manual Actions</h4>
+                <div class="ban-row" style="margin-bottom:10px;">
+                    <input id="actionEmail" type="email" placeholder="user@gmail.com">
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <button class="small-btn btn-ban" onclick="manualBan(false)">Ban</button>
+                    <button class="small-btn btn-temp" onclick="manualBan(true)">Temp Ban (1h)</button>
+                    <button class="small-btn btn-mute" onclick="manualMute(true)">Mute (remove chat)</button>
+                    <button class="small-btn btn-unban" onclick="manualMute(false)">Unmute</button>
+                    <button class="small-btn btn-admin" onclick="manualGiveAdmin(true)">Give Admin</button>
+                    <button class="small-btn btn-ban" onclick="manualGiveAdmin(false)">Remove Admin</button>
                 </div>
             </div>
 
+            <!-- BANNED -->
             <div class="admin-section">
-                <h4>Banned Emails</h4>
+                <h4>Banned Accounts</h4>
                 <div class="ban-list" id="banList"></div>
             </div>
 
+            <!-- MUTED -->
             <div class="admin-section">
-                <h4>Banned IPs</h4>
-                <div class="ban-list" id="ipBanList"></div>
+                <h4>Muted (no chat privileges)</h4>
+                <div class="ban-list" id="muteList"></div>
+            </div>
+
+            <!-- EXTRA ADMINS -->
+            <div class="admin-section">
+                <h4>Additional Admins</h4>
+                <div class="ban-list" id="extraAdminList"></div>
             </div>
         </div>
 
@@ -433,26 +448,43 @@ header {
 
 <script>
 /* ============================================================
-   ADMIN CONFIGURATION
+   ADMIN CONFIGURATION + LISTS
    ============================================================ */
-const ADMIN_EMAILS = [
+const HARDCODED_ADMINS = [
     "yates.christian@norwinsd.org",
     "christiany1000@gmail.com"
 ];
 
 /*
- * IMPORTANT SECURITY NOTES
- * ------------------------
- * This remains a frontend prototype.
- * - Bans (email + IP) live in localStorage → easily cleared.
- * - Online user list + IPs are self-reported over a public MQTT broker.
- * - Anyone can spoof presence messages or ignore bans.
- * - Real production systems must verify Google ID tokens and enforce
- *   bans on a server that sees the true connecting IP.
+ * All moderation data is stored in localStorage.
+ * This is only a frontend prototype – easily bypassed.
  */
 
 let bannedUsers = JSON.parse(localStorage.getItem("learnmultiply_bans") || "[]");
-let bannedIPs   = JSON.parse(localStorage.getItem("learnmultiply_ip_bans") || "[]");
+// format: { email, until: null | timestamp }
+let mutedUsers  = JSON.parse(localStorage.getItem("learnmultiply_mutes") || "[]");
+let extraAdmins = JSON.parse(localStorage.getItem("learnmultiply_extra_admins") || "[]");
+
+function getAllAdmins() {
+    return [...new Set([...HARDCODED_ADMINS, ...extraAdmins.map(e => e.toLowerCase())])];
+}
+
+function isBanned(email) {
+    email = (email || "").toLowerCase();
+    const entry = bannedUsers.find(b => b.email === email);
+    if (!entry) return false;
+    if (entry.until && Date.now() > entry.until) {
+        // expired
+        bannedUsers = bannedUsers.filter(b => b.email !== email);
+        saveBans();
+        return false;
+    }
+    return true;
+}
+
+function isMuted(email) {
+    return mutedUsers.includes((email || "").toLowerCase());
+}
 
 /* ============================================================
    USER AUTH + IP
@@ -460,6 +492,7 @@ let bannedIPs   = JSON.parse(localStorage.getItem("learnmultiply_ip_bans") || "[
 let currentUser = null;
 let myPublicIP  = "unknown";
 let presenceInterval = null;
+let chatMonitorLog = []; // recent messages for admin monitor
 
 async function fetchPublicIP() {
     try {
@@ -480,8 +513,8 @@ function handleGoogleLogin(response) {
             picture: payload.picture || ""
         };
 
-        if (bannedUsers.includes(user.email)) {
-            showBannedScreen(user.email, "email");
+        if (isBanned(user.email)) {
+            showBannedScreen(user.email);
             return;
         }
 
@@ -490,10 +523,6 @@ function handleGoogleLogin(response) {
 
         fetchPublicIP().then(ip => {
             myPublicIP = ip;
-            if (bannedIPs.includes(ip)) {
-                showBannedScreen(ip, "ip");
-                return;
-            }
             applyUser(user);
             startPresence();
         });
@@ -519,19 +548,15 @@ function applyUser(user) {
     document.getElementById("userName").textContent = user.name;
     document.getElementById("userAvatar").src = user.picture || "";
     document.getElementById("nickname").value = user.name;
-    renderBanList();
-    renderIPBanList();
-    updateAdminButton();
+    renderAllAdminLists();
 }
 
 function logout() {
     stopPresence();
     localStorage.removeItem("learnmultiply_user");
-    sessionStorage.removeItem("learnmultiply_admin_ok");
     currentUser = null;
     document.body.classList.add("locked");
     document.getElementById("authGate").style.display = "flex";
-    updateAdminButton();
 }
 
 function checkExistingLogin() {
@@ -539,17 +564,13 @@ function checkExistingLogin() {
     if (!saved) return;
     try {
         const user = JSON.parse(saved);
-        if (bannedUsers.includes(user.email)) {
-            showBannedScreen(user.email, "email");
+        if (isBanned(user.email)) {
+            showBannedScreen(user.email);
             return;
         }
         currentUser = user;
         fetchPublicIP().then(ip => {
             myPublicIP = ip;
-            if (bannedIPs.includes(ip)) {
-                showBannedScreen(ip, "ip");
-                return;
-            }
             applyUser(user);
             startPresence();
         });
@@ -564,16 +585,15 @@ function showAuthError(message) {
     error.style.display = "block";
 }
 
-function showBannedScreen(value, type) {
-    const label = type === "ip" ? "IP address" : "Google account";
+function showBannedScreen(email) {
     document.getElementById("authGate").innerHTML = `
         <div class="auth-card">
             <div class="logo">
                 <span class="logo-x">✕</span>
                 <span class="logo-text">LearnMultiply</span>
             </div>
-            <h2 style="color:#ef4444;">Account / Access Banned</h2>
-            <p>The ${label} <strong>${escapeHtml(value)}</strong> is currently banned from LearnMultiply.</p>
+            <h2 style="color:#ef4444;">Account Banned</h2>
+            <p>The Google account <strong>${escapeHtml(email)}</strong> is currently banned from LearnMultiply.</p>
             <p>If you believe this was a mistake, contact a site administrator.</p>
         </div>
     `;
@@ -582,64 +602,55 @@ function showBannedScreen(value, type) {
 }
 
 /* ============================================================
-   ADMIN HELPERS + REDIRECT TO admin.html
+   ADMIN HELPERS
    ============================================================ */
 function isAdmin() {
-    return !!(currentUser && ADMIN_EMAILS.includes(currentUser.email.toLowerCase()));
+    return !!(currentUser && getAllAdmins().includes(currentUser.email.toLowerCase()));
 }
 
 function getAdminTag(email) {
-    if (ADMIN_EMAILS.includes(String(email).toLowerCase())) return "ADMIN";
+    if (getAllAdmins().includes(String(email).toLowerCase())) return "ADMIN";
     return "";
-}
-
-function updateAdminButton() {
-    const btn = document.getElementById("adminPanelBtn");
-    if (btn) {
-        btn.style.display = isAdmin() ? "inline-block" : "none";
-    }
-}
-
-function goToAdminPanel() {
-    if (!isAdmin()) {
-        alert("Administrator access required.");
-        return;
-    }
-    // Short-lived flag so admin.html can do a second check
-    sessionStorage.setItem("learnmultiply_admin_ok", Date.now().toString());
-    window.location.href = "admin.html";
 }
 
 function openSettings() {
     document.getElementById("settingsModal").style.display = "flex";
     const adminPanel = document.getElementById("adminSettings");
     adminPanel.style.display = isAdmin() ? "block" : "none";
-    renderBanList();
-    renderIPBanList();
+    renderAllAdminLists();
     renderOnlineList();
+    renderChatMonitor();
 }
 
 function closeSettings() {
     document.getElementById("settingsModal").style.display = "none";
 }
 
-/* ---- Email bans ---- */
-function banUser() {
-    if (!isAdmin()) { alert("Administrator access required."); return; }
-    const input = document.getElementById("banEmail");
-    const email = input.value.trim().toLowerCase();
-    if (!email) { alert("Enter an email address."); return; }
-    if (ADMIN_EMAILS.includes(email)) { alert("You cannot ban an administrator."); return; }
-    if (!bannedUsers.includes(email)) bannedUsers.push(email);
-    saveBans();
-    input.value = "";
+function renderAllAdminLists() {
     renderBanList();
-    alert(email + " has been banned (email).");
+    renderMuteList();
+    renderExtraAdminList();
 }
 
-function unbanUser(email) {
-    if (!isAdmin()) { alert("Administrator access required."); return; }
-    bannedUsers = bannedUsers.filter(u => u !== email);
+/* ---- Ban / Temp Ban ---- */
+function banEmail(email, tempHours = null) {
+    email = (email || "").toLowerCase().trim();
+    if (!email) return;
+    if (HARDCODED_ADMINS.includes(email)) {
+        alert("You cannot ban a hardcoded administrator.");
+        return;
+    }
+    // remove existing
+    bannedUsers = bannedUsers.filter(b => b.email !== email);
+    const until = tempHours ? Date.now() + tempHours * 3600 * 1000 : null;
+    bannedUsers.push({ email, until });
+    saveBans();
+    renderBanList();
+}
+
+function unbanEmail(email) {
+    email = (email || "").toLowerCase();
+    bannedUsers = bannedUsers.filter(b => b.email !== email);
     saveBans();
     renderBanList();
 }
@@ -652,74 +663,159 @@ function renderBanList() {
     const list = document.getElementById("banList");
     if (!list) return;
     list.innerHTML = "";
+    // clean expired
+    bannedUsers = bannedUsers.filter(b => !b.until || b.until > Date.now());
+    saveBans();
+
     if (bannedUsers.length === 0) {
-        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No banned emails.</span>`;
+        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No banned accounts.</span>`;
         return;
     }
-    bannedUsers.forEach(email => {
+    bannedUsers.forEach(entry => {
+        const row = document.createElement("div");
+        row.className = "banned-user";
+        const label = entry.until
+            ? `${entry.email} (temp until ${new Date(entry.until).toLocaleTimeString()})`
+            : entry.email;
+        const text = document.createElement("span");
+        text.textContent = label;
+        const button = document.createElement("button");
+        button.className = "small-btn btn-unban";
+        button.textContent = "Unban";
+        button.onclick = () => unbanEmail(entry.email);
+        row.appendChild(text);
+        row.appendChild(button);
+        list.appendChild(row);
+    });
+}
+
+/* ---- Mute / Unmute ---- */
+function muteEmail(email) {
+    email = (email || "").toLowerCase().trim();
+    if (!email || HARDCODED_ADMINS.includes(email)) return;
+    if (!mutedUsers.includes(email)) mutedUsers.push(email);
+    saveMutes();
+    renderMuteList();
+}
+
+function unmuteEmail(email) {
+    email = (email || "").toLowerCase();
+    mutedUsers = mutedUsers.filter(e => e !== email);
+    saveMutes();
+    renderMuteList();
+}
+
+function saveMutes() {
+    localStorage.setItem("learnmultiply_mutes", JSON.stringify(mutedUsers));
+}
+
+function renderMuteList() {
+    const list = document.getElementById("muteList");
+    if (!list) return;
+    list.innerHTML = "";
+    if (mutedUsers.length === 0) {
+        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No muted users.</span>`;
+        return;
+    }
+    mutedUsers.forEach(email => {
         const row = document.createElement("div");
         row.className = "banned-user";
         const text = document.createElement("span");
         text.textContent = email;
         const button = document.createElement("button");
-        button.className = "admin-btn";
-        button.textContent = "Unban";
-        button.onclick = () => unbanUser(email);
+        button.className = "small-btn btn-unban";
+        button.textContent = "Unmute";
+        button.onclick = () => unmuteEmail(email);
         row.appendChild(text);
         row.appendChild(button);
         list.appendChild(row);
     });
 }
 
-/* ---- IP bans ---- */
-function banIP(ipFromArg) {
-    if (!isAdmin()) { alert("Administrator access required."); return; }
-    const input = document.getElementById("banIP");
-    const ip = (ipFromArg || input.value).trim();
-    if (!ip || ip === "unknown") { alert("Enter a valid IP address."); return; }
-    if (!bannedIPs.includes(ip)) bannedIPs.push(ip);
-    saveIPBans();
-    if (!ipFromArg) input.value = "";
-    renderIPBanList();
-    alert(ip + " has been banned (IP).");
+/* ---- Extra Admins ---- */
+function giveAdmin(email) {
+    email = (email || "").toLowerCase().trim();
+    if (!email) return;
+    if (!extraAdmins.includes(email)) extraAdmins.push(email);
+    saveExtraAdmins();
+    renderExtraAdminList();
 }
 
-function unbanIP(ip) {
-    if (!isAdmin()) { alert("Administrator access required."); return; }
-    bannedIPs = bannedIPs.filter(i => i !== ip);
-    saveIPBans();
-    renderIPBanList();
-}
-
-function saveIPBans() {
-    localStorage.setItem("learnmultiply_ip_bans", JSON.stringify(bannedIPs));
-}
-
-function renderIPBanList() {
-    const list = document.getElementById("ipBanList");
-    if (!list) return;
-    list.innerHTML = "";
-    if (bannedIPs.length === 0) {
-        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No banned IPs.</span>`;
+function removeAdmin(email) {
+    email = (email || "").toLowerCase();
+    if (HARDCODED_ADMINS.includes(email)) {
+        alert("Cannot remove a hardcoded administrator.");
         return;
     }
-    bannedIPs.forEach(ip => {
+    extraAdmins = extraAdmins.filter(e => e !== email);
+    saveExtraAdmins();
+    renderExtraAdminList();
+}
+
+function saveExtraAdmins() {
+    localStorage.setItem("learnmultiply_extra_admins", JSON.stringify(extraAdmins));
+}
+
+function renderExtraAdminList() {
+    const list = document.getElementById("extraAdminList");
+    if (!list) return;
+    list.innerHTML = "";
+    if (extraAdmins.length === 0) {
+        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No additional admins.</span>`;
+        return;
+    }
+    extraAdmins.forEach(email => {
         const row = document.createElement("div");
         row.className = "banned-user";
         const text = document.createElement("span");
-        text.textContent = ip;
+        text.textContent = email;
         const button = document.createElement("button");
-        button.className = "admin-btn";
-        button.textContent = "Unban";
-        button.onclick = () => unbanIP(ip);
+        button.className = "small-btn btn-ban";
+        button.textContent = "Remove";
+        button.onclick = () => removeAdmin(email);
         row.appendChild(text);
         row.appendChild(button);
         list.appendChild(row);
     });
 }
 
+/* ---- Manual action helpers ---- */
+function manualBan(temp) {
+    if (!isAdmin()) return;
+    const email = document.getElementById("actionEmail").value.trim();
+    if (!email) { alert("Enter an email"); return; }
+    banEmail(email, temp ? 1 : null);
+    alert(email + (temp ? " temp-banned for 1 hour." : " banned."));
+}
+
+function manualMute(mute) {
+    if (!isAdmin()) return;
+    const email = document.getElementById("actionEmail").value.trim();
+    if (!email) { alert("Enter an email"); return; }
+    if (mute) {
+        muteEmail(email);
+        alert(email + " muted (chat privileges removed).");
+    } else {
+        unmuteEmail(email);
+        alert(email + " unmuted.");
+    }
+}
+
+function manualGiveAdmin(give) {
+    if (!isAdmin()) return;
+    const email = document.getElementById("actionEmail").value.trim();
+    if (!email) { alert("Enter an email"); return; }
+    if (give) {
+        giveAdmin(email);
+        alert(email + " is now an admin (on this browser).");
+    } else {
+        removeAdmin(email);
+        alert(email + " admin status removed.");
+    }
+}
+
 /* ============================================================
-   PRESENCE / ONLINE USERS (self-reported)
+   PRESENCE / ONLINE USERS
    ============================================================ */
 const PRESENCE_TOPIC = "learnmultiply/v3/presence";
 const PRESENCE_TTL_MS = 90 * 1000;
@@ -796,8 +892,13 @@ function renderOnlineList() {
 
         const info = document.createElement("div");
         info.className = "info";
+        const statusBits = [];
+        if (getAdminTag(u.email)) statusBits.push("ADMIN");
+        if (isBanned(u.email)) statusBits.push("BANNED");
+        if (isMuted(u.email)) statusBits.push("MUTED");
         info.innerHTML = `
-            <strong>${escapeHtml(u.name)}</strong><br>
+            <strong>${escapeHtml(u.name)}</strong>
+            ${statusBits.length ? `<span style="color:var(--accent);font-size:11px;"> [${statusBits.join(", ")}]</span>` : ""}<br>
             <span style="color:var(--muted)">${escapeHtml(u.email)}</span><br>
             <span style="font-family:monospace;font-size:12px">${escapeHtml(u.ip)}</span>
             <span style="color:var(--muted);font-size:11px"> · ${Math.round((now - u.lastSeen)/1000)}s ago</span>
@@ -806,35 +907,47 @@ function renderOnlineList() {
         const actions = document.createElement("div");
         actions.className = "actions";
 
-        if (!ADMIN_EMAILS.includes(u.email)) {
-            const banEmailBtn = document.createElement("button");
-            banEmailBtn.className = "small-btn btn-ban-email";
-            banEmailBtn.textContent = "Ban Email";
-            banEmailBtn.onclick = () => {
-                if (!bannedUsers.includes(u.email)) {
-                    bannedUsers.push(u.email);
-                    saveBans();
-                    renderBanList();
-                    alert(u.email + " banned.");
-                }
-            };
-            actions.appendChild(banEmailBtn);
+        if (!HARDCODED_ADMINS.includes(u.email)) {
+            const banBtn = document.createElement("button");
+            banBtn.className = "small-btn btn-ban";
+            banBtn.textContent = "Ban";
+            banBtn.onclick = () => { banEmail(u.email); alert(u.email + " banned."); };
 
-            if (u.ip && u.ip !== "unknown") {
-                const banIpBtn = document.createElement("button");
-                banIpBtn.className = "small-btn btn-ban-ip";
-                banIpBtn.textContent = "Ban IP";
-                banIpBtn.onclick = () => banIP(u.ip);
-                actions.appendChild(banIpBtn);
-            }
+            const tempBtn = document.createElement("button");
+            tempBtn.className = "small-btn btn-temp";
+            tempBtn.textContent = "Temp 1h";
+            tempBtn.onclick = () => { banEmail(u.email, 1); alert(u.email + " temp-banned 1h."); };
+
+            const muteBtn = document.createElement("button");
+            muteBtn.className = "small-btn btn-mute";
+            muteBtn.textContent = isMuted(u.email) ? "Unmute" : "Mute";
+            muteBtn.onclick = () => {
+                if (isMuted(u.email)) { unmuteEmail(u.email); alert("Unmuted"); }
+                else { muteEmail(u.email); alert("Muted"); }
+                renderOnlineList();
+            };
+
+            const adminBtn = document.createElement("button");
+            adminBtn.className = "small-btn btn-admin";
+            adminBtn.textContent = getAdminTag(u.email) ? "Remove Admin" : "Make Admin";
+            adminBtn.onclick = () => {
+                if (getAdminTag(u.email)) { removeAdmin(u.email); alert("Admin removed"); }
+                else { giveAdmin(u.email); alert("Admin granted"); }
+                renderOnlineList();
+            };
+
+            actions.appendChild(banBtn);
+            actions.appendChild(tempBtn);
+            actions.appendChild(muteBtn);
+            actions.appendChild(adminBtn);
         }
 
         const copyBtn = document.createElement("button");
         copyBtn.className = "small-btn btn-copy";
-        copyBtn.textContent = "Copy report";
+        copyBtn.textContent = "Copy";
         copyBtn.onclick = () => {
-            const text = `LearnMultiply report\nName: ${u.name}\nEmail: ${u.email}\nIP (self-reported): ${u.ip}\nLast seen: ${new Date(u.lastSeen).toLocaleString()}\nNote: IP is self-reported by the browser and may be shared by many students on the same network.`;
-            navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard.")).catch(() => prompt("Copy this:", text));
+            const text = `Name: ${u.name}\nEmail: ${u.email}\nIP: ${u.ip}\nLast seen: ${new Date(u.lastSeen).toLocaleString()}`;
+            navigator.clipboard.writeText(text).then(() => alert("Copied")).catch(() => prompt("Copy:", text));
         };
         actions.appendChild(copyBtn);
 
@@ -842,6 +955,30 @@ function renderOnlineList() {
         row.appendChild(actions);
         list.appendChild(row);
     });
+}
+
+/* ---- Chat Monitor ---- */
+function addToChatMonitor(author, email, text, time) {
+    chatMonitorLog.unshift({ author, email, text, time, ts: Date.now() });
+    if (chatMonitorLog.length > 40) chatMonitorLog.pop();
+    if (document.getElementById("settingsModal").style.display === "flex") {
+        renderChatMonitor();
+    }
+}
+
+function renderChatMonitor() {
+    const box = document.getElementById("chatMonitor");
+    if (!box) return;
+    if (chatMonitorLog.length === 0) {
+        box.innerHTML = `<div style="color:var(--muted);">No messages captured yet.</div>`;
+        return;
+    }
+    box.innerHTML = chatMonitorLog.map(m => `
+        <div class="monitor-line">
+            <div class="meta">${escapeHtml(m.time || "")} · ${escapeHtml(m.author)} (${escapeHtml(m.email)})</div>
+            <div>${escapeHtml(m.text)}</div>
+        </div>
+    `).join("");
 }
 
 /* ============================================================
@@ -916,12 +1053,17 @@ function initChat() {
                     }
                 }
 
-                messages[key].push({
+                const msgObj = {
                     author: data.author,
                     email: data.email,
                     text,
                     time: data.time
-                });
+                };
+                messages[key].push(msgObj);
+
+                // feed monitor
+                addToChatMonitor(data.author, data.email, text, data.time);
+
                 if (key === currentRoom) renderMessages();
             }
         } catch (error) {
@@ -936,8 +1078,13 @@ function initChat() {
 function sendMessage(event) {
     event.preventDefault();
     if (!currentUser) return;
-    if (bannedUsers.includes(currentUser.email) || bannedIPs.includes(myPublicIP)) {
-        alert("Your account or IP is banned.");
+
+    if (isBanned(currentUser.email)) {
+        alert("Your account is banned.");
+        return;
+    }
+    if (isMuted(currentUser.email)) {
+        alert("You have been muted and cannot send messages.");
         return;
     }
     if (!mqttClient) { alert("Chat is not connected."); return; }
