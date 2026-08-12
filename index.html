@@ -40,7 +40,7 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
+            padding: 0.8rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -50,8 +50,14 @@
             animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
         .logo {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
@@ -63,6 +69,38 @@
             gap: 0.5rem;
         }
 
+        /* Top Nav Tabs */
+        .top-nav {
+            display: flex;
+            gap: 0.4rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.3rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.45rem 1.1rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            box-shadow: 0 2px 10px var(--primary-glow);
+        }
+
         .header-right {
             display: flex;
             align-items: center;
@@ -72,19 +110,19 @@
         .search-container {
             position: relative;
             width: 100%;
-            max-width: 280px;
+            max-width: 240px;
         }
 
         .search-bar {
             width: 100%;
-            padding: 0.65rem 1.2rem 0.65rem 2.6rem;
+            padding: 0.55rem 1rem 0.55rem 2.4rem;
             border-radius: 9999px;
             border: 1px solid var(--border);
             background-color: rgba(255, 255, 255, 0.03);
             color: var(--text);
             outline: none;
             transition: all 0.3s ease;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         .search-bar:focus {
@@ -95,28 +133,31 @@
 
         .search-icon {
             position: absolute;
-            left: 0.9rem;
+            left: 0.8rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
             pointer-events: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        .admin-btn {
+        .settings-btn {
             background-color: var(--surface);
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 0.65rem 1.2rem;
+            padding: 0.55rem 1rem;
             border-radius: 9999px;
             cursor: pointer;
             font-weight: 600;
             font-size: 0.9rem;
             transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
             white-space: nowrap;
         }
 
-        .admin-btn:hover {
+        .settings-btn:hover {
             border-color: var(--primary);
             background-color: rgba(6, 182, 212, 0.1);
             transform: translateY(-1px);
@@ -148,7 +189,7 @@
             font-size: 1.1rem;
         }
 
-        /* Category Filter Tabs */
+        /* Sub-Category Filter Tabs for Games */
         .categories {
             display: flex;
             justify-content: center;
@@ -190,7 +231,7 @@
             gap: 1.8rem;
         }
 
-        /* Game Card */
+        /* Card Component */
         .card {
             background-color: var(--surface);
             border-radius: 1rem;
@@ -251,12 +292,25 @@
             border-radius: 99px;
         }
 
-        /* Modal Styles */
-        .modal {
+        /* Modal Base */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(9, 13, 22, 0.9);
+            background: rgba(9, 13, 22, 0.88);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Player Modal */
+        .modal-player {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(9, 13, 22, 0.95);
             backdrop-filter: blur(8px);
             z-index: 1000;
             flex-direction: column;
@@ -300,19 +354,72 @@
             border: none;
         }
 
-        /* Numpad Modal Specifics */
-        .numpad-modal-container {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(9, 13, 22, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-out;
+        /* Settings Modal Panel */
+        .settings-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1.2rem;
+            padding: 2rem;
+            width: 380px;
+            max-width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .settings-header h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .settings-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-item-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .settings-item-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .action-btn {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0.55rem 1rem;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.03);
+        }
+
+        /* Numpad Modal Specifics */
         .numpad-box {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -399,15 +506,16 @@
                 gap: 1rem;
                 padding: 1rem;
             }
+            .header-left {
+                width: 100%;
+                justify-content: space-between;
+            }
             .header-right {
                 width: 100%;
-                flex-direction: column;
+                justify-content: space-between;
             }
             .search-container {
                 max-width: 100%;
-            }
-            .admin-btn {
-                width: 100%;
             }
             .hero h1 {
                 font-size: 2.2rem;
@@ -418,29 +526,35 @@
 <body>
 
     <header>
-        <a href="#" class="logo">⚡ LearnMultiply</a>
+        <div class="header-left">
+            <a href="#" class="logo">⚡ LearnMultiply</a>
+            <div class="top-nav">
+                <button class="nav-tab active" id="navGames" onclick="switchMainTab('Games')">Games</button>
+                <button class="nav-tab" id="navVideos" onclick="switchMainTab('Videos')">Videos</button>
+            </div>
+        </div>
         <div class="header-right">
             <div class="search-container">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" class="search-bar" placeholder="Search games or videos...">
+                <input type="text" id="searchInput" class="search-bar" placeholder="Search...">
             </div>
-            <button class="admin-btn" onclick="openAdminModal()">Admin Code</button>
+            <button class="settings-btn" onclick="openSettingsModal()">⚙️ Settings</button>
         </div>
     </header>
 
     <div class="container">
         <div class="hero">
-            <h1>Level Up Your Break</h1>
-            <p>The ultimate collection of high-performance unblocked games & media.</p>
+            <h1 id="heroTitle">Level Up Your Break</h1>
+            <p id="heroSubtitle">The ultimate collection of high-performance unblocked games & media.</p>
         </div>
 
+        <!-- Sub-category Filter Tabs for Games -->
         <div class="categories" id="categoryFilters">
-            <button class="cat-btn active" data-category="All">All Items</button>
+            <button class="cat-btn active" data-category="All">All Games</button>
             <button class="cat-btn" data-category="Adventure">Adventure</button>
             <button class="cat-btn" data-category="Arcade">Arcade</button>
             <button class="cat-btn" data-category="Classic">Classic</button>
             <button class="cat-btn" data-category="Strategy">Strategy</button>
-            <button class="cat-btn" data-category="YouTube">📺 YouTube Videos</button>
         </div>
 
         <div class="grid" id="gameGrid">
@@ -449,7 +563,7 @@
     </div>
 
     <!-- Modal Player -->
-    <div class="modal" id="gameModal">
+    <div class="modal-player" id="gameModal">
         <div class="modal-header">
             <h3 id="modalTitle" style="margin: 0; font-size: 1.2rem;">Title</h3>
             <button class="close-btn" onclick="closeGame()">Close Player</button>
@@ -459,8 +573,28 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="settings-box">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button class="close-btn" style="padding: 0.3rem 0.8rem;" onclick="closeSettingsModal()">✕</button>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-info">
+                    <h4>Admin Access</h4>
+                    <p>Enter passkey code</p>
+                </div>
+                <button class="action-btn" onclick="openAdminFromSettings()">Admin Code</button>
+            </div>
+
+            <button class="close-btn" onclick="closeSettingsModal()" style="width: 100%; padding: 0.7rem; background: var(--surface); border: 1px solid var(--border);">Close</button>
+        </div>
+    </div>
+
     <!-- Admin Numpad Modal -->
-    <div class="numpad-modal-container" id="adminModal">
+    <div class="modal-overlay" id="adminModal">
         <div class="numpad-box">
             <div class="numpad-title">Enter Admin Code</div>
             <div id="pinDisplay" class="pin-display">_ _ _ _ _ _</div>
@@ -538,7 +672,8 @@
         ];
 
         let youtubeVideos = [];
-        let currentCategory = 'All';
+        let currentMainTab = 'Games';
+        let currentGameCategory = 'All';
         let searchTimeout = null;
         let enteredPin = "";
 
@@ -548,8 +683,50 @@
         const iframe = document.getElementById('gameIframe');
         const modalTitle = document.getElementById('modalTitle');
         const categoryButtons = document.querySelectorAll('.cat-btn');
+        const categoryFilters = document.getElementById('categoryFilters');
+        
+        const settingsModal = document.getElementById('settingsModal');
         const adminModal = document.getElementById('adminModal');
         const pinDisplay = document.getElementById('pinDisplay');
+
+        // Top Nav Main Tab Switcher
+        function switchMainTab(tab) {
+            currentMainTab = tab;
+            document.getElementById('navGames').classList.toggle('active', tab === 'Games');
+            document.getElementById('navVideos').classList.toggle('active', tab === 'Videos');
+
+            if (tab === 'Games') {
+                categoryFilters.style.display = 'flex';
+                document.getElementById('heroTitle').textContent = "Level Up Your Break";
+                document.getElementById('heroSubtitle').textContent = "The ultimate collection of high-performance unblocked games.";
+                filterAndRender();
+            } else if (tab === 'Videos') {
+                categoryFilters.style.display = 'none';
+                document.getElementById('heroTitle').textContent = "Trending Videos";
+                document.getElementById('heroSubtitle').textContent = "Watch gaming streams, highlights, and videos.";
+                if (youtubeVideos.length === 0) {
+                    fetchYouTubeVideos(searchInput.value.trim() || "gaming highlights");
+                } else {
+                    filterAndRender();
+                }
+            }
+        }
+
+        // Settings Modal Functions
+        function openSettingsModal() {
+            settingsModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSettingsModal() {
+            settingsModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function openAdminFromSettings() {
+            closeSettingsModal();
+            openAdminModal();
+        }
 
         // Admin Numpad Functions
         function openAdminModal() {
@@ -612,7 +789,7 @@
                         url: `https://www.youtube.com/embed/${item.id.videoId}?autoplay=1`,
                         isYouTube: true
                     }));
-                    filterAndRender();
+                    if (currentMainTab === 'Videos') filterAndRender();
                 } else if (data.error) {
                     grid.innerHTML = `<p style="color: #ef4444; grid-column: 1 / -1; text-align: center; padding: 3rem;">API Error: ${data.error.message}</p>`;
                 }
@@ -650,14 +827,16 @@
 
         function filterAndRender() {
             const term = searchInput.value.toLowerCase();
-            
             let pool = [];
-            if (currentCategory === 'All') {
-                pool = [...games, ...youtubeVideos];
-            } else if (currentCategory === 'YouTube') {
-                pool = youtubeVideos;
+
+            if (currentMainTab === 'Games') {
+                if (currentGameCategory === 'All') {
+                    pool = games;
+                } else {
+                    pool = games.filter(g => g.category === currentGameCategory);
+                }
             } else {
-                pool = games.filter(g => g.category === currentCategory);
+                pool = youtubeVideos;
             }
 
             const filtered = pool.filter(item => 
@@ -692,7 +871,7 @@
 
         searchInput.addEventListener('input', () => {
             const term = searchInput.value.trim();
-            if (currentCategory === 'YouTube') {
+            if (currentMainTab === 'Videos') {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     fetchYouTubeVideos(term || "gaming highlights");
@@ -706,17 +885,13 @@
             btn.addEventListener('click', (e) => {
                 categoryButtons.forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                currentCategory = e.target.getAttribute('data-category');
-                
-                if (currentCategory === 'YouTube' && youtubeVideos.length === 0) {
-                    fetchYouTubeVideos(searchInput.value.trim() || "gaming highlights");
-                } else {
-                    filterAndRender();
-                }
+                currentGameCategory = e.target.getAttribute('data-category');
+                filterAndRender();
             });
         });
 
-        fetchYouTubeVideos();
+        // Initialize page
+        filterAndRender();
     </script>
 </body>
 </html>
