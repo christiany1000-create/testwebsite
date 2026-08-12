@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LearnMultiply | Admin Panel</title>
+<style>
+    :root {
+        --bg: #0b1120;
+        --surface2: #1e293b;
+        --primary: #38bdf8;
+        --danger: #ef4444;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --border: rgba(255,255,255,.10);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .card {
+        width: 100%;
+        max-width: 480px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        text-align: center;
+    }
+    h1 { margin-bottom: 12px; }
+    p { color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+    .denied { color: var(--danger); }
+    button {
+        padding: 10px 18px;
+        border: 0;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        margin: 4px;
+    }
+    .primary { background: var(--primary); color: #06111a; }
+    .danger { background: var(--danger); color: white; }
+</style>
+</head>
+<body>
+<div class="card" id="content">
+    <h1>Checking admin access…</h1>
+    <p>Please wait.</p>
+</div>
+
+<script>
+const ADMIN_EMAILS = [
+    "yates.christian@norwinsd.org",
+    "christiany1000@gmail.com"
+];
+
+// How long the “I came from the main site as admin” flag is valid (5 minutes)
+const ADMIN_FLAG_MAX_AGE_MS = 5 * 60 * 1000;
+
+function escapeHtml(str) {
+    return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function showDenied(reason) {
+    document.getElementById("content").innerHTML = `
+        <h1 class="denied">Access Denied</h1>
+        <p>${escapeHtml(reason)}</p>
+        <button class="primary" onclick="window.location.href='index.html'">
+            Return to Portal
+        </button>
+    `;
+}
+
+function showAdminPanel(user) {
+    document.getElementById("content").innerHTML = `
+        <h1>🛡 Admin Panel</h1>
+        <p>Signed in as<br><strong>${escapeHtml(user.name)}</strong><br>${escapeHtml(user.email)}</p>
+        <p style="font-size:13px;color:var(--muted);">
+            This is a separate page that re-checked your email against the admin list.
+            Real security still requires a backend.
+        </p>
+        <button class="primary" onclick="window.location.href='index.html'">
+            Back to Portal
+        </button>
+        <button class="danger" onclick="logoutAndLeave()">
+            Log out
+        </button>
+        <!-- Put your real admin tools here later -->
+    `;
+}
+
+function logoutAndLeave() {
+    localStorage.removeItem("learnmultiply_user");
+    sessionStorage.removeItem("learnmultiply_admin_ok");
+    window.location.href = "index.html";
+}
+
+function checkAdminAccess() {
+    // 1. Must have a stored user
+    const raw = localStorage.getItem("learnmultiply_user");
+    if (!raw) {
+        showDenied("No signed-in user found. Please sign in on the main portal first.");
+        return;
+    }
+
+    let user;
+    try {
+        user = JSON.parse(raw);
+    } catch {
+        showDenied("Invalid user data.");
+        return;
+    }
+
+    const email = (user.email || "").toLowerCase();
+
+    // 2. Email must be in the admin list
+    if (!ADMIN_EMAILS.includes(email)) {
+        showDenied("This Google account is not an administrator.");
+        return;
+    }
+
+    // 3. Optional extra check: did they recently come from the main site as admin?
+    const flag = sessionStorage.getItem("learnmultiply_admin_ok");
+    if (flag) {
+        const age = Date.now() - Number(flag);
+        if (isNaN(age) || age > ADMIN_FLAG_MAX_AGE_MS) {
+            // Flag expired – still allow because email matched, but you could be stricter
+            console.warn("Admin session flag expired or missing");
+        }
+    }
+
+    // All checks passed
+    showAdminPanel(user);
+}
+
+// Run the check as soon as the page loads
+checkAdminAccess();
+</script>
+</body>
+</html>
