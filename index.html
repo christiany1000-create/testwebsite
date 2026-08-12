@@ -1,15 +1,12 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LearnMultiply | Student Portal</title>
-
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
 <style>
 :root {
     --bg: #0b1120;
@@ -25,13 +22,7 @@
     --border: rgba(255,255,255,.10);
     --chat-bg: #0f172a;
 }
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: "Segoe UI", Arial, sans-serif;
     background:
@@ -42,654 +33,220 @@ body {
     color: var(--text);
     min-height: 100vh;
 }
-
-body.locked {
-    overflow: hidden;
-}
+body.locked { overflow: hidden; }
 
 /* AUTH */
-
 .auth-gate {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    background: rgba(5,10,20,.97);
-    backdrop-filter: blur(18px);
+    position: fixed; inset: 0; z-index: 99999;
+    display: flex; justify-content: center; align-items: center;
+    padding: 20px; background: rgba(5,10,20,.97); backdrop-filter: blur(18px);
 }
-
 .auth-card {
-    width: 100%;
-    max-width: 430px;
-    padding: 38px 30px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    text-align: center;
+    width: 100%; max-width: 430px; padding: 38px 30px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 18px; text-align: center;
     box-shadow: 0 25px 70px rgba(0,0,0,.65);
 }
-
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text);
-    text-decoration: none;
-    font-weight: 900;
-}
-
-.logo-x {
-    color: var(--primary);
-    font-size: 35px;
-    text-shadow: 0 0 15px rgba(56,189,248,.5);
-}
-
-.logo-text {
-    font-size: 22px;
-}
-
-.auth-card .logo {
-    justify-content: center;
-    margin-bottom: 25px;
-}
-
-.auth-card h2 {
-    margin-bottom: 10px;
-}
-
-.auth-card p {
-    color: var(--muted);
-    line-height: 1.5;
-    margin-bottom: 25px;
-}
-
-.auth-error {
-    display: none;
-    margin-top: 15px;
-    color: #fca5a5;
-    font-size: 13px;
-}
+.logo { display: flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none; font-weight: 900; }
+.logo-x { color: var(--primary); font-size: 35px; text-shadow: 0 0 15px rgba(56,189,248,.5); }
+.logo-text { font-size: 22px; }
+.auth-card .logo { justify-content: center; margin-bottom: 25px; }
+.auth-card h2 { margin-bottom: 10px; }
+.auth-card p { color: var(--muted); line-height: 1.5; margin-bottom: 25px; }
+.auth-error { display: none; margin-top: 15px; color: #fca5a5; font-size: 13px; }
 
 /* HEADER */
-
 header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    padding: 12px 25px;
-    background: rgba(15,23,42,.92);
-    backdrop-filter: blur(15px);
+    position: sticky; top: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center; gap: 20px;
+    padding: 12px 25px; background: rgba(15,23,42,.92); backdrop-filter: blur(15px);
     border-bottom: 1px solid var(--border);
 }
-
-.header-left,
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
+.header-left, .header-right { display: flex; align-items: center; gap: 14px; }
 .school-badge {
-    padding: 4px 8px;
-    border-radius: 5px;
-    color: var(--primary);
-    background: rgba(56,189,248,.1);
-    border: 1px solid rgba(56,189,248,.25);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1px;
+    padding: 4px 8px; border-radius: 5px; color: var(--primary);
+    background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.25);
+    font-size: 10px; font-weight: 800; letter-spacing: 1px;
 }
-
 .top-nav {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    background: rgba(0,0,0,.25);
-    border: 1px solid var(--border);
-    border-radius: 9px;
+    display: flex; gap: 4px; padding: 4px;
+    background: rgba(0,0,0,.25); border: 1px solid var(--border); border-radius: 9px;
 }
-
-.nav-tab,
-.settings-btn,
-.cat-btn,
-.create-btn,
-.send-btn,
-.close-btn,
-.admin-btn {
-    border: 0;
-    cursor: pointer;
-    font-weight: 700;
+.nav-tab, .settings-btn, .cat-btn, .create-btn, .send-btn, .close-btn, .admin-btn {
+    border: 0; cursor: pointer; font-weight: 700;
 }
-
-.nav-tab {
-    padding: 8px 15px;
-    border-radius: 6px;
-    color: var(--muted);
-    background: transparent;
-}
-
-.nav-tab:hover {
-    color: var(--text);
-}
-
-.nav-tab.active {
-    background: var(--primary);
-    color: #06111a;
-}
-
+.nav-tab { padding: 8px 15px; border-radius: 6px; color: var(--muted); background: transparent; }
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { background: var(--primary); color: #06111a; }
 .search {
-    width: 220px;
-    padding: 9px 12px;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    color: var(--text);
-    outline: none;
+    width: 220px; padding: 9px 12px; background: #0b1220;
+    border: 1px solid var(--border); border-radius: 7px; color: var(--text); outline: none;
 }
-
 .user-profile {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 8px 4px 4px;
-    border: 1px solid var(--border);
-    border-radius: 25px;
-    background: rgba(0,0,0,.25);
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 8px 4px 4px; border: 1px solid var(--border);
+    border-radius: 25px; background: rgba(0,0,0,.25);
 }
-
-.user-profile img {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-}
-
-.user-name {
-    max-width: 120px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.logout {
-    color: var(--danger);
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-}
-
+.user-profile img { width: 30px; height: 30px; border-radius: 50%; }
+.user-name { max-width: 120px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; font-weight: 700; }
+.logout { color: var(--danger); background: transparent; border: 0; cursor: pointer; }
 .settings-btn {
-    padding: 9px 13px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    color: var(--text);
+    padding: 9px 13px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 7px; color: var(--text);
 }
 
 /* MAIN */
-
-.container {
-    max-width: 1280px;
-    margin: auto;
-    padding: 35px 20px;
-}
-
+.container { max-width: 1280px; margin: auto; padding: 35px 20px; }
 .hero {
-    text-align: center;
-    padding: 35px 20px;
-    margin-bottom: 25px;
-    background: rgba(30,41,59,.65);
-    border: 1px solid var(--border);
-    border-radius: 14px;
+    text-align: center; padding: 35px 20px; margin-bottom: 25px;
+    background: rgba(30,41,59,.65); border: 1px solid var(--border); border-radius: 14px;
 }
-
-.hero h1 {
-    font-size: 35px;
-    margin-bottom: 8px;
-}
-
-.hero p {
-    color: var(--muted);
-}
-
-.categories {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 25px;
-}
-
+.hero h1 { font-size: 35px; margin-bottom: 8px; }
+.hero p { color: var(--muted); }
+.categories { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; }
 .cat-btn {
-    padding: 8px 16px;
-    color: var(--muted);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 7px;
+    padding: 8px 16px; color: var(--muted); background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 7px;
 }
-
-.cat-btn.active {
-    background: var(--primary);
-    color: #06111a;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
-    gap: 22px;
-}
-
+.cat-btn.active { background: var(--primary); color: #06111a; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 22px; }
 .card {
-    overflow: hidden;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: .2s;
+    overflow: hidden; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; cursor: pointer; transition: .2s;
 }
-
-.card:hover {
-    transform: translateY(-4px);
-    border-color: var(--primary);
-}
-
-.card-image {
-    height: 160px;
-    background: #080d18;
-}
-
-.card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.card-content {
-    padding: 16px;
-}
-
-.card-title {
-    font-size: 17px;
-    font-weight: 800;
-    margin-bottom: 8px;
-}
-
+.card:hover { transform: translateY(-4px); border-color: var(--primary); }
+.card-image { height: 160px; background: #080d18; }
+.card-image img { width: 100%; height: 100%; object-fit: cover; }
+.card-content { padding: 16px; }
+.card-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
 .card-category {
-    display: inline-block;
-    padding: 4px 7px;
-    border-radius: 5px;
-    color: var(--primary);
-    background: rgba(56,189,248,.1);
-    font-size: 11px;
-    font-weight: 800;
+    display: inline-block; padding: 4px 7px; border-radius: 5px;
+    color: var(--primary); background: rgba(56,189,248,.1); font-size: 11px; font-weight: 800;
 }
 
 /* CHAT */
-
 .chat-wrapper {
-    display: none;
-    grid-template-columns: 270px 1fr;
-    height: 680px;
-    overflow: hidden;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
+    display: none; grid-template-columns: 270px 1fr; height: 680px; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
 }
-
 .chat-sidebar {
-    display: flex;
-    flex-direction: column;
-    background: rgba(2,6,23,.65);
+    display: flex; flex-direction: column; background: rgba(2,6,23,.65);
     border-right: 1px solid var(--border);
 }
-
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-}
-
-.sidebar-title {
-    color: var(--primary);
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 1px;
-}
-
-.create-btn {
-    padding: 6px 9px;
-    background: var(--primary);
-    color: #06111a;
-    border-radius: 6px;
-}
-
-.channel-list {
-    list-style: none;
-    padding: 10px;
-    overflow-y: auto;
-    flex: 1;
-}
-
+.sidebar-header { display: flex; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); }
+.sidebar-title { color: var(--primary); font-size: 12px; font-weight: 900; letter-spacing: 1px; }
+.create-btn { padding: 6px 9px; background: var(--primary); color: #06111a; border-radius: 6px; }
+.channel-list { list-style: none; padding: 10px; overflow-y: auto; flex: 1; }
 .channel {
-    width: 100%;
-    padding: 11px;
-    margin-bottom: 4px;
-    text-align: left;
-    color: var(--muted);
-    background: transparent;
-    border: 0;
-    border-radius: 7px;
-    cursor: pointer;
+    width: 100%; padding: 11px; margin-bottom: 4px; text-align: left;
+    color: var(--muted); background: transparent; border: 0; border-radius: 7px; cursor: pointer;
 }
-
-.channel:hover {
-    background: rgba(255,255,255,.05);
-    color: var(--text);
-}
-
-.channel.active {
-    background: var(--primary);
-    color: #06111a;
-    font-weight: 800;
-}
-
-.nickname-box {
-    padding: 15px;
-    border-top: 1px solid var(--border);
-}
-
-.nickname-box label {
-    display: block;
-    color: var(--muted);
-    font-size: 11px;
-    margin-bottom: 6px;
-}
-
+.channel:hover { background: rgba(255,255,255,.05); color: var(--text); }
+.channel.active { background: var(--primary); color: #06111a; font-weight: 800; }
+.nickname-box { padding: 15px; border-top: 1px solid var(--border); }
+.nickname-box label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 6px; }
 .nickname-box input {
-    width: 100%;
-    padding: 8px;
-    color: var(--text);
-    background: #080d18;
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    width: 100%; padding: 8px; color: var(--text); background: #080d18;
+    border: 1px solid var(--border); border-radius: 6px;
 }
-
-.chat-main {
-    display: flex;
-    flex-direction: column;
-    background: var(--chat-bg);
-}
-
+.chat-main { display: flex; flex-direction: column; background: var(--chat-bg); }
 .chat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 18px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(30,41,59,.5);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 18px; border-bottom: 1px solid var(--border); background: rgba(30,41,59,.5);
 }
-
-.status {
-    color: var(--success);
-    font-size: 12px;
-}
-
-.messages {
-    flex: 1;
-    padding: 18px;
-    overflow-y: auto;
-}
-
-.message {
-    margin-bottom: 14px;
-    max-width: 85%;
-}
-
-.message.self {
-    margin-left: auto;
-    text-align: right;
-}
-
-.message-meta {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 4px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.message.self .message-meta {
-    justify-content: flex-end;
-}
-
-.author {
-    color: var(--primary);
-    font-weight: 800;
-}
-
+.status { color: var(--success); font-size: 12px; }
+.messages { flex: 1; padding: 18px; overflow-y: auto; }
+.message { margin-bottom: 14px; max-width: 85%; }
+.message.self { margin-left: auto; text-align: right; }
+.message-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+.message.self .message-meta { justify-content: flex-end; }
+.author { color: var(--primary); font-weight: 800; }
 .admin-tag {
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #111827;
-    background: var(--accent);
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: .5px;
+    padding: 2px 6px; border-radius: 4px; color: #111827; background: var(--accent);
+    font-size: 9px; font-weight: 900; letter-spacing: .5px;
 }
-
 .message-body {
-    display: inline-block;
-    padding: 9px 12px;
-    color: var(--text);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    text-align: left;
-    word-break: break-word;
+    display: inline-block; padding: 9px 12px; color: var(--text);
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    text-align: left; word-break: break-word;
 }
-
-.message.self .message-body {
-    background: rgba(56,189,248,.13);
-    border-color: rgba(56,189,248,.3);
-}
-
+.message.self .message-body { background: rgba(56,189,248,.13); border-color: rgba(56,189,248,.3); }
 .chat-input {
-    display: flex;
-    gap: 8px;
-    padding: 13px;
-    border-top: 1px solid var(--border);
+    display: flex; gap: 8px; padding: 13px; border-top: 1px solid var(--border);
     background: rgba(30,41,59,.7);
 }
-
 .chat-input input {
-    flex: 1;
-    padding: 11px;
-    color: var(--text);
-    background: #080d18;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    outline: none;
+    flex: 1; padding: 11px; color: var(--text); background: #080d18;
+    border: 1px solid var(--border); border-radius: 8px; outline: none;
 }
-
-.send-btn {
-    padding: 0 20px;
-    background: var(--primary);
-    color: #06111a;
-    border-radius: 8px;
-}
+.send-btn { padding: 0 20px; background: var(--primary); color: #06111a; border-radius: 8px; }
 
 /* MODALS */
-
 .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 5000;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    background: rgba(2,6,23,.92);
-    backdrop-filter: blur(10px);
+    display: none; position: fixed; inset: 0; z-index: 5000;
+    justify-content: center; align-items: center; padding: 20px;
+    background: rgba(2,6,23,.92); backdrop-filter: blur(10px);
 }
-
 .modal-box {
-    width: 100%;
-    max-width: 450px;
-    padding: 25px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 25px 70px rgba(0,0,0,.6);
+    width: 100%; max-width: 520px; padding: 25px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: 0 25px 70px rgba(0,0,0,.6); max-height: 90vh; overflow-y: auto;
 }
-
-.modal-box h3 {
-    margin-bottom: 18px;
-}
-
+.modal-box h3 { margin-bottom: 18px; }
 .modal-input {
-    width: 100%;
-    padding: 11px;
-    margin-bottom: 10px;
-    color: var(--text);
-    background: #080d18;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    outline: none;
+    width: 100%; padding: 11px; margin-bottom: 10px; color: var(--text);
+    background: #080d18; border: 1px solid var(--border); border-radius: 7px; outline: none;
 }
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.close-btn {
-    padding: 9px 14px;
-    color: white;
-    background: var(--danger);
-    border-radius: 7px;
-}
-
-.admin-btn {
-    padding: 9px 14px;
-    color: #06111a;
-    background: var(--primary);
-    border-radius: 7px;
-}
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.close-btn { padding: 9px 14px; color: white; background: var(--danger); border-radius: 7px; }
+.admin-btn { padding: 9px 14px; color: #06111a; background: var(--primary); border-radius: 7px; }
 
 /* ADMIN PANEL */
-
-.admin-panel {
-    display: none;
-}
-
-.admin-section {
-    margin-bottom: 22px;
-}
-
-.admin-section h4 {
-    margin-bottom: 8px;
-}
-
-.admin-section p {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 12px;
-}
-
-.ban-row {
-    display: flex;
-    gap: 8px;
-}
-
+.admin-panel { display: none; }
+.admin-section { margin-bottom: 22px; }
+.admin-section h4 { margin-bottom: 8px; }
+.admin-section p { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.ban-row { display: flex; gap: 8px; }
 .ban-row input {
-    flex: 1;
-    padding: 10px;
-    color: var(--text);
-    background: #080d18;
-    border: 1px solid var(--border);
-    border-radius: 7px;
+    flex: 1; padding: 10px; color: var(--text); background: #080d18;
+    border: 1px solid var(--border); border-radius: 7px;
 }
-
-.ban-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.ban-list, .online-list { display: flex; flex-direction: column; gap: 6px; }
+.banned-user, .online-user {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 9px; background: #080d18; border: 1px solid var(--border);
+    border-radius: 7px; font-size: 13px; flex-wrap: wrap;
 }
-
-.banned-user {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 9px;
-    background: #080d18;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    font-size: 13px;
+.online-user .info { flex: 1; min-width: 180px; }
+.online-user .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.small-btn {
+    padding: 5px 9px; font-size: 11px; border-radius: 5px; border: 0; cursor: pointer; font-weight: 700;
+}
+.btn-ban-email { background: var(--danger); color: white; }
+.btn-ban-ip { background: #b45309; color: white; }
+.btn-copy { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.warning-box {
+    background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.35);
+    padding: 10px 12px; border-radius: 8px; font-size: 12px; color: #fca5a5; margin-bottom: 14px;
 }
 
 /* PLAYER */
-
-.player {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 4000;
-    flex-direction: column;
-    background: #000;
-}
-
+.player { display: none; position: fixed; inset: 0; z-index: 4000; flex-direction: column; background: #000; }
 .player-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 18px;
-    background: var(--surface2);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 18px; background: var(--surface2);
 }
-
-.player iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-}
-
-/* RESPONSIVE */
+.player iframe { width: 100%; height: 100%; border: 0; }
 
 @media(max-width:900px) {
-    header {
-        flex-wrap: wrap;
-    }
-
-    .header-left {
-        flex-wrap: wrap;
-    }
-
-    .search {
-        display: none;
-    }
-
-    .chat-wrapper {
-        grid-template-columns: 1fr;
-    }
-
-    .chat-sidebar {
-        display: none;
-    }
+    header { flex-wrap: wrap; }
+    .header-left { flex-wrap: wrap; }
+    .search { display: none; }
+    .chat-wrapper { grid-template-columns: 1fr; }
+    .chat-sidebar { display: none; }
 }
 </style>
 </head>
-
 <body class="locked">
 
 <!-- AUTH -->
@@ -699,301 +256,221 @@ header {
             <span class="logo-x">✕</span>
             <span class="logo-text">LearnMultiply</span>
         </div>
-
         <h2>Authentication Required</h2>
-
-        <p>
-            Sign in with your Google Account to access
-            LearnMultiply.
-        </p>
-
+        <p>Sign in with your Google Account to access LearnMultiply.</p>
         <div id="g_id_onload"
              data-client_id="787259726635-ldace8nm63t3ehiog8189pekts6138dc.apps.googleusercontent.com"
              data-callback="handleGoogleLogin"
              data-auto_prompt="false">
         </div>
-
         <div class="g_id_signin"
              data-type="standard"
              data-shape="pill"
              data-theme="filled_blue"
              data-size="large">
         </div>
-
         <div class="auth-error" id="authError"></div>
     </div>
 </div>
 
 <header>
     <div class="header-left">
-
         <a class="logo" href="#">
             <span class="logo-x">✕</span>
             <span class="logo-text">LearnMultiply</span>
         </a>
-
         <span class="school-badge">Student Portal</span>
-
         <nav class="top-nav">
-            <button class="nav-tab active" id="navGames"
-                    onclick="switchMainTab('Games')">
-                Games
-            </button>
-
-            <button class="nav-tab" id="navVideos"
-                    onclick="switchMainTab('Videos')">
-                Videos
-            </button>
-
-            <button class="nav-tab" id="navChat"
-                    onclick="switchMainTab('Chat')">
-                Live Chat
-            </button>
+            <button class="nav-tab active" id="navGames" onclick="switchMainTab('Games')">Games</button>
+            <button class="nav-tab" id="navVideos" onclick="switchMainTab('Videos')">Videos</button>
+            <button class="nav-tab" id="navChat" onclick="switchMainTab('Chat')">Live Chat</button>
         </nav>
     </div>
-
     <div class="header-right">
-
-        <input
-            class="search"
-            id="searchInput"
-            placeholder="Search resources..."
-        >
-
+        <input class="search" id="searchInput" placeholder="Search resources...">
         <div class="user-profile">
             <img id="userAvatar" alt="Profile">
             <span class="user-name" id="userName">Student</span>
             <button class="logout" onclick="logout()">✕</button>
         </div>
-
-        <button class="settings-btn" onclick="openSettings()">
-            ⚙ Settings
-        </button>
+        <button class="settings-btn" onclick="openSettings()">⚙ Settings</button>
     </div>
 </header>
 
 <main class="container">
-
     <section class="hero">
-        <h1 id="heroTitle">
-            Interactive Learning & Study Break Portal
-        </h1>
-
-        <p id="heroSubtitle">
-            Select an educational module or interactive game to begin.
-        </p>
+        <h1 id="heroTitle">Interactive Learning & Study Break Portal</h1>
+        <p id="heroSubtitle">Select an educational module or interactive game to begin.</p>
     </section>
 
     <div class="categories" id="categories">
-        <button class="cat-btn active" data-category="All">
-            All Modules
-        </button>
-        <button class="cat-btn" data-category="Adventure">
-            Adventure
-        </button>
-        <button class="cat-btn" data-category="Arcade">
-            Arcade
-        </button>
-        <button class="cat-btn" data-category="Classic">
-            Classic
-        </button>
+        <button class="cat-btn active" data-category="All">All Modules</button>
+        <button class="cat-btn" data-category="Adventure">Adventure</button>
+        <button class="cat-btn" data-category="Arcade">Arcade</button>
+        <button class="cat-btn" data-category="Classic">Classic</button>
     </div>
 
     <div class="grid" id="gameGrid"></div>
 
     <!-- CHAT -->
     <section class="chat-wrapper" id="chatContainer">
-
         <aside class="chat-sidebar">
-
             <div class="sidebar-header">
                 <span class="sidebar-title">Study Groups</span>
-
-                <button class="create-btn"
-                        onclick="openCreateGroup()">
-                    + New
-                </button>
+                <button class="create-btn" onclick="openCreateGroup()">+ New</button>
             </div>
-
             <ul class="channel-list" id="channelList"></ul>
-
             <div class="nickname-box">
                 <label>Your Nickname</label>
                 <input id="nickname" maxlength="30">
             </div>
-
         </aside>
-
         <div class="chat-main">
-
             <div class="chat-header">
                 <div>
-                    <strong id="currentRoom">
-                        🌐 General Lounge
-                    </strong>
-                    <div class="status" id="status">
-                        Connecting...
-                    </div>
+                    <strong id="currentRoom">🌐 General Lounge</strong>
+                    <div class="status" id="status">Connecting...</div>
                 </div>
             </div>
-
             <div class="messages" id="messages"></div>
-
             <form class="chat-input" onsubmit="sendMessage(event)">
-                <input
-                    id="messageInput"
-                    autocomplete="off"
-                    maxlength="500"
-                    placeholder="Type a live message..."
-                >
+                <input id="messageInput" autocomplete="off" maxlength="500" placeholder="Type a live message...">
                 <button class="send-btn">Send</button>
             </form>
-
         </div>
     </section>
-
 </main>
 
-<!-- SETTINGS -->
+<!-- SETTINGS / ADMIN -->
 <div class="modal" id="settingsModal">
     <div class="modal-box">
-
         <h3>Portal Settings</h3>
 
         <div id="normalSettings">
-            <p style="color:var(--muted);font-size:13px;">
-                Your Google account is currently signed in.
-            </p>
+            <p style="color:var(--muted);font-size:13px;">Your Google account is currently signed in.</p>
         </div>
 
         <div id="adminSettings" class="admin-panel">
-
-            <div class="admin-section">
-                <h4>🛡 Administrator</h4>
-                <p>
-                    You have administrator permissions.
-                </p>
+            <div class="warning-box">
+                <strong>Prototype only.</strong> Bans and the online-user list are enforced only in the browser and over a public MQTT broker. Anyone can bypass them. For real school use, move bans + IP logging to a server. Shared school Wi-Fi means one public IP is used by many students.
             </div>
 
             <div class="admin-section">
-                <h4>Ban User</h4>
-                <p>
-                    Enter the Google email address of the account
-                    you want to ban.
-                </p>
+                <h4>🛡 Administrator</h4>
+                <p>You have administrator permissions.</p>
+            </div>
 
+            <!-- ONLINE USERS -->
+            <div class="admin-section">
+                <h4>Online Users <span id="onlineCount" style="color:var(--muted);font-weight:400;"></span></h4>
+                <p>Live presence (name, email, self-reported public IP). Use “Copy report” if you need to send details to school IT.</p>
+                <div class="online-list" id="onlineList">
+                    <span style="color:var(--muted);font-size:12px;">Waiting for presence data…</span>
+                </div>
+            </div>
+
+            <!-- EMAIL BAN -->
+            <div class="admin-section">
+                <h4>Ban by Email</h4>
+                <p>Enter the Google email address to ban.</p>
                 <div class="ban-row">
-                    <input
-                        id="banEmail"
-                        type="email"
-                        placeholder="user@gmail.com"
-                    >
+                    <input id="banEmail" type="email" placeholder="user@gmail.com">
+                    <button class="close-btn" onclick="banUser()">Ban Email</button>
+                </div>
+            </div>
 
-                    <button class="close-btn"
-                            onclick="banUser()">
-                        Ban
-                    </button>
+            <!-- IP BAN -->
+            <div class="admin-section">
+                <h4>Ban by IP (self-reported)</h4>
+                <p>Enter a public IP address. This is weak on shared networks.</p>
+                <div class="ban-row">
+                    <input id="banIP" type="text" placeholder="203.0.113.45">
+                    <button class="close-btn" onclick="banIP()">Ban IP</button>
                 </div>
             </div>
 
             <div class="admin-section">
-                <h4>Banned Accounts</h4>
+                <h4>Banned Emails</h4>
                 <div class="ban-list" id="banList"></div>
             </div>
 
+            <div class="admin-section">
+                <h4>Banned IPs</h4>
+                <div class="ban-list" id="ipBanList"></div>
+            </div>
         </div>
 
         <div class="modal-actions">
-            <button class="close-btn" onclick="closeSettings()">
-                Close
-            </button>
+            <button class="close-btn" onclick="closeSettings()">Close</button>
         </div>
-
     </div>
 </div>
 
 <!-- CREATE GROUP -->
 <div class="modal" id="groupModal">
     <div class="modal-box">
-
         <h3>Create Study Group</h3>
-
-        <input
-            class="modal-input"
-            id="groupName"
-            placeholder="Group name"
-        >
-
-        <input
-            class="modal-input"
-            id="groupPassword"
-            type="password"
-            placeholder="Password (optional)"
-        >
-
+        <input class="modal-input" id="groupName" placeholder="Group name">
+        <input class="modal-input" id="groupPassword" type="password" placeholder="Password (optional)">
         <div class="modal-actions">
-            <button class="close-btn"
-                    onclick="closeCreateGroup()">
-                Cancel
-            </button>
-
-            <button class="admin-btn"
-                    onclick="createGroup()">
-                Create
-            </button>
+            <button class="close-btn" onclick="closeCreateGroup()">Cancel</button>
+            <button class="admin-btn" onclick="createGroup()">Create</button>
         </div>
-
     </div>
 </div>
 
 <!-- GAME PLAYER -->
 <div class="player" id="player">
-
     <div class="player-header">
         <strong id="playerTitle">Game</strong>
-
-        <button class="close-btn" onclick="closePlayer()">
-            Exit
-        </button>
+        <button class="close-btn" onclick="closePlayer()">Exit</button>
     </div>
-
     <iframe id="playerFrame" allowfullscreen></iframe>
-
 </div>
 
 <script>
 /* ============================================================
    ADMIN CONFIGURATION
    ============================================================ */
-
 const ADMIN_EMAILS = [
     "yates.christian@norwinsd.org",
     "christiany1000@gmail.com"
 ];
 
 /*
- * IMPORTANT:
- * This is only a frontend prototype.
- *
- * A real production ban system must verify these permissions
- * on a server. Do NOT rely on this array as your only security
- * mechanism.
+ * IMPORTANT SECURITY NOTES
+ * ------------------------
+ * This remains a frontend prototype.
+ * - Bans (email + IP) live in localStorage → easily cleared.
+ * - Online user list + IPs are self-reported over a public MQTT broker.
+ * - Anyone can spoof presence messages or ignore bans.
+ * - Real production systems must verify Google ID tokens and enforce
+ *   bans on a server that sees the true connecting IP.
  */
 
-let bannedUsers =
-    JSON.parse(localStorage.getItem("learnmultiply_bans") || "[]");
+let bannedUsers = JSON.parse(localStorage.getItem("learnmultiply_bans") || "[]");
+let bannedIPs   = JSON.parse(localStorage.getItem("learnmultiply_ip_bans") || "[]");
 
 /* ============================================================
-   USER AUTH
+   USER AUTH + IP
    ============================================================ */
-
 let currentUser = null;
+let myPublicIP  = "unknown";
+let presenceInterval = null;
+
+async function fetchPublicIP() {
+    try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        return data.ip || "unknown";
+    } catch {
+        return "unknown";
+    }
+}
 
 function handleGoogleLogin(response) {
-
     try {
         const payload = parseJwt(response.credential);
-
         const user = {
             name: payload.name || "Student",
             email: (payload.email || "").toLowerCase(),
@@ -1001,19 +478,23 @@ function handleGoogleLogin(response) {
         };
 
         if (bannedUsers.includes(user.email)) {
-            showBannedScreen(user.email);
+            showBannedScreen(user.email, "email");
             return;
         }
 
         currentUser = user;
+        localStorage.setItem("learnmultiply_user", JSON.stringify(user));
 
-        localStorage.setItem(
-            "learnmultiply_user",
-            JSON.stringify(user)
-        );
-
-        applyUser(user);
-
+        // Fetch IP then check IP ban and apply user
+        fetchPublicIP().then(ip => {
+            myPublicIP = ip;
+            if (bannedIPs.includes(ip)) {
+                showBannedScreen(ip, "ip");
+                return;
+            }
+            applyUser(user);
+            startPresence();
+        });
     } catch (error) {
         console.error(error);
         showAuthError("Google sign-in could not be verified.");
@@ -1021,407 +502,401 @@ function handleGoogleLogin(response) {
 }
 
 function parseJwt(token) {
-
     const parts = token.split(".");
-
-    if (parts.length !== 3) {
-        throw new Error("Invalid Google credential");
-    }
-
-    const base64 = parts[1]
-        .replace(/-/g, "+")
-        .replace(/_/g, "/");
-
+    if (parts.length !== 3) throw new Error("Invalid Google credential");
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
     const json = decodeURIComponent(
-        atob(base64)
-        .split("")
-        .map(c =>
-            "%" +
-            ("00" + c.charCodeAt(0).toString(16)).slice(-2)
-        )
-        .join("")
+        atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join("")
     );
-
     return JSON.parse(json);
 }
 
 function applyUser(user) {
-
     document.getElementById("authGate").style.display = "none";
     document.body.classList.remove("locked");
-
-    document.getElementById("userName").textContent =
-        user.name;
-
-    document.getElementById("userAvatar").src =
-        user.picture;
-
-    document.getElementById("nickname").value =
-        user.name;
-
+    document.getElementById("userName").textContent = user.name;
+    document.getElementById("userAvatar").src = user.picture || "";
+    document.getElementById("nickname").value = user.name;
     renderBanList();
+    renderIPBanList();
 }
 
 function logout() {
-
+    stopPresence();
     localStorage.removeItem("learnmultiply_user");
-
     currentUser = null;
-
     document.body.classList.add("locked");
     document.getElementById("authGate").style.display = "flex";
 }
 
 function checkExistingLogin() {
-
-    const saved =
-        localStorage.getItem("learnmultiply_user");
-
+    const saved = localStorage.getItem("learnmultiply_user");
     if (!saved) return;
-
     try {
-
         const user = JSON.parse(saved);
-
         if (bannedUsers.includes(user.email)) {
-            showBannedScreen(user.email);
+            showBannedScreen(user.email, "email");
             return;
         }
-
         currentUser = user;
-        applyUser(user);
-
+        fetchPublicIP().then(ip => {
+            myPublicIP = ip;
+            if (bannedIPs.includes(ip)) {
+                showBannedScreen(ip, "ip");
+                return;
+            }
+            applyUser(user);
+            startPresence();
+        });
     } catch {
         localStorage.removeItem("learnmultiply_user");
     }
 }
 
 function showAuthError(message) {
-
-    const error =
-        document.getElementById("authError");
-
+    const error = document.getElementById("authError");
     error.textContent = message;
     error.style.display = "block";
 }
 
-function showBannedScreen(email) {
-
+function showBannedScreen(value, type) {
+    const label = type === "ip" ? "IP address" : "Google account";
     document.getElementById("authGate").innerHTML = `
         <div class="auth-card">
             <div class="logo">
                 <span class="logo-x">✕</span>
                 <span class="logo-text">LearnMultiply</span>
             </div>
-
-            <h2 style="color:#ef4444;">
-                Account Banned
-            </h2>
-
-            <p>
-                The Google account
-                <strong>${escapeHtml(email)}</strong>
-                is currently banned from LearnMultiply.
-            </p>
-
-            <p>
-                If you believe this was a mistake,
-                contact a site administrator.
-            </p>
+            <h2 style="color:#ef4444;">Account / Access Banned</h2>
+            <p>The ${label} <strong>${escapeHtml(value)}</strong> is currently banned from LearnMultiply.</p>
+            <p>If you believe this was a mistake, contact a site administrator.</p>
         </div>
     `;
-
     document.getElementById("authGate").style.display = "flex";
     document.body.classList.add("locked");
 }
 
 /* ============================================================
-   ADMIN
+   ADMIN HELPERS
    ============================================================ */
-
 function isAdmin() {
-
-    return !!(
-        currentUser &&
-        ADMIN_EMAILS.includes(
-            currentUser.email.toLowerCase()
-        )
-    );
+    return !!(currentUser && ADMIN_EMAILS.includes(currentUser.email.toLowerCase()));
 }
 
 function getAdminTag(email) {
-
-    if (
-        ADMIN_EMAILS.includes(
-            String(email).toLowerCase()
-        )
-    ) {
-        return "ADMIN";
-    }
-
+    if (ADMIN_EMAILS.includes(String(email).toLowerCase())) return "ADMIN";
     return "";
 }
 
 function openSettings() {
-
-    document.getElementById("settingsModal")
-        .style.display = "flex";
-
-    const adminPanel =
-        document.getElementById("adminSettings");
-
-    adminPanel.style.display =
-        isAdmin() ? "block" : "none";
-
+    document.getElementById("settingsModal").style.display = "flex";
+    const adminPanel = document.getElementById("adminSettings");
+    adminPanel.style.display = isAdmin() ? "block" : "none";
     renderBanList();
+    renderIPBanList();
+    renderOnlineList();
 }
 
 function closeSettings() {
-
-    document.getElementById("settingsModal")
-        .style.display = "none";
+    document.getElementById("settingsModal").style.display = "none";
 }
 
+/* ---- Email bans ---- */
 function banUser() {
-
-    if (!isAdmin()) {
-        alert("Administrator access required.");
-        return;
-    }
-
-    const input =
-        document.getElementById("banEmail");
-
-    const email =
-        input.value.trim().toLowerCase();
-
-    if (!email) {
-        alert("Enter an email address.");
-        return;
-    }
-
-    if (ADMIN_EMAILS.includes(email)) {
-        alert("You cannot ban an administrator.");
-        return;
-    }
-
-    if (!bannedUsers.includes(email)) {
-        bannedUsers.push(email);
-    }
-
+    if (!isAdmin()) { alert("Administrator access required."); return; }
+    const input = document.getElementById("banEmail");
+    const email = input.value.trim().toLowerCase();
+    if (!email) { alert("Enter an email address."); return; }
+    if (ADMIN_EMAILS.includes(email)) { alert("You cannot ban an administrator."); return; }
+    if (!bannedUsers.includes(email)) bannedUsers.push(email);
     saveBans();
-
     input.value = "";
-
     renderBanList();
-
-    alert(email + " has been banned.");
+    alert(email + " has been banned (email).");
 }
 
 function unbanUser(email) {
-
-    if (!isAdmin()) {
-        alert("Administrator access required.");
-        return;
-    }
-
-    bannedUsers =
-        bannedUsers.filter(
-            user => user !== email
-        );
-
+    if (!isAdmin()) { alert("Administrator access required."); return; }
+    bannedUsers = bannedUsers.filter(u => u !== email);
     saveBans();
     renderBanList();
 }
 
 function saveBans() {
-
-    localStorage.setItem(
-        "learnmultiply_bans",
-        JSON.stringify(bannedUsers)
-    );
+    localStorage.setItem("learnmultiply_bans", JSON.stringify(bannedUsers));
 }
 
 function renderBanList() {
-
-    const list =
-        document.getElementById("banList");
-
+    const list = document.getElementById("banList");
     if (!list) return;
-
     list.innerHTML = "";
-
     if (bannedUsers.length === 0) {
-
-        list.innerHTML =
-            `<span style="color:var(--muted);font-size:12px;">
-                No banned accounts.
-            </span>`;
-
+        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No banned emails.</span>`;
         return;
     }
-
     bannedUsers.forEach(email => {
-
-        const row =
-            document.createElement("div");
-
+        const row = document.createElement("div");
         row.className = "banned-user";
-
-        const text =
-            document.createElement("span");
-
+        const text = document.createElement("span");
         text.textContent = email;
-
-        const button =
-            document.createElement("button");
-
+        const button = document.createElement("button");
         button.className = "admin-btn";
         button.textContent = "Unban";
-
-        button.onclick =
-            () => unbanUser(email);
-
+        button.onclick = () => unbanUser(email);
         row.appendChild(text);
         row.appendChild(button);
+        list.appendChild(row);
+    });
+}
 
+/* ---- IP bans ---- */
+function banIP(ipFromArg) {
+    if (!isAdmin()) { alert("Administrator access required."); return; }
+    const input = document.getElementById("banIP");
+    const ip = (ipFromArg || input.value).trim();
+    if (!ip || ip === "unknown") { alert("Enter a valid IP address."); return; }
+    if (!bannedIPs.includes(ip)) bannedIPs.push(ip);
+    saveIPBans();
+    if (!ipFromArg) input.value = "";
+    renderIPBanList();
+    alert(ip + " has been banned (IP).");
+}
+
+function unbanIP(ip) {
+    if (!isAdmin()) { alert("Administrator access required."); return; }
+    bannedIPs = bannedIPs.filter(i => i !== ip);
+    saveIPBans();
+    renderIPBanList();
+}
+
+function saveIPBans() {
+    localStorage.setItem("learnmultiply_ip_bans", JSON.stringify(bannedIPs));
+}
+
+function renderIPBanList() {
+    const list = document.getElementById("ipBanList");
+    if (!list) return;
+    list.innerHTML = "";
+    if (bannedIPs.length === 0) {
+        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No banned IPs.</span>`;
+        return;
+    }
+    bannedIPs.forEach(ip => {
+        const row = document.createElement("div");
+        row.className = "banned-user";
+        const text = document.createElement("span");
+        text.textContent = ip;
+        const button = document.createElement("button");
+        button.className = "admin-btn";
+        button.textContent = "Unban";
+        button.onclick = () => unbanIP(ip);
+        row.appendChild(text);
+        row.appendChild(button);
         list.appendChild(row);
     });
 }
 
 /* ============================================================
-   CHAT
+   PRESENCE / ONLINE USERS (self-reported)
    ============================================================ */
+const PRESENCE_TOPIC = "learnmultiply/v3/presence";
+const PRESENCE_TTL_MS = 90 * 1000; // consider offline after 90 s
+let onlineUsers = {}; // clientId -> { name, email, ip, lastSeen, clientId }
 
-const MQTT_BROKER =
-    "wss://broker.emqx.io:8084/mqtt";
+function startPresence() {
+    if (!currentUser || !isAdmin() && !mqttClient) {
+        // still publish presence even if not admin
+    }
+    if (presenceInterval) clearInterval(presenceInterval);
 
-const TOPIC_PREFIX =
-    "learnmultiply/v3/";
+    // Ensure MQTT is up
+    if (!mqttClient) initChat();
 
-const DISCOVERY_TOPIC =
-    TOPIC_PREFIX + "rooms";
+    const publish = () => {
+        if (!mqttClient || !mqttClient.connected || !currentUser) return;
+        const payload = {
+            clientId: mqttClient.options.clientId,
+            name: document.getElementById("nickname").value.trim() || currentUser.name,
+            email: currentUser.email,
+            ip: myPublicIP,
+            ts: Date.now()
+        };
+        mqttClient.publish(PRESENCE_TOPIC, JSON.stringify(payload), { qos: 0 });
+    };
+
+    publish();
+    presenceInterval = setInterval(publish, 25000);
+}
+
+function stopPresence() {
+    if (presenceInterval) {
+        clearInterval(presenceInterval);
+        presenceInterval = null;
+    }
+}
+
+function handlePresenceMessage(data) {
+    if (!data || !data.clientId) return;
+    onlineUsers[data.clientId] = {
+        clientId: data.clientId,
+        name: data.name || "Student",
+        email: (data.email || "").toLowerCase(),
+        ip: data.ip || "unknown",
+        lastSeen: data.ts || Date.now()
+    };
+    // prune old
+    const now = Date.now();
+    Object.keys(onlineUsers).forEach(id => {
+        if (now - onlineUsers[id].lastSeen > PRESENCE_TTL_MS) {
+            delete onlineUsers[id];
+        }
+    });
+    if (document.getElementById("settingsModal").style.display === "flex") {
+        renderOnlineList();
+    }
+}
+
+function renderOnlineList() {
+    const list = document.getElementById("onlineList");
+    const countEl = document.getElementById("onlineCount");
+    if (!list) return;
+
+    const now = Date.now();
+    const users = Object.values(onlineUsers)
+        .filter(u => now - u.lastSeen <= PRESENCE_TTL_MS)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    countEl.textContent = `(${users.length})`;
+
+    if (users.length === 0) {
+        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No active users detected.</span>`;
+        return;
+    }
+
+    list.innerHTML = "";
+    users.forEach(u => {
+        const row = document.createElement("div");
+        row.className = "online-user";
+
+        const info = document.createElement("div");
+        info.className = "info";
+        info.innerHTML = `
+            <strong>${escapeHtml(u.name)}</strong><br>
+            <span style="color:var(--muted)">${escapeHtml(u.email)}</span><br>
+            <span style="font-family:monospace;font-size:12px">${escapeHtml(u.ip)}</span>
+            <span style="color:var(--muted);font-size:11px"> · ${Math.round((now - u.lastSeen)/1000)}s ago</span>
+        `;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        if (!ADMIN_EMAILS.includes(u.email)) {
+            const banEmailBtn = document.createElement("button");
+            banEmailBtn.className = "small-btn btn-ban-email";
+            banEmailBtn.textContent = "Ban Email";
+            banEmailBtn.onclick = () => {
+                if (!bannedUsers.includes(u.email)) {
+                    bannedUsers.push(u.email);
+                    saveBans();
+                    renderBanList();
+                    alert(u.email + " banned.");
+                }
+            };
+            actions.appendChild(banEmailBtn);
+
+            if (u.ip && u.ip !== "unknown") {
+                const banIpBtn = document.createElement("button");
+                banIpBtn.className = "small-btn btn-ban-ip";
+                banIpBtn.textContent = "Ban IP";
+                banIpBtn.onclick = () => banIP(u.ip);
+                actions.appendChild(banIpBtn);
+            }
+        }
+
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "small-btn btn-copy";
+        copyBtn.textContent = "Copy report";
+        copyBtn.onclick = () => {
+            const text = `LearnMultiply report\nName: ${u.name}\nEmail: ${u.email}\nIP (self-reported): ${u.ip}\nLast seen: ${new Date(u.lastSeen).toLocaleString()}\nNote: IP is self-reported by the browser and may be shared by many students on the same network.`;
+            navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard.")).catch(() => prompt("Copy this:", text));
+        };
+        actions.appendChild(copyBtn);
+
+        row.appendChild(info);
+        row.appendChild(actions);
+        list.appendChild(row);
+    });
+}
+
+/* ============================================================
+   CHAT (MQTT)
+   ============================================================ */
+const MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
+const TOPIC_PREFIX = "learnmultiply/v3/";
+const DISCOVERY_TOPIC = TOPIC_PREFIX + "rooms";
 
 let mqttClient = null;
-
 let currentRoom = "general";
-
 let rooms = {
-    general: {
-        name: "🌐 General Lounge",
-        locked: false,
-        password: ""
-    }
+    general: { name: "🌐 General Lounge", locked: false, password: "" }
 };
-
-let messages = {
-    general: []
-};
+let messages = { general: [] };
 
 function initChat() {
-
     if (mqttClient) return;
 
-    const clientId =
-        "learnmultiply_" +
-        Math.random().toString(16).slice(2);
-
-    mqttClient = mqtt.connect(
-        MQTT_BROKER,
-        {
-            clientId,
-            clean: true,
-            keepalive: 60
-        }
-    );
+    const clientId = "learnmultiply_" + Math.random().toString(16).slice(2);
+    mqttClient = mqtt.connect(MQTT_BROKER, {
+        clientId,
+        clean: true,
+        keepalive: 60
+    });
 
     mqttClient.on("connect", () => {
-
-        document.getElementById("status")
-            .textContent =
-            "● Connected to Live Server";
-
+        document.getElementById("status").textContent = "● Connected to Live Server";
         mqttClient.subscribe(DISCOVERY_TOPIC);
-        mqttClient.subscribe(
-            TOPIC_PREFIX + "chat/general"
-        );
-
+        mqttClient.subscribe(TOPIC_PREFIX + "chat/general");
+        mqttClient.subscribe(PRESENCE_TOPIC);
         renderChannels();
+        if (currentUser) startPresence();
     });
 
     mqttClient.on("offline", () => {
-
-        document.getElementById("status")
-            .textContent =
-            "● Reconnecting...";
+        document.getElementById("status").textContent = "● Reconnecting...";
     });
 
     mqttClient.on("message", (topic, payload) => {
-
         try {
+            const data = JSON.parse(payload.toString());
 
-            const data =
-                JSON.parse(payload.toString());
+            if (topic === PRESENCE_TOPIC) {
+                handlePresenceMessage(data);
+                return;
+            }
 
             if (topic === DISCOVERY_TOPIC) {
-
                 if (!rooms[data.key]) {
-
                     rooms[data.key] = {
                         name: data.name,
                         locked: !!data.locked,
                         password: ""
                     };
-
                     messages[data.key] = [];
-
                     renderChannels();
                 }
-
-            } else if (
-                topic.startsWith(
-                    TOPIC_PREFIX + "chat/"
-                )
-            ) {
-
-                const key =
-                    topic.replace(
-                        TOPIC_PREFIX + "chat/",
-                        ""
-                    );
-
-                if (!messages[key]) {
-                    messages[key] = [];
-                }
+            } else if (topic.startsWith(TOPIC_PREFIX + "chat/")) {
+                const key = topic.replace(TOPIC_PREFIX + "chat/", "");
+                if (!messages[key]) messages[key] = [];
 
                 let text = data.text || "";
-
                 if (data.encrypted) {
-
-                    const password =
-                        rooms[key]?.password || "";
-
+                    const password = rooms[key]?.password || "";
                     try {
-
-                        const bytes =
-                            CryptoJS.AES.decrypt(
-                                text,
-                                password
-                            );
-
-                        const decoded =
-                            bytes.toString(
-                                CryptoJS.enc.Utf8
-                            );
-
-                        text =
-                            decoded ||
-                            "🔒 Encrypted message";
-
+                        const bytes = CryptoJS.AES.decrypt(text, password);
+                        const decoded = bytes.toString(CryptoJS.enc.Utf8);
+                        text = decoded || "🔒 Encrypted message";
                     } catch {
-
-                        text =
-                            "🔒 Unable to decrypt message";
+                        text = "🔒 Unable to decrypt message";
                     }
                 }
 
@@ -1431,13 +906,9 @@ function initChat() {
                     text,
                     time: data.time
                 });
-
-                if (key === currentRoom) {
-                    renderMessages();
-                }
+                if (key === currentRoom) renderMessages();
             }
-
-        } catch(error) {
+        } catch (error) {
             console.error(error);
         }
     });
@@ -1447,231 +918,109 @@ function initChat() {
 }
 
 function sendMessage(event) {
-
     event.preventDefault();
-
     if (!currentUser) return;
-
-    if (bannedUsers.includes(currentUser.email)) {
-        alert("Your account is banned.");
+    if (bannedUsers.includes(currentUser.email) || bannedIPs.includes(myPublicIP)) {
+        alert("Your account or IP is banned.");
         return;
     }
+    if (!mqttClient) { alert("Chat is not connected."); return; }
 
-    if (!mqttClient) {
-        alert("Chat is not connected.");
-        return;
-    }
-
-    const input =
-        document.getElementById("messageInput");
-
-    const text =
-        input.value.trim();
-
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
     if (!text) return;
 
-    const room =
-        rooms[currentRoom];
-
-    const now =
-        new Date().toLocaleTimeString(
-            [],
-            {
-                hour: "2-digit",
-                minute: "2-digit"
-            }
-        );
+    const room = rooms[currentRoom];
+    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     let outgoingText = text;
     let encrypted = false;
-
     if (room.locked && room.password) {
-
-        outgoingText =
-            CryptoJS.AES.encrypt(
-                text,
-                room.password
-            ).toString();
-
+        outgoingText = CryptoJS.AES.encrypt(text, room.password).toString();
         encrypted = true;
     }
 
     const packet = {
-        author:
-            document.getElementById("nickname").value.trim()
-            || currentUser.name,
-
-        email:
-            currentUser.email,
-
-        text:
-            outgoingText,
-
+        author: document.getElementById("nickname").value.trim() || currentUser.name,
+        email: currentUser.email,
+        text: outgoingText,
         encrypted,
         time: now
     };
 
-    mqttClient.publish(
-        TOPIC_PREFIX +
-        "chat/" +
-        currentRoom,
-        JSON.stringify(packet)
-    );
-
+    mqttClient.publish(TOPIC_PREFIX + "chat/" + currentRoom, JSON.stringify(packet));
     input.value = "";
 }
 
 function renderMessages() {
-
-    const container =
-        document.getElementById("messages");
-
+    const container = document.getElementById("messages");
     container.innerHTML = "";
-
-    const list =
-        messages[currentRoom] || [];
-
+    const list = messages[currentRoom] || [];
     if (!list.length) {
-
-        container.innerHTML =
-            `<div style="text-align:center;color:var(--muted);padding:30px;">
-                No messages yet.
-            </div>`;
-
+        container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px;">No messages yet.</div>`;
         return;
     }
-
     list.forEach(message => {
-
-        const wrapper =
-            document.createElement("div");
-
+        const wrapper = document.createElement("div");
         wrapper.className = "message";
+        if (currentUser && message.email === currentUser.email) wrapper.classList.add("self");
 
-        if (
-            currentUser &&
-            message.email === currentUser.email
-        ) {
-            wrapper.classList.add("self");
-        }
-
-        const meta =
-            document.createElement("div");
-
+        const meta = document.createElement("div");
         meta.className = "message-meta";
 
-        const author =
-            document.createElement("span");
-
+        const author = document.createElement("span");
         author.className = "author";
-        author.textContent =
-            message.author || "Student";
-
+        author.textContent = message.author || "Student";
         meta.appendChild(author);
 
         if (getAdminTag(message.email)) {
-
-            const tag =
-                document.createElement("span");
-
+            const tag = document.createElement("span");
             tag.className = "admin-tag";
             tag.textContent = "ADMIN";
-
             meta.appendChild(tag);
         }
 
-        const time =
-            document.createElement("span");
-
-        time.textContent =
-            "• " + (message.time || "");
-
+        const time = document.createElement("span");
+        time.textContent = "• " + (message.time || "");
         meta.appendChild(time);
 
-        const body =
-            document.createElement("div");
-
+        const body = document.createElement("div");
         body.className = "message-body";
-
-        body.textContent =
-            message.text || "";
+        body.textContent = message.text || "";
 
         wrapper.appendChild(meta);
         wrapper.appendChild(body);
-
         container.appendChild(wrapper);
     });
-
-    container.scrollTop =
-        container.scrollHeight;
+    container.scrollTop = container.scrollHeight;
 }
 
 function renderChannels() {
-
-    const list =
-        document.getElementById("channelList");
-
+    const list = document.getElementById("channelList");
     list.innerHTML = "";
-
-    Object.entries(rooms).forEach(
-        ([key, room]) => {
-
-            const li =
-                document.createElement("li");
-
-            const button =
-                document.createElement("button");
-
-            button.className = "channel";
-
-            if (key === currentRoom) {
-                button.classList.add("active");
-            }
-
-            button.textContent =
-                room.name +
-                (room.locked ? " 🔒" : "");
-
-            button.onclick =
-                () => selectRoom(key);
-
-            li.appendChild(button);
-            list.appendChild(li);
-        }
-    );
+    Object.entries(rooms).forEach(([key, room]) => {
+        const li = document.createElement("li");
+        const button = document.createElement("button");
+        button.className = "channel";
+        if (key === currentRoom) button.classList.add("active");
+        button.textContent = room.name + (room.locked ? " 🔒" : "");
+        button.onclick = () => selectRoom(key);
+        li.appendChild(button);
+        list.appendChild(li);
+    });
 }
 
 function selectRoom(key) {
-
     const room = rooms[key];
-
     if (!room) return;
-
     if (room.locked && !room.password) {
-
-        const password =
-            prompt(
-                "Enter the password for " +
-                room.name
-            );
-
+        const password = prompt("Enter the password for " + room.name);
         if (password === null) return;
-
         room.password = password;
     }
-
     currentRoom = key;
-
-    document.getElementById("currentRoom")
-        .textContent = room.name;
-
-    if (mqttClient) {
-
-        mqttClient.subscribe(
-            TOPIC_PREFIX + "chat/" + key
-        );
-    }
-
+    document.getElementById("currentRoom").textContent = room.name;
+    if (mqttClient) mqttClient.subscribe(TOPIC_PREFIX + "chat/" + key);
     renderChannels();
     renderMessages();
 }
@@ -1679,116 +1028,72 @@ function selectRoom(key) {
 /* ============================================================
    GROUPS
    ============================================================ */
-
 function openCreateGroup() {
-    document.getElementById("groupModal")
-        .style.display = "flex";
+    document.getElementById("groupModal").style.display = "flex";
 }
-
 function closeCreateGroup() {
-    document.getElementById("groupModal")
-        .style.display = "none";
+    document.getElementById("groupModal").style.display = "none";
 }
-
 function createGroup() {
+    const name = document.getElementById("groupName").value.trim();
+    const password = document.getElementById("groupPassword").value.trim();
+    if (!name) { alert("Enter a group name."); return; }
 
-    const name =
-        document.getElementById("groupName")
-            .value.trim();
-
-    const password =
-        document.getElementById("groupPassword")
-            .value.trim();
-
-    if (!name) {
-        alert("Enter a group name.");
-        return;
-    }
-
-    const key =
-        "group_" +
-        Date.now().toString(36);
-
-    rooms[key] = {
-        name,
-        locked: !!password,
-        password: password
-    };
-
+    const key = "group_" + Date.now().toString(36);
+    rooms[key] = { name, locked: !!password, password };
     messages[key] = [];
 
     if (mqttClient) {
-
-        mqttClient.publish(
-            DISCOVERY_TOPIC,
-            JSON.stringify({
-                key,
-                name,
-                locked: !!password
-            }),
-            { retain: true }
-        );
+        mqttClient.publish(DISCOVERY_TOPIC, JSON.stringify({ key, name, locked: !!password }), { retain: true });
     }
 
     currentRoom = key;
-
-    document.getElementById("currentRoom")
-        .textContent = name;
-
+    document.getElementById("currentRoom").textContent = name;
     renderChannels();
     renderMessages();
-
     document.getElementById("groupName").value = "";
     document.getElementById("groupPassword").value = "";
-
     closeCreateGroup();
 }
 
 /* ============================================================
    GAMES
    ============================================================ */
-
 const games = [
     {
         title: "Super Mario 64",
         category: "Adventure",
-        image:
-            "https://placehold.co/400x250/1e293b/38bdf8?text=Super+Mario+64",
+        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Super+Mario+64",
         url: "sm64/index.html"
     },
     {
         title: "Craft",
         category: "Adventure",
-        image:
-            "https://placehold.co/400x250/1e293b/38bdf8?text=Craft",
+        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Craft",
         url: "craft.html"
     },
     {
         title: "Dash",
         category: "Arcade",
-        image:
-            "https://placehold.co/400x250/1e293b/38bdf8?text=Dash",
+        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Dash",
         url: "games/dash.html"
     },
     {
         title: "Gulper.io",
         category: "Arcade",
-        image:
-            "https://placehold.co/400x250/1e293b/38bdf8?text=Gulper.io",
+        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Gulper.io",
         url: "https://gulper.io/"
     },
     {
         title: "Flappy Bird",
         category: "Classic",
-        image:
-            "https://placehold.co/400x250/1e293b/38bdf8?text=Pac-Man",
+        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Flappy+Bird",
         url: "games/flappy.html"
     },
     {
         title: "Tetris",
         category: "Arcade",
-        image:
-            "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris",
+        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris",
         url: "games/tetris.html"
     }
 ];
@@ -1797,172 +1102,84 @@ let currentTab = "Games";
 let category = "All";
 
 function renderGames() {
-
-    const grid =
-        document.getElementById("gameGrid");
-
-    const search =
-        document.getElementById("searchInput")
-            .value.toLowerCase();
-
-    let filtered =
-        games.filter(game => {
-
-            const categoryMatch =
-                category === "All" ||
-                game.category === category;
-
-            const searchMatch =
-                game.title
-                    .toLowerCase()
-                    .includes(search);
-
-            return categoryMatch && searchMatch;
-        });
+    const grid = document.getElementById("gameGrid");
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    const filtered = games.filter(game => {
+        const categoryMatch = category === "All" || game.category === category;
+        const searchMatch = game.title.toLowerCase().includes(search);
+        return categoryMatch && searchMatch;
+    });
 
     grid.innerHTML = "";
-
     filtered.forEach(game => {
-
-        const card =
-            document.createElement("div");
-
+        const card = document.createElement("div");
         card.className = "card";
-
         card.innerHTML = `
             <div class="card-image">
                 <img src="${game.image}" alt="">
             </div>
-
             <div class="card-content">
-                <div class="card-title">
-                    ${escapeHtml(game.title)}
-                </div>
-
-                <span class="card-category">
-                    ${escapeHtml(game.category)}
-                </span>
+                <div class="card-title">${escapeHtml(game.title)}</div>
+                <span class="card-category">${escapeHtml(game.category)}</span>
             </div>
         `;
-
-        card.onclick = () =>
-            openGame(game);
-
+        card.onclick = () => openGame(game);
         grid.appendChild(card);
     });
 }
 
 function openGame(game) {
-
-    if (
-        game.url.startsWith("http") ||
-        game.url.endsWith(".html")
-    ) {
-
-        document.getElementById("playerTitle")
-            .textContent = game.title;
-
-        document.getElementById("playerFrame")
-            .src = game.url;
-
-        document.getElementById("player")
-            .style.display = "flex";
+    if (game.url.startsWith("http") || game.url.endsWith(".html")) {
+        document.getElementById("playerTitle").textContent = game.title;
+        document.getElementById("playerFrame").src = game.url;
+        document.getElementById("player").style.display = "flex";
     }
 }
 
 function closePlayer() {
-
-    document.getElementById("player")
-        .style.display = "none";
-
-    document.getElementById("playerFrame")
-        .src = "";
+    document.getElementById("player").style.display = "none";
+    document.getElementById("playerFrame").src = "";
 }
 
 /* ============================================================
    TABS
    ============================================================ */
-
 function switchMainTab(tab) {
-
     currentTab = tab;
+    document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+    document.getElementById("nav" + tab).classList.add("active");
 
-    document
-        .querySelectorAll(".nav-tab")
-        .forEach(button =>
-            button.classList.remove("active")
-        );
-
-    document.getElementById(
-        "nav" + tab
-    ).classList.add("active");
-
-    const grid =
-        document.getElementById("gameGrid");
-
-    const categories =
-        document.getElementById("categories");
-
-    const chat =
-        document.getElementById("chatContainer");
+    const grid = document.getElementById("gameGrid");
+    const categories = document.getElementById("categories");
+    const chat = document.getElementById("chatContainer");
 
     if (tab === "Games") {
-
         grid.style.display = "grid";
         categories.style.display = "flex";
         chat.style.display = "none";
-
-        document.getElementById("heroTitle")
-            .textContent =
-            "Interactive Learning & Study Break Portal";
-
-        document.getElementById("heroSubtitle")
-            .textContent =
-            "Select an educational module or interactive game to begin.";
-
+        document.getElementById("heroTitle").textContent = "Interactive Learning & Study Break Portal";
+        document.getElementById("heroSubtitle").textContent = "Select an educational module or interactive game to begin.";
         renderGames();
-
     } else if (tab === "Videos") {
-
         grid.style.display = "grid";
         categories.style.display = "none";
         chat.style.display = "none";
-
-        document.getElementById("heroTitle")
-            .textContent =
-            "Educational & Gaming Video Media";
-
-        document.getElementById("heroSubtitle")
-            .textContent =
-            "Video content can be added through your secure backend.";
-
+        document.getElementById("heroTitle").textContent = "Educational & Gaming Video Media";
+        document.getElementById("heroSubtitle").textContent = "Video content can be added through your secure backend.";
         grid.innerHTML = `
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title">
-                        Video system ready
-                    </div>
-                    <p style="color:var(--muted);font-size:13px;">
-                        coming soon.
-                    </p>
+                    <div class="card-title">Video system ready</div>
+                    <p style="color:var(--muted);font-size:13px;">coming soon.</p>
                 </div>
             </div>
         `;
-
     } else if (tab === "Chat") {
-
         grid.style.display = "none";
         categories.style.display = "none";
         chat.style.display = "grid";
-
-        document.getElementById("heroTitle")
-            .textContent =
-            "Real-Time Student Groups";
-
-        document.getElementById("heroSubtitle")
-            .textContent =
-            "Chat with other students in live study groups.";
-
+        document.getElementById("heroTitle").textContent = "Real-Time Student Groups";
+        document.getElementById("heroSubtitle").textContent = "Chat with other students in live study groups.";
         initChat();
     }
 }
@@ -1970,9 +1187,7 @@ function switchMainTab(tab) {
 /* ============================================================
    SAFETY
    ============================================================ */
-
 function escapeHtml(value) {
-
     return String(value)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
@@ -1984,46 +1199,22 @@ function escapeHtml(value) {
 /* ============================================================
    EVENTS
    ============================================================ */
+document.getElementById("searchInput").addEventListener("input", renderGames);
 
-document
-    .getElementById("searchInput")
-    .addEventListener(
-        "input",
-        renderGames
-    );
-
-document
-    .querySelectorAll(".cat-btn")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                document
-                    .querySelectorAll(".cat-btn")
-                    .forEach(b =>
-                        b.classList.remove("active")
-                    );
-
-                button.classList.add("active");
-
-                category =
-                    button.dataset.category;
-
-                renderGames();
-            }
-        );
+document.querySelectorAll(".cat-btn").forEach(button => {
+    button.addEventListener("click", () => {
+        document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+        button.classList.add("active");
+        category = button.dataset.category;
+        renderGames();
     });
+});
 
 /* ============================================================
    STARTUP
    ============================================================ */
-
 checkExistingLogin();
 renderGames();
 </script>
-
 </body>
 </html>
-```
