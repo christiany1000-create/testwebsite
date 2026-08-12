@@ -200,7 +200,7 @@
     const GROUND_Y = 370;
     const BLOCK_SIZE = 40;
 
-    let gameState = 'MENU'; // MENU, LEVEL_SELECT, PLAYING, GAMEOVER, WIN
+    let gameState = 'MENU';
     let currentLevelIndex = 0;
     let attempts = 1;
     let animationFrameId = null;
@@ -210,12 +210,12 @@
     const TARGET_FPS = 60;
     const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
-    // --- AUDIO SYNTHESIZER (Web Audio API) ---
+    // --- AUDIO SYNTHESIZER ---
     class AudioEngine {
       constructor() {
         this.ctx = null;
         this.musicInterval = null;
-        this.tempo = 130;
+        this.tempo = 110; // Slowed down music tempo to match new game speed
       }
 
       init() {
@@ -230,13 +230,13 @@
         const gain = this.ctx.createGain();
         osc.type = 'square';
         osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.12);
         gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.1);
+        osc.stop(this.ctx.currentTime + 0.12);
       }
 
       playDeath() {
@@ -245,13 +245,13 @@
         const gain = this.ctx.createGain();
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(40, this.ctx.currentTime + 0.25);
+        osc.frequency.linearRampToValueAtTime(40, this.ctx.currentTime + 0.3);
         gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
         osc.start();
-        osc.stop(this.ctx.currentTime + 0.25);
+        osc.stop(this.ctx.currentTime + 0.3);
       }
 
       startMusic(levelIdx) {
@@ -295,12 +295,13 @@
     const audio = new AudioEngine();
 
     // --- LEVEL DATA ---
+    // Reduced horizontal scroll speed (down from 6 and 7)
     const LEVELS = [
       {
         name: "Stereo Tech",
         color: "#00ffcc",
         bgPrimary: "#0a0a20",
-        speed: 6,
+        speed: 4.0,
         data: [
           0,0,0,0,0,0,0,0,0,0,
           2,0,0,0,1,0,0,2,0,0,
@@ -317,7 +318,7 @@
         name: "Cyber Pulse",
         color: "#ff0055",
         bgPrimary: "#1a0010",
-        speed: 7,
+        speed: 4.6,
         data: [
           0,0,0,0,0,0,0,0,0,0,
           2,2,0,0,1,1,0,0,2,0,
@@ -332,16 +333,19 @@
       }
     ];
 
-    // --- GAME ENGINE & PHYSICS ---
+    // --- GAME ENGINE & ADJUSTED PHYSICS ---
     class Player {
       constructor() {
         this.size = 36;
         this.x = 100;
         this.y = GROUND_Y - this.size;
         this.vy = 0;
-        this.gravity = 1.1;
-        this.jumpForce = -14.5;
-        this.padForce = -18.5;
+        
+        // Floatier physics parameters
+        this.gravity = 0.65;    // Reduced from 1.1 for lighter pull
+        this.jumpForce = -11.0; // Scaled down from -14.5 to match lower gravity
+        this.padForce = -14.5;  // Scaled down from -18.5
+        
         this.isGrounded = false;
         this.rotation = 0;
         this.isDead = false;
@@ -381,7 +385,7 @@
         this.y += this.vy;
 
         if (!this.isGrounded) {
-          this.rotation += 8;
+          this.rotation += 5.5; // Slower rotational spin during floatier jump
         } else {
           this.rotation = Math.round(this.rotation / 90) * 90;
         }
@@ -518,7 +522,7 @@
 
       audio.startMusic(currentLevelIndex);
 
-      lastTime = 0; // Reset frame timer
+      lastTime = 0;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       animationFrameId = requestAnimationFrame(gameLoop);
     }
@@ -541,7 +545,6 @@
       winOverlay.classList.remove('hidden');
     }
 
-    // Fixed 60 FPS Throttle Game Loop
     function gameLoop(timestamp) {
       if (gameState === 'PLAYING' || gameState === 'GAMEOVER') {
         animationFrameId = requestAnimationFrame(gameLoop);
