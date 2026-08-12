@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flappy Bird HTML5</title>
+  <title>Flappy Bird - Global Leaderboard</title>
+
+  <!-- Firebase Web SDKs (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -23,7 +28,6 @@
       overflow: hidden;
     }
 
-    /* Container maintaining 9:16 aspect ratio on Desktop & Mobile */
     #game-container {
       position: relative;
       height: 92vh;
@@ -48,7 +52,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(6px);
       display: flex;
       flex-direction: column;
@@ -100,6 +104,12 @@
     .btn:active {
       transform: translateY(3px);
       box-shadow: 0 1px 0 #9a3412;
+    }
+
+    .btn:disabled {
+      background-color: #64748b;
+      box-shadow: none;
+      cursor: not-allowed;
     }
 
     .score-badge {
@@ -155,7 +165,7 @@
       font-weight: bold;
     }
 
-    .leaderboard-empty {
+    .leaderboard-status {
       color: #94a3b8;
       font-style: italic;
       margin: 15px 0;
@@ -165,7 +175,6 @@
 <body>
 
   <div id="game-container">
-    <!-- Fixed internal virtual resolution (360x640) for 100% consistent physics across all devices -->
     <canvas id="canvas" width="360" height="640"></canvas>
 
     <!-- Main Menu -->
@@ -183,14 +192,10 @@
         <span>Score:</span>
         <span id="final-score">0</span>
       </div>
-      <div class="score-badge">
-        <span>Best:</span>
-        <span id="best-score">0</span>
-      </div>
 
       <div id="save-score-section" class="input-group">
         <input type="text" id="player-name" placeholder="Enter Name" maxlength="10">
-        <button class="btn" onclick="submitScore()">SAVE SCORE</button>
+        <button class="btn" id="save-btn" onclick="submitScore()">SAVE SCORE</button>
       </div>
 
       <button class="btn" onclick="startGame()">RETRY</button>
@@ -199,7 +204,7 @@
 
     <!-- Leaderboard Screen -->
     <div id="leaderboard-screen" class="overlay hidden">
-      <h2>HIGH SCORES</h2>
+      <h2>GLOBAL SCORES</h2>
       <table class="leaderboard-table" id="leaderboard-table">
         <thead>
           <tr>
@@ -210,41 +215,53 @@
         </thead>
         <tbody id="leaderboard-body"></tbody>
       </table>
-      <div id="no-scores" class="leaderboard-empty hidden">No scores saved yet!</div>
+      <div id="leaderboard-status" class="leaderboard-status">Loading online scores...</div>
       <button class="btn" onclick="showMenu()">BACK</button>
     </div>
   </div>
 
   <script>
+    // --- FIREBASE CONFIGURATION ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyA35rRNfcWMHQEb85esLad9k7uaeqSU5t8",
+      authDomain: "flappybirdleaderboard-a9da6.firebaseapp.com",
+      projectId: "flappybirdleaderboard-a9da6",
+      storageBucket: "flappybirdleaderboard-a9da6.firebasestorage.app",
+      messagingSenderId: "585905180942",
+      appId: "1:585905180942:web:b765c415481d2593e3c75f",
+      measurementId: "G-CW62VDYH92"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // --- GAME ENGINE ---
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    // UI Elements
     const mainMenu = document.getElementById('main-menu');
     const gameOverMenu = document.getElementById('game-over');
     const leaderboardScreen = document.getElementById('leaderboard-screen');
     const finalScoreEl = document.getElementById('final-score');
-    const bestScoreEl = document.getElementById('best-score');
     const playerNameInput = document.getElementById('player-name');
     const saveScoreSection = document.getElementById('save-score-section');
     const leaderboardBody = document.getElementById('leaderboard-body');
-    const noScoresEl = document.getElementById('no-scores');
+    const statusEl = document.getElementById('leaderboard-status');
+    const saveBtn = document.getElementById('save-btn');
 
-    // Game Variables
     let state = 'MENU';
     let score = 0;
     let lastTime = 0;
     let pipeSpawnTimer = 0;
     const groundHeight = 50;
 
-    // --- FLOATY PHYSICS CONFIGURATION ---
     const bird = {
       x: 80,
       y: 280,
       radius: 13,
       velocity: 0,
-      gravity: 0.115,  // Very light gravity pull
-      jump: -3.8,      // Smooth, floaty hop
+      gravity: 0.115,
+      jump: -3.8,
       rotation: 0,
 
       draw() {
@@ -252,7 +269,6 @@
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
 
-        // Body
         ctx.fillStyle = '#f59e0b';
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
@@ -261,7 +277,6 @@
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Eye
         ctx.fillStyle = '#fff';
         ctx.beginPath();
         ctx.arc(4, -4, 4, 0, Math.PI * 2);
@@ -271,7 +286,6 @@
         ctx.arc(5, -4, 1.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Beak
         ctx.fillStyle = '#ea580c';
         ctx.beginPath();
         ctx.arc(6, 2, 5, 0, Math.PI);
@@ -288,20 +302,17 @@
         this.velocity += this.gravity * dt;
         this.y += this.velocity * dt;
 
-        // Angle Rotation based on speed
         if (this.velocity < 0) {
           this.rotation = -0.25;
         } else {
           this.rotation = Math.min(Math.PI / 2, this.rotation + 0.035 * dt);
         }
 
-        // Floor Collision
         if (this.y + this.radius >= canvas.height - groundHeight) {
           this.y = canvas.height - groundHeight - this.radius;
           endGame();
         }
 
-        // Ceiling Collision
         if (this.y - this.radius <= 0) {
           this.y = this.radius;
           this.velocity = 0;
@@ -315,12 +326,11 @@
       }
     };
 
-    // Pipes Manager
     const pipes = {
       items: [],
       width: 52,
-      gap: 135,       // Generous gap for comfortable navigation
-      speed: 1.6,     // Relaxed scroll speed
+      gap: 135,
+      speed: 1.6,
 
       draw() {
         for (let p of this.items) {
@@ -328,11 +338,9 @@
           ctx.strokeStyle = '#15803d';
           ctx.lineWidth = 2;
 
-          // Top Pipe
           ctx.fillRect(p.x, 0, this.width, p.top);
           ctx.strokeRect(p.x, 0, this.width, p.top);
 
-          // Bottom Pipe
           ctx.fillRect(p.x, p.bottom, this.width, canvas.height - groundHeight - p.bottom);
           ctx.strokeRect(p.x, p.bottom, this.width, canvas.height - groundHeight - p.bottom);
         }
@@ -359,7 +367,6 @@
           let p = this.items[i];
           p.x -= this.speed * dt;
 
-          // Collision Detection
           if (
             bird.x + bird.radius > p.x &&
             bird.x - bird.radius < p.x + this.width &&
@@ -368,13 +375,11 @@
             endGame();
           }
 
-          // Score Increment
           if (p.x + this.width < bird.x && !p.passed) {
             score++;
             p.passed = true;
           }
 
-          // Remove Offscreen Pipes
           if (p.x + this.width < 0) {
             this.items.splice(i, 1);
             i--;
@@ -413,7 +418,6 @@
       }
     }
 
-    // Delta-Time Frame Normalization Loop (Fixes 60Hz / 144Hz differences)
     function gameLoop(timestamp) {
       if (!lastTime) lastTime = timestamp;
       const dt = Math.min((timestamp - lastTime) / 16.666, 2.5);
@@ -471,14 +475,10 @@
     function endGame() {
       state = 'GAMEOVER';
       finalScoreEl.textContent = score;
-
-      const leaderboard = getLeaderboard();
-      const best = leaderboard.length > 0 ? leaderboard[0].score : 0;
-      bestScoreEl.textContent = Math.max(best, score);
-
       saveScoreSection.classList.remove('hidden');
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'SAVE SCORE';
       playerNameInput.value = '';
-
       gameOverMenu.classList.remove('hidden');
     }
 
@@ -486,7 +486,7 @@
       state = 'LEADERBOARD';
       hideOverlays();
       leaderboardScreen.classList.remove('hidden');
-      renderLeaderboard();
+      fetchGlobalLeaderboard();
     }
 
     function hideOverlays() {
@@ -501,45 +501,61 @@
       score = 0;
     }
 
-    // Local Storage Leaderboard
-    function getLeaderboard() {
-      const data = localStorage.getItem('flappy_leaderboard');
-      return data ? JSON.parse(data) : [];
-    }
-
-    function submitScore() {
+    // --- FIRESTORE FUNCTIONS ---
+    async function submitScore() {
       const name = playerNameInput.value.trim() || 'Anonymous';
-      const leaderboard = getLeaderboard();
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'SAVING...';
 
-      leaderboard.push({ name, score });
-      leaderboard.sort((a, b) => b.score - a.score);
-      leaderboard.splice(10);
-
-      localStorage.setItem('flappy_leaderboard', JSON.stringify(leaderboard));
-      saveScoreSection.classList.add('hidden');
-      showLeaderboard();
+      try {
+        await db.collection('leaderboard').add({
+          name: name,
+          score: score,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        saveScoreSection.classList.add('hidden');
+        showLeaderboard();
+      } catch (err) {
+        console.error("Firestore submit error:", err);
+        alert("Failed to save score! Make sure Firestore Database is created and set to Test Mode.");
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'RETRY SAVE';
+      }
     }
 
-    function renderLeaderboard() {
-      const leaderboard = getLeaderboard();
+    async function fetchGlobalLeaderboard() {
       leaderboardBody.innerHTML = '';
+      statusEl.textContent = 'Loading online scores...';
+      statusEl.classList.remove('hidden');
+      document.getElementById('leaderboard-table').classList.add('hidden');
 
-      if (leaderboard.length === 0) {
-        noScoresEl.classList.remove('hidden');
-        document.getElementById('leaderboard-table').classList.add('hidden');
-      } else {
-        noScoresEl.classList.add('hidden');
-        document.getElementById('leaderboard-table').classList.remove('hidden');
+      try {
+        const snapshot = await db.collection('leaderboard')
+          .orderBy('score', 'desc')
+          .limit(10)
+          .get();
 
-        leaderboard.forEach((entry, index) => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${escapeHTML(entry.name)}</td>
-            <td>${entry.score}</td>
-          `;
-          leaderboardBody.appendChild(row);
-        });
+        if (snapshot.empty) {
+          statusEl.textContent = 'No scores saved yet!';
+        } else {
+          statusEl.classList.add('hidden');
+          document.getElementById('leaderboard-table').classList.remove('hidden');
+
+          let rank = 1;
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${rank++}</td>
+              <td>${escapeHTML(data.name)}</td>
+              <td>${data.score}</td>
+            `;
+            leaderboardBody.appendChild(row);
+          });
+        }
+      } catch (err) {
+        console.error("Firestore fetch error:", err);
+        statusEl.textContent = 'Failed to load scores. Check Firestore database rules.';
       }
     }
 
@@ -549,7 +565,6 @@
       );
     }
 
-    // Run Engine
     requestAnimationFrame(gameLoop);
   </script>
 </body>
