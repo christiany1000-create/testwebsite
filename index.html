@@ -349,8 +349,8 @@
     </div>
 
     <script>
-        // REPLACE THIS WITH YOUR ACTUAL YOUTUBE API KEY
-        const YOUTUBE_API_KEY = "YOUR_API_KEY_HERE";
+        // Your YouTube API Key is now configured here
+        const YOUTUBE_API_KEY = "AIzaSyDwfmW1IQ6raSNlXW7NNDUty3KBdF-bGlY";
 
         const games = [
             {
@@ -408,13 +408,7 @@
         const modalTitle = document.getElementById('modalTitle');
         const categoryButtons = document.querySelectorAll('.cat-btn');
 
-        // Fetch YouTube Videos using your API Key
         async function fetchYouTubeVideos(query = "gaming highlights") {
-            if (YOUTUBE_API_KEY === "YOUR_API_KEY_HERE" || !YOUTUBE_API_KEY) {
-                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: 1 / -1; text-align: center; padding: 3rem;">Please enter your YouTube API Key in the script code to load videos!</p>';
-                return;
-            }
-
             try {
                 const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&key=${YOUTUBE_API_KEY}`);
                 const data = await response.json();
@@ -466,7 +460,6 @@
         function filterAndRender() {
             const term = searchInput.value.toLowerCase();
             
-            // Combine games and youtube videos based on selected category
             let pool = [];
             if (currentCategory === 'All') {
                 pool = [...games, ...youtubeVideos];
@@ -507,7 +500,6 @@
         }
 
         searchInput.addEventListener('input', () => {
-            // If user is searching while in YouTube tab or All tab, query YouTube dynamically if needed
             filterAndRender();
         });
 
@@ -525,12 +517,8 @@
             });
         });
 
-        // Pre-fetch some initial YouTube videos silently on load
-        if (YOUTUBE_API_KEY !== "AIzaSyDwfmW1IQ6raSNlXW7NNDUty3KBdF-bGlY") {
-            fetchYouTubeVideos();
-        } else {
-            renderItems(games);
-        }
+        // Pre-fetch YouTube videos on page load
+        fetchYouTubeVideos();
     </script>
 </body>
 </html>
