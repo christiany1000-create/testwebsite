@@ -201,7 +201,7 @@ header {
 .close-btn { padding: 9px 14px; color: white; background: var(--danger); border-radius: 7px; }
 .admin-btn { padding: 9px 14px; color: #06111a; background: var(--primary); border-radius: 7px; }
 
-/* ADMIN PANEL */
+/* ADMIN PANEL (in-page settings) */
 .admin-panel { display: none; }
 .admin-section { margin-bottom: 22px; }
 .admin-section h4 { margin-bottom: 8px; }
@@ -294,6 +294,9 @@ header {
             <button class="logout" onclick="logout()">✕</button>
         </div>
         <button class="settings-btn" onclick="openSettings()">⚙ Settings</button>
+        <button class="settings-btn" id="adminPanelBtn" style="display:none;" onclick="goToAdminPanel()">
+            🛡 Admin Panel
+        </button>
     </div>
 </header>
 
@@ -357,7 +360,7 @@ header {
 
             <div class="admin-section">
                 <h4>🛡 Administrator</h4>
-                <p>You have administrator permissions.</p>
+                <p>You have administrator permissions. Use the separate Admin Panel button for the double-checked page.</p>
             </div>
 
             <!-- ONLINE USERS -->
@@ -485,7 +488,6 @@ function handleGoogleLogin(response) {
         currentUser = user;
         localStorage.setItem("learnmultiply_user", JSON.stringify(user));
 
-        // Fetch IP then check IP ban and apply user
         fetchPublicIP().then(ip => {
             myPublicIP = ip;
             if (bannedIPs.includes(ip)) {
@@ -519,14 +521,17 @@ function applyUser(user) {
     document.getElementById("nickname").value = user.name;
     renderBanList();
     renderIPBanList();
+    updateAdminButton();
 }
 
 function logout() {
     stopPresence();
     localStorage.removeItem("learnmultiply_user");
+    sessionStorage.removeItem("learnmultiply_admin_ok");
     currentUser = null;
     document.body.classList.add("locked");
     document.getElementById("authGate").style.display = "flex";
+    updateAdminButton();
 }
 
 function checkExistingLogin() {
@@ -577,7 +582,7 @@ function showBannedScreen(value, type) {
 }
 
 /* ============================================================
-   ADMIN HELPERS
+   ADMIN HELPERS + REDIRECT TO admin.html
    ============================================================ */
 function isAdmin() {
     return !!(currentUser && ADMIN_EMAILS.includes(currentUser.email.toLowerCase()));
@@ -586,6 +591,23 @@ function isAdmin() {
 function getAdminTag(email) {
     if (ADMIN_EMAILS.includes(String(email).toLowerCase())) return "ADMIN";
     return "";
+}
+
+function updateAdminButton() {
+    const btn = document.getElementById("adminPanelBtn");
+    if (btn) {
+        btn.style.display = isAdmin() ? "inline-block" : "none";
+    }
+}
+
+function goToAdminPanel() {
+    if (!isAdmin()) {
+        alert("Administrator access required.");
+        return;
+    }
+    // Short-lived flag so admin.html can do a second check
+    sessionStorage.setItem("learnmultiply_admin_ok", Date.now().toString());
+    window.location.href = "admin.html";
 }
 
 function openSettings() {
@@ -700,16 +722,11 @@ function renderIPBanList() {
    PRESENCE / ONLINE USERS (self-reported)
    ============================================================ */
 const PRESENCE_TOPIC = "learnmultiply/v3/presence";
-const PRESENCE_TTL_MS = 90 * 1000; // consider offline after 90 s
-let onlineUsers = {}; // clientId -> { name, email, ip, lastSeen, clientId }
+const PRESENCE_TTL_MS = 90 * 1000;
+let onlineUsers = {};
 
 function startPresence() {
-    if (!currentUser || !isAdmin() && !mqttClient) {
-        // still publish presence even if not admin
-    }
     if (presenceInterval) clearInterval(presenceInterval);
-
-    // Ensure MQTT is up
     if (!mqttClient) initChat();
 
     const publish = () => {
@@ -744,7 +761,6 @@ function handlePresenceMessage(data) {
         ip: data.ip || "unknown",
         lastSeen: data.ts || Date.now()
     };
-    // prune old
     const now = Date.now();
     Object.keys(onlineUsers).forEach(id => {
         if (now - onlineUsers[id].lastSeen > PRESENCE_TTL_MS) {
