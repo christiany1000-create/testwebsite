@@ -201,7 +201,7 @@ header {
 .close-btn { padding: 9px 14px; color: white; background: var(--danger); border-radius: 7px; }
 .admin-btn { padding: 9px 14px; color: #06111a; background: var(--primary); border-radius: 7px; }
 
-/* ADMIN PANEL */
+/* ADMIN PANEL (only visible to admins) */
 .admin-panel { display: none; }
 .admin-section { margin-bottom: 22px; }
 .admin-section h4 { margin-bottom: 8px; }
@@ -211,13 +211,13 @@ header {
     flex: 1; min-width: 140px; padding: 10px; color: var(--text); background: #080d18;
     border: 1px solid var(--border); border-radius: 7px;
 }
-.ban-list, .online-list, .monitor-list { display: flex; flex-direction: column; gap: 6px; }
-.banned-user, .online-user, .monitor-item {
+.ban-list, .online-list { display: flex; flex-direction: column; gap: 6px; }
+.banned-user, .online-user {
     display: flex; justify-content: space-between; align-items: center; gap: 8px;
     padding: 9px; background: #080d18; border: 1px solid var(--border);
     border-radius: 7px; font-size: 13px; flex-wrap: wrap;
 }
-.online-user .info, .monitor-item .info { flex: 1; min-width: 180px; }
+.online-user .info { flex: 1; min-width: 180px; }
 .online-user .actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .small-btn {
     padding: 5px 9px; font-size: 11px; border-radius: 5px; border: 0; cursor: pointer; font-weight: 700;
@@ -351,24 +351,29 @@ header {
     </section>
 </main>
 
-<!-- SETTINGS + FULL ADMIN PANEL -->
+<!-- SETTINGS (admin panel is hidden inside here and only shown to admins) -->
 <div class="modal" id="settingsModal">
     <div class="modal-box">
         <h3>Portal Settings</h3>
 
+        <!-- Visible to everyone -->
         <div id="normalSettings">
-            <p style="color:var(--muted);font-size:13px;">Your Google account is currently signed in.</p>
+            <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
+                Your Google account is currently signed in.
+            </p>
         </div>
 
+        <!-- HIDDEN ADMIN PANEL – only appears when isAdmin() is true -->
         <div id="adminSettings" class="admin-panel">
             <div class="warning-box">
-                <strong>Prototype only.</strong> All bans, mutes, and admin grants are stored in this browser only and can be bypassed. For real school use you need a backend.
+                <strong>Admin Tools</strong> – This section is only visible to administrators.
+                All actions are stored in this browser only (prototype).
             </div>
 
-            <!-- ONLINE USERS + QUICK ACTIONS -->
+            <!-- ONLINE USERS -->
             <div class="admin-section">
                 <h4>Online Users <span id="onlineCount" style="color:var(--muted);font-weight:400;"></span></h4>
-                <p>Live presence. Use the buttons to ban, temp-ban, mute, or promote.</p>
+                <p>Live presence with quick moderation actions.</p>
                 <div class="online-list" id="onlineList">
                     <span style="color:var(--muted);font-size:12px;">Waiting for presence data…</span>
                 </div>
@@ -377,7 +382,7 @@ header {
             <!-- CHAT MONITOR -->
             <div class="admin-section">
                 <h4>Chat Monitor</h4>
-                <p>Recent messages seen by this client (subscribe to rooms to see more).</p>
+                <p>Recent messages this client has seen.</p>
                 <div class="monitor-box" id="chatMonitor">
                     <div style="color:var(--muted);">No messages captured yet.</div>
                 </div>
@@ -392,26 +397,24 @@ header {
                 <div style="display:flex;flex-wrap:wrap;gap:6px;">
                     <button class="small-btn btn-ban" onclick="manualBan(false)">Ban</button>
                     <button class="small-btn btn-temp" onclick="manualBan(true)">Temp Ban (1h)</button>
-                    <button class="small-btn btn-mute" onclick="manualMute(true)">Mute (remove chat)</button>
+                    <button class="small-btn btn-mute" onclick="manualMute(true)">Mute</button>
                     <button class="small-btn btn-unban" onclick="manualMute(false)">Unmute</button>
                     <button class="small-btn btn-admin" onclick="manualGiveAdmin(true)">Give Admin</button>
                     <button class="small-btn btn-ban" onclick="manualGiveAdmin(false)">Remove Admin</button>
                 </div>
             </div>
 
-            <!-- BANNED -->
+            <!-- LISTS -->
             <div class="admin-section">
                 <h4>Banned Accounts</h4>
                 <div class="ban-list" id="banList"></div>
             </div>
 
-            <!-- MUTED -->
             <div class="admin-section">
                 <h4>Muted (no chat privileges)</h4>
                 <div class="ban-list" id="muteList"></div>
             </div>
 
-            <!-- EXTRA ADMINS -->
             <div class="admin-section">
                 <h4>Additional Admins</h4>
                 <div class="ban-list" id="extraAdminList"></div>
@@ -448,20 +451,14 @@ header {
 
 <script>
 /* ============================================================
-   ADMIN CONFIGURATION + LISTS
+   ADMIN CONFIG
    ============================================================ */
 const HARDCODED_ADMINS = [
     "yates.christian@norwinsd.org",
     "christiany1000@gmail.com"
 ];
 
-/*
- * All moderation data is stored in localStorage.
- * This is only a frontend prototype – easily bypassed.
- */
-
 let bannedUsers = JSON.parse(localStorage.getItem("learnmultiply_bans") || "[]");
-// format: { email, until: null | timestamp }
 let mutedUsers  = JSON.parse(localStorage.getItem("learnmultiply_mutes") || "[]");
 let extraAdmins = JSON.parse(localStorage.getItem("learnmultiply_extra_admins") || "[]");
 
@@ -474,7 +471,6 @@ function isBanned(email) {
     const entry = bannedUsers.find(b => b.email === email);
     if (!entry) return false;
     if (entry.until && Date.now() > entry.until) {
-        // expired
         bannedUsers = bannedUsers.filter(b => b.email !== email);
         saveBans();
         return false;
@@ -487,12 +483,12 @@ function isMuted(email) {
 }
 
 /* ============================================================
-   USER AUTH + IP
+   AUTH
    ============================================================ */
 let currentUser = null;
 let myPublicIP  = "unknown";
 let presenceInterval = null;
-let chatMonitorLog = []; // recent messages for admin monitor
+let chatMonitorLog = [];
 
 async function fetchPublicIP() {
     try {
@@ -548,7 +544,6 @@ function applyUser(user) {
     document.getElementById("userName").textContent = user.name;
     document.getElementById("userAvatar").src = user.picture || "";
     document.getElementById("nickname").value = user.name;
-    renderAllAdminLists();
 }
 
 function logout() {
@@ -593,8 +588,7 @@ function showBannedScreen(email) {
                 <span class="logo-text">LearnMultiply</span>
             </div>
             <h2 style="color:#ef4444;">Account Banned</h2>
-            <p>The Google account <strong>${escapeHtml(email)}</strong> is currently banned from LearnMultiply.</p>
-            <p>If you believe this was a mistake, contact a site administrator.</p>
+            <p>The Google account <strong>${escapeHtml(email)}</strong> is currently banned.</p>
         </div>
     `;
     document.getElementById("authGate").style.display = "flex";
@@ -602,24 +596,29 @@ function showBannedScreen(email) {
 }
 
 /* ============================================================
-   ADMIN HELPERS
+   SETTINGS + HIDDEN ADMIN PANEL
    ============================================================ */
 function isAdmin() {
     return !!(currentUser && getAllAdmins().includes(currentUser.email.toLowerCase()));
 }
 
 function getAdminTag(email) {
-    if (getAllAdmins().includes(String(email).toLowerCase())) return "ADMIN";
-    return "";
+    return getAllAdmins().includes(String(email).toLowerCase()) ? "ADMIN" : "";
 }
 
 function openSettings() {
     document.getElementById("settingsModal").style.display = "flex";
+
+    // Only show the admin panel if the current user is an admin
     const adminPanel = document.getElementById("adminSettings");
-    adminPanel.style.display = isAdmin() ? "block" : "none";
-    renderAllAdminLists();
-    renderOnlineList();
-    renderChatMonitor();
+    if (isAdmin()) {
+        adminPanel.style.display = "block";
+        renderAllAdminLists();
+        renderOnlineList();
+        renderChatMonitor();
+    } else {
+        adminPanel.style.display = "none";
+    }
 }
 
 function closeSettings() {
@@ -632,25 +631,18 @@ function renderAllAdminLists() {
     renderExtraAdminList();
 }
 
-/* ---- Ban / Temp Ban ---- */
+/* Ban / Temp Ban */
 function banEmail(email, tempHours = null) {
     email = (email || "").toLowerCase().trim();
-    if (!email) return;
-    if (HARDCODED_ADMINS.includes(email)) {
-        alert("You cannot ban a hardcoded administrator.");
-        return;
-    }
-    // remove existing
+    if (!email || HARDCODED_ADMINS.includes(email)) return;
     bannedUsers = bannedUsers.filter(b => b.email !== email);
-    const until = tempHours ? Date.now() + tempHours * 3600 * 1000 : null;
-    bannedUsers.push({ email, until });
+    bannedUsers.push({ email, until: tempHours ? Date.now() + tempHours * 3600 * 1000 : null });
     saveBans();
     renderBanList();
 }
 
 function unbanEmail(email) {
-    email = (email || "").toLowerCase();
-    bannedUsers = bannedUsers.filter(b => b.email !== email);
+    bannedUsers = bannedUsers.filter(b => b.email !== (email || "").toLowerCase());
     saveBans();
     renderBanList();
 }
@@ -662,12 +654,10 @@ function saveBans() {
 function renderBanList() {
     const list = document.getElementById("banList");
     if (!list) return;
-    list.innerHTML = "";
-    // clean expired
     bannedUsers = bannedUsers.filter(b => !b.until || b.until > Date.now());
     saveBans();
-
-    if (bannedUsers.length === 0) {
+    list.innerHTML = "";
+    if (!bannedUsers.length) {
         list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No banned accounts.</span>`;
         return;
     }
@@ -675,21 +665,19 @@ function renderBanList() {
         const row = document.createElement("div");
         row.className = "banned-user";
         const label = entry.until
-            ? `${entry.email} (temp until ${new Date(entry.until).toLocaleTimeString()})`
+            ? `${entry.email} (until ${new Date(entry.until).toLocaleTimeString()})`
             : entry.email;
-        const text = document.createElement("span");
-        text.textContent = label;
-        const button = document.createElement("button");
-        button.className = "small-btn btn-unban";
-        button.textContent = "Unban";
-        button.onclick = () => unbanEmail(entry.email);
-        row.appendChild(text);
-        row.appendChild(button);
+        row.innerHTML = `<span>${escapeHtml(label)}</span>`;
+        const btn = document.createElement("button");
+        btn.className = "small-btn btn-unban";
+        btn.textContent = "Unban";
+        btn.onclick = () => unbanEmail(entry.email);
+        row.appendChild(btn);
         list.appendChild(row);
     });
 }
 
-/* ---- Mute / Unmute ---- */
+/* Mute */
 function muteEmail(email) {
     email = (email || "").toLowerCase().trim();
     if (!email || HARDCODED_ADMINS.includes(email)) return;
@@ -699,8 +687,7 @@ function muteEmail(email) {
 }
 
 function unmuteEmail(email) {
-    email = (email || "").toLowerCase();
-    mutedUsers = mutedUsers.filter(e => e !== email);
+    mutedUsers = mutedUsers.filter(e => e !== (email || "").toLowerCase());
     saveMutes();
     renderMuteList();
 }
@@ -713,26 +700,24 @@ function renderMuteList() {
     const list = document.getElementById("muteList");
     if (!list) return;
     list.innerHTML = "";
-    if (mutedUsers.length === 0) {
+    if (!mutedUsers.length) {
         list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No muted users.</span>`;
         return;
     }
     mutedUsers.forEach(email => {
         const row = document.createElement("div");
         row.className = "banned-user";
-        const text = document.createElement("span");
-        text.textContent = email;
-        const button = document.createElement("button");
-        button.className = "small-btn btn-unban";
-        button.textContent = "Unmute";
-        button.onclick = () => unmuteEmail(email);
-        row.appendChild(text);
-        row.appendChild(button);
+        row.innerHTML = `<span>${escapeHtml(email)}</span>`;
+        const btn = document.createElement("button");
+        btn.className = "small-btn btn-unban";
+        btn.textContent = "Unmute";
+        btn.onclick = () => unmuteEmail(email);
+        row.appendChild(btn);
         list.appendChild(row);
     });
 }
 
-/* ---- Extra Admins ---- */
+/* Extra Admins */
 function giveAdmin(email) {
     email = (email || "").toLowerCase().trim();
     if (!email) return;
@@ -743,10 +728,7 @@ function giveAdmin(email) {
 
 function removeAdmin(email) {
     email = (email || "").toLowerCase();
-    if (HARDCODED_ADMINS.includes(email)) {
-        alert("Cannot remove a hardcoded administrator.");
-        return;
-    }
+    if (HARDCODED_ADMINS.includes(email)) return;
     extraAdmins = extraAdmins.filter(e => e !== email);
     saveExtraAdmins();
     renderExtraAdminList();
@@ -760,30 +742,28 @@ function renderExtraAdminList() {
     const list = document.getElementById("extraAdminList");
     if (!list) return;
     list.innerHTML = "";
-    if (extraAdmins.length === 0) {
+    if (!extraAdmins.length) {
         list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No additional admins.</span>`;
         return;
     }
     extraAdmins.forEach(email => {
         const row = document.createElement("div");
         row.className = "banned-user";
-        const text = document.createElement("span");
-        text.textContent = email;
-        const button = document.createElement("button");
-        button.className = "small-btn btn-ban";
-        button.textContent = "Remove";
-        button.onclick = () => removeAdmin(email);
-        row.appendChild(text);
-        row.appendChild(button);
+        row.innerHTML = `<span>${escapeHtml(email)}</span>`;
+        const btn = document.createElement("button");
+        btn.className = "small-btn btn-ban";
+        btn.textContent = "Remove";
+        btn.onclick = () => removeAdmin(email);
+        row.appendChild(btn);
         list.appendChild(row);
     });
 }
 
-/* ---- Manual action helpers ---- */
+/* Manual helpers */
 function manualBan(temp) {
     if (!isAdmin()) return;
     const email = document.getElementById("actionEmail").value.trim();
-    if (!email) { alert("Enter an email"); return; }
+    if (!email) return alert("Enter an email");
     banEmail(email, temp ? 1 : null);
     alert(email + (temp ? " temp-banned for 1 hour." : " banned."));
 }
@@ -791,31 +771,21 @@ function manualBan(temp) {
 function manualMute(mute) {
     if (!isAdmin()) return;
     const email = document.getElementById("actionEmail").value.trim();
-    if (!email) { alert("Enter an email"); return; }
-    if (mute) {
-        muteEmail(email);
-        alert(email + " muted (chat privileges removed).");
-    } else {
-        unmuteEmail(email);
-        alert(email + " unmuted.");
-    }
+    if (!email) return alert("Enter an email");
+    if (mute) { muteEmail(email); alert(email + " muted."); }
+    else { unmuteEmail(email); alert(email + " unmuted."); }
 }
 
 function manualGiveAdmin(give) {
     if (!isAdmin()) return;
     const email = document.getElementById("actionEmail").value.trim();
-    if (!email) { alert("Enter an email"); return; }
-    if (give) {
-        giveAdmin(email);
-        alert(email + " is now an admin (on this browser).");
-    } else {
-        removeAdmin(email);
-        alert(email + " admin status removed.");
-    }
+    if (!email) return alert("Enter an email");
+    if (give) { giveAdmin(email); alert(email + " is now an admin."); }
+    else { removeAdmin(email); alert(email + " admin removed."); }
 }
 
 /* ============================================================
-   PRESENCE / ONLINE USERS
+   PRESENCE
    ============================================================ */
 const PRESENCE_TOPIC = "learnmultiply/v3/presence";
 const PRESENCE_TTL_MS = 90 * 1000;
@@ -827,16 +797,14 @@ function startPresence() {
 
     const publish = () => {
         if (!mqttClient || !mqttClient.connected || !currentUser) return;
-        const payload = {
+        mqttClient.publish(PRESENCE_TOPIC, JSON.stringify({
             clientId: mqttClient.options.clientId,
             name: document.getElementById("nickname").value.trim() || currentUser.name,
             email: currentUser.email,
             ip: myPublicIP,
             ts: Date.now()
-        };
-        mqttClient.publish(PRESENCE_TOPIC, JSON.stringify(payload), { qos: 0 });
+        }), { qos: 0 });
     };
-
     publish();
     presenceInterval = setInterval(publish, 25000);
 }
@@ -859,11 +827,9 @@ function handlePresenceMessage(data) {
     };
     const now = Date.now();
     Object.keys(onlineUsers).forEach(id => {
-        if (now - onlineUsers[id].lastSeen > PRESENCE_TTL_MS) {
-            delete onlineUsers[id];
-        }
+        if (now - onlineUsers[id].lastSeen > PRESENCE_TTL_MS) delete onlineUsers[id];
     });
-    if (document.getElementById("settingsModal").style.display === "flex") {
+    if (document.getElementById("settingsModal").style.display === "flex" && isAdmin()) {
         renderOnlineList();
     }
 }
@@ -879,26 +845,27 @@ function renderOnlineList() {
         .sort((a, b) => a.name.localeCompare(b.name));
 
     countEl.textContent = `(${users.length})`;
+    list.innerHTML = "";
 
-    if (users.length === 0) {
+    if (!users.length) {
         list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No active users detected.</span>`;
         return;
     }
 
-    list.innerHTML = "";
     users.forEach(u => {
         const row = document.createElement("div");
         row.className = "online-user";
 
+        const status = [];
+        if (getAdminTag(u.email)) status.push("ADMIN");
+        if (isBanned(u.email)) status.push("BANNED");
+        if (isMuted(u.email)) status.push("MUTED");
+
         const info = document.createElement("div");
         info.className = "info";
-        const statusBits = [];
-        if (getAdminTag(u.email)) statusBits.push("ADMIN");
-        if (isBanned(u.email)) statusBits.push("BANNED");
-        if (isMuted(u.email)) statusBits.push("MUTED");
         info.innerHTML = `
             <strong>${escapeHtml(u.name)}</strong>
-            ${statusBits.length ? `<span style="color:var(--accent);font-size:11px;"> [${statusBits.join(", ")}]</span>` : ""}<br>
+            ${status.length ? `<span style="color:var(--accent);font-size:11px;"> [${status.join(", ")}]</span>` : ""}<br>
             <span style="color:var(--muted)">${escapeHtml(u.email)}</span><br>
             <span style="font-family:monospace;font-size:12px">${escapeHtml(u.ip)}</span>
             <span style="color:var(--muted);font-size:11px"> · ${Math.round((now - u.lastSeen)/1000)}s ago</span>
@@ -911,19 +878,19 @@ function renderOnlineList() {
             const banBtn = document.createElement("button");
             banBtn.className = "small-btn btn-ban";
             banBtn.textContent = "Ban";
-            banBtn.onclick = () => { banEmail(u.email); alert(u.email + " banned."); };
+            banBtn.onclick = () => { banEmail(u.email); alert("Banned"); };
 
             const tempBtn = document.createElement("button");
             tempBtn.className = "small-btn btn-temp";
             tempBtn.textContent = "Temp 1h";
-            tempBtn.onclick = () => { banEmail(u.email, 1); alert(u.email + " temp-banned 1h."); };
+            tempBtn.onclick = () => { banEmail(u.email, 1); alert("Temp banned"); };
 
             const muteBtn = document.createElement("button");
             muteBtn.className = "small-btn btn-mute";
             muteBtn.textContent = isMuted(u.email) ? "Unmute" : "Mute";
             muteBtn.onclick = () => {
-                if (isMuted(u.email)) { unmuteEmail(u.email); alert("Unmuted"); }
-                else { muteEmail(u.email); alert("Muted"); }
+                if (isMuted(u.email)) unmuteEmail(u.email);
+                else muteEmail(u.email);
                 renderOnlineList();
             };
 
@@ -931,37 +898,33 @@ function renderOnlineList() {
             adminBtn.className = "small-btn btn-admin";
             adminBtn.textContent = getAdminTag(u.email) ? "Remove Admin" : "Make Admin";
             adminBtn.onclick = () => {
-                if (getAdminTag(u.email)) { removeAdmin(u.email); alert("Admin removed"); }
-                else { giveAdmin(u.email); alert("Admin granted"); }
+                if (getAdminTag(u.email)) removeAdmin(u.email);
+                else giveAdmin(u.email);
                 renderOnlineList();
             };
 
-            actions.appendChild(banBtn);
-            actions.appendChild(tempBtn);
-            actions.appendChild(muteBtn);
-            actions.appendChild(adminBtn);
+            actions.append(banBtn, tempBtn, muteBtn, adminBtn);
         }
 
         const copyBtn = document.createElement("button");
         copyBtn.className = "small-btn btn-copy";
         copyBtn.textContent = "Copy";
         copyBtn.onclick = () => {
-            const text = `Name: ${u.name}\nEmail: ${u.email}\nIP: ${u.ip}\nLast seen: ${new Date(u.lastSeen).toLocaleString()}`;
+            const text = `Name: ${u.name}\nEmail: ${u.email}\nIP: ${u.ip}`;
             navigator.clipboard.writeText(text).then(() => alert("Copied")).catch(() => prompt("Copy:", text));
         };
         actions.appendChild(copyBtn);
 
-        row.appendChild(info);
-        row.appendChild(actions);
+        row.append(info, actions);
         list.appendChild(row);
     });
 }
 
-/* ---- Chat Monitor ---- */
+/* Chat Monitor */
 function addToChatMonitor(author, email, text, time) {
-    chatMonitorLog.unshift({ author, email, text, time, ts: Date.now() });
+    chatMonitorLog.unshift({ author, email, text, time });
     if (chatMonitorLog.length > 40) chatMonitorLog.pop();
-    if (document.getElementById("settingsModal").style.display === "flex") {
+    if (document.getElementById("settingsModal").style.display === "flex" && isAdmin()) {
         renderChatMonitor();
     }
 }
@@ -969,7 +932,7 @@ function addToChatMonitor(author, email, text, time) {
 function renderChatMonitor() {
     const box = document.getElementById("chatMonitor");
     if (!box) return;
-    if (chatMonitorLog.length === 0) {
+    if (!chatMonitorLog.length) {
         box.innerHTML = `<div style="color:var(--muted);">No messages captured yet.</div>`;
         return;
     }
@@ -982,7 +945,7 @@ function renderChatMonitor() {
 }
 
 /* ============================================================
-   CHAT (MQTT)
+   CHAT
    ============================================================ */
 const MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
 const TOPIC_PREFIX = "learnmultiply/v3/";
@@ -990,20 +953,13 @@ const DISCOVERY_TOPIC = TOPIC_PREFIX + "rooms";
 
 let mqttClient = null;
 let currentRoom = "general";
-let rooms = {
-    general: { name: "🌐 General Lounge", locked: false, password: "" }
-};
+let rooms = { general: { name: "🌐 General Lounge", locked: false, password: "" } };
 let messages = { general: [] };
 
 function initChat() {
     if (mqttClient) return;
-
     const clientId = "learnmultiply_" + Math.random().toString(16).slice(2);
-    mqttClient = mqtt.connect(MQTT_BROKER, {
-        clientId,
-        clean: true,
-        keepalive: 60
-    });
+    mqttClient = mqtt.connect(MQTT_BROKER, { clientId, clean: true, keepalive: 60 });
 
     mqttClient.on("connect", () => {
         document.getElementById("status").textContent = "● Connected to Live Server";
@@ -1021,54 +977,33 @@ function initChat() {
     mqttClient.on("message", (topic, payload) => {
         try {
             const data = JSON.parse(payload.toString());
-
             if (topic === PRESENCE_TOPIC) {
                 handlePresenceMessage(data);
                 return;
             }
-
             if (topic === DISCOVERY_TOPIC) {
                 if (!rooms[data.key]) {
-                    rooms[data.key] = {
-                        name: data.name,
-                        locked: !!data.locked,
-                        password: ""
-                    };
+                    rooms[data.key] = { name: data.name, locked: !!data.locked, password: "" };
                     messages[data.key] = [];
                     renderChannels();
                 }
             } else if (topic.startsWith(TOPIC_PREFIX + "chat/")) {
                 const key = topic.replace(TOPIC_PREFIX + "chat/", "");
                 if (!messages[key]) messages[key] = [];
-
                 let text = data.text || "";
                 if (data.encrypted) {
-                    const password = rooms[key]?.password || "";
                     try {
-                        const bytes = CryptoJS.AES.decrypt(text, password);
-                        const decoded = bytes.toString(CryptoJS.enc.Utf8);
-                        text = decoded || "🔒 Encrypted message";
+                        const bytes = CryptoJS.AES.decrypt(text, rooms[key]?.password || "");
+                        text = bytes.toString(CryptoJS.enc.Utf8) || "🔒 Encrypted message";
                     } catch {
-                        text = "🔒 Unable to decrypt message";
+                        text = "🔒 Unable to decrypt";
                     }
                 }
-
-                const msgObj = {
-                    author: data.author,
-                    email: data.email,
-                    text,
-                    time: data.time
-                };
-                messages[key].push(msgObj);
-
-                // feed monitor
+                messages[key].push({ author: data.author, email: data.email, text, time: data.time });
                 addToChatMonitor(data.author, data.email, text, data.time);
-
                 if (key === currentRoom) renderMessages();
             }
-        } catch (error) {
-            console.error(error);
-        }
+        } catch (e) { console.error(e); }
     });
 
     renderChannels();
@@ -1078,16 +1013,9 @@ function initChat() {
 function sendMessage(event) {
     event.preventDefault();
     if (!currentUser) return;
-
-    if (isBanned(currentUser.email)) {
-        alert("Your account is banned.");
-        return;
-    }
-    if (isMuted(currentUser.email)) {
-        alert("You have been muted and cannot send messages.");
-        return;
-    }
-    if (!mqttClient) { alert("Chat is not connected."); return; }
+    if (isBanned(currentUser.email)) return alert("Your account is banned.");
+    if (isMuted(currentUser.email)) return alert("You are muted and cannot chat.");
+    if (!mqttClient) return alert("Chat is not connected.");
 
     const input = document.getElementById("messageInput");
     const text = input.value.trim();
@@ -1095,7 +1023,6 @@ function sendMessage(event) {
 
     const room = rooms[currentRoom];
     const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
     let outgoingText = text;
     let encrypted = false;
     if (room.locked && room.password) {
@@ -1103,15 +1030,13 @@ function sendMessage(event) {
         encrypted = true;
     }
 
-    const packet = {
+    mqttClient.publish(TOPIC_PREFIX + "chat/" + currentRoom, JSON.stringify({
         author: document.getElementById("nickname").value.trim() || currentUser.name,
         email: currentUser.email,
         text: outgoingText,
         encrypted,
         time: now
-    };
-
-    mqttClient.publish(TOPIC_PREFIX + "chat/" + currentRoom, JSON.stringify(packet));
+    }));
     input.value = "";
 }
 
@@ -1125,34 +1050,26 @@ function renderMessages() {
     }
     list.forEach(message => {
         const wrapper = document.createElement("div");
-        wrapper.className = "message";
-        if (currentUser && message.email === currentUser.email) wrapper.classList.add("self");
-
+        wrapper.className = "message" + (currentUser && message.email === currentUser.email ? " self" : "");
         const meta = document.createElement("div");
         meta.className = "message-meta";
-
         const author = document.createElement("span");
         author.className = "author";
         author.textContent = message.author || "Student";
         meta.appendChild(author);
-
         if (getAdminTag(message.email)) {
             const tag = document.createElement("span");
             tag.className = "admin-tag";
             tag.textContent = "ADMIN";
             meta.appendChild(tag);
         }
-
         const time = document.createElement("span");
         time.textContent = "• " + (message.time || "");
         meta.appendChild(time);
-
         const body = document.createElement("div");
         body.className = "message-body";
         body.textContent = message.text || "";
-
-        wrapper.appendChild(meta);
-        wrapper.appendChild(body);
+        wrapper.append(meta, body);
         container.appendChild(wrapper);
     });
     container.scrollTop = container.scrollHeight;
@@ -1164,8 +1081,7 @@ function renderChannels() {
     Object.entries(rooms).forEach(([key, room]) => {
         const li = document.createElement("li");
         const button = document.createElement("button");
-        button.className = "channel";
-        if (key === currentRoom) button.classList.add("active");
+        button.className = "channel" + (key === currentRoom ? " active" : "");
         button.textContent = room.name + (room.locked ? " 🔒" : "");
         button.onclick = () => selectRoom(key);
         li.appendChild(button);
@@ -1189,27 +1105,20 @@ function selectRoom(key) {
 }
 
 /* ============================================================
-   GROUPS
+   GROUPS / GAMES / TABS (unchanged core)
    ============================================================ */
-function openCreateGroup() {
-    document.getElementById("groupModal").style.display = "flex";
-}
-function closeCreateGroup() {
-    document.getElementById("groupModal").style.display = "none";
-}
+function openCreateGroup() { document.getElementById("groupModal").style.display = "flex"; }
+function closeCreateGroup() { document.getElementById("groupModal").style.display = "none"; }
 function createGroup() {
     const name = document.getElementById("groupName").value.trim();
     const password = document.getElementById("groupPassword").value.trim();
-    if (!name) { alert("Enter a group name."); return; }
-
+    if (!name) return alert("Enter a group name.");
     const key = "group_" + Date.now().toString(36);
     rooms[key] = { name, locked: !!password, password };
     messages[key] = [];
-
     if (mqttClient) {
         mqttClient.publish(DISCOVERY_TOPIC, JSON.stringify({ key, name, locked: !!password }), { retain: true });
     }
-
     currentRoom = key;
     document.getElementById("currentRoom").textContent = name;
     renderChannels();
@@ -1219,46 +1128,13 @@ function createGroup() {
     closeCreateGroup();
 }
 
-/* ============================================================
-   GAMES
-   ============================================================ */
 const games = [
-    {
-        title: "Super Mario 64",
-        category: "Adventure",
-        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Super+Mario+64",
-        url: "sm64/index.html"
-    },
-    {
-        title: "Craft",
-        category: "Adventure",
-        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Craft",
-        url: "craft.html"
-    },
-    {
-        title: "Dash",
-        category: "Arcade",
-        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Dash",
-        url: "games/dash.html"
-    },
-    {
-        title: "Gulper.io",
-        category: "Arcade",
-        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Gulper.io",
-        url: "https://gulper.io/"
-    },
-    {
-        title: "Flappy Bird",
-        category: "Classic",
-        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Flappy+Bird",
-        url: "games/flappy.html"
-    },
-    {
-        title: "Tetris",
-        category: "Arcade",
-        image: "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris",
-        url: "games/tetris.html"
-    }
+    { title: "Super Mario 64", category: "Adventure", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Super+Mario+64", url: "sm64/index.html" },
+    { title: "Craft", category: "Adventure", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Craft", url: "craft.html" },
+    { title: "Dash", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Dash", url: "games/dash.html" },
+    { title: "Gulper.io", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Gulper.io", url: "https://gulper.io/" },
+    { title: "Flappy Bird", category: "Classic", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Flappy+Bird", url: "games/flappy.html" },
+    { title: "Tetris", category: "Arcade", image: "https://placehold.co/400x250/1e293b/38bdf8?text=Tetris", url: "games/tetris.html" }
 ];
 
 let currentTab = "Games";
@@ -1267,25 +1143,20 @@ let category = "All";
 function renderGames() {
     const grid = document.getElementById("gameGrid");
     const search = document.getElementById("searchInput").value.toLowerCase();
-    const filtered = games.filter(game => {
-        const categoryMatch = category === "All" || game.category === category;
-        const searchMatch = game.title.toLowerCase().includes(search);
-        return categoryMatch && searchMatch;
-    });
-
+    const filtered = games.filter(g =>
+        (category === "All" || g.category === category) &&
+        g.title.toLowerCase().includes(search)
+    );
     grid.innerHTML = "";
     filtered.forEach(game => {
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
-            <div class="card-image">
-                <img src="${game.image}" alt="">
-            </div>
+            <div class="card-image"><img src="${game.image}" alt=""></div>
             <div class="card-content">
                 <div class="card-title">${escapeHtml(game.title)}</div>
                 <span class="card-category">${escapeHtml(game.category)}</span>
-            </div>
-        `;
+            </div>`;
         card.onclick = () => openGame(game);
         grid.appendChild(card);
     });
@@ -1304,9 +1175,6 @@ function closePlayer() {
     document.getElementById("playerFrame").src = "";
 }
 
-/* ============================================================
-   TABS
-   ============================================================ */
 function switchMainTab(tab) {
     currentTab = tab;
     document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
@@ -1329,14 +1197,7 @@ function switchMainTab(tab) {
         chat.style.display = "none";
         document.getElementById("heroTitle").textContent = "Educational & Gaming Video Media";
         document.getElementById("heroSubtitle").textContent = "Video content can be added through your secure backend.";
-        grid.innerHTML = `
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title">Video system ready</div>
-                    <p style="color:var(--muted);font-size:13px;">coming soon.</p>
-                </div>
-            </div>
-        `;
+        grid.innerHTML = `<div class="card"><div class="card-content"><div class="card-title">Video system ready</div><p style="color:var(--muted);font-size:13px;">coming soon.</p></div></div>`;
     } else if (tab === "Chat") {
         grid.style.display = "none";
         categories.style.display = "none";
@@ -1347,9 +1208,6 @@ function switchMainTab(tab) {
     }
 }
 
-/* ============================================================
-   SAFETY
-   ============================================================ */
 function escapeHtml(value) {
     return String(value)
         .replaceAll("&", "&amp;")
@@ -1359,11 +1217,7 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
-/* ============================================================
-   EVENTS
-   ============================================================ */
 document.getElementById("searchInput").addEventListener("input", renderGames);
-
 document.querySelectorAll(".cat-btn").forEach(button => {
     button.addEventListener("click", () => {
         document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
@@ -1373,9 +1227,6 @@ document.querySelectorAll(".cat-btn").forEach(button => {
     });
 });
 
-/* ============================================================
-   STARTUP
-   ============================================================ */
 checkExistingLogin();
 renderGames();
 </script>
