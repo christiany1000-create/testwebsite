@@ -34,6 +34,11 @@ body {
 }
 body.locked { overflow: hidden; }
 
+/* Smooth transitions */
+button, .card, .nav-tab, .cat-btn, .channel, .settings-btn, .create-btn, .send-btn {
+    transition: all 0.22s ease;
+}
+
 /* AUTH */
 .auth-gate {
     position: fixed; inset: 0; z-index: 99999;
@@ -42,8 +47,9 @@ body.locked { overflow: hidden; }
 }
 .auth-card {
     width: 100%; max-width: 420px; padding: 40px 32px;
-    background: white; border-radius: 12px;
-    text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    background: white; border-radius: 14px;
+    text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,.3);
+    animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .logo { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 700; }
 .logo-x { color: var(--primary); font-size: 28px; }
@@ -57,9 +63,9 @@ body.locked { overflow: hidden; }
 header {
     position: sticky; top: 0; z-index: 100;
     display: flex; justify-content: space-between; align-items: center; gap: 20px;
-    padding: 0 28px; height: 60px;
+    padding: 0 28px; height: 62px;
     background: var(--header-bg); color: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    box-shadow: 0 2px 10px rgba(0,0,0,.15);
 }
 .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
 header .logo { color: white; }
@@ -72,16 +78,16 @@ header .logo-x { color: #93c5fd; }
 }
 .top-nav { display: flex; gap: 2px; }
 .nav-tab {
-    padding: 8px 16px; border-radius: 6px; border: 0;
+    padding: 8px 16px; border-radius: 7px; border: 0;
     background: transparent; color: #94a3b8;
     font-weight: 600; font-size: 14px; cursor: pointer;
 }
-.nav-tab:hover { color: white; background: rgba(255,255,255,.08); }
-.nav-tab.active { background: rgba(255,255,255,.15); color: white; }
+.nav-tab:hover { color: white; background: rgba(255,255,255,.1); }
+.nav-tab.active { background: rgba(255,255,255,.18); color: white; }
 .search {
     width: 200px; padding: 8px 12px;
     background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    border-radius: 6px; color: white; outline: none; font-size: 14px;
+    border-radius: 7px; color: white; outline: none; font-size: 14px;
 }
 .search::placeholder { color: #94a3b8; }
 .user-profile {
@@ -89,45 +95,67 @@ header .logo-x { color: #93c5fd; }
     padding: 4px 10px 4px 4px; border-radius: 20px;
     background: rgba(255,255,255,.1);
 }
-.user-profile img { width: 28px; height: 28px; border-radius: 50%; }
+.user-profile img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
 .user-name { max-width: 110px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; font-weight: 600; color: white; }
 .logout { color: #fca5a5; background: transparent; border: 0; cursor: pointer; font-size: 14px; }
 .settings-btn {
     padding: 8px 14px; background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.15); border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.15); border-radius: 7px;
     color: white; font-weight: 600; font-size: 13px; cursor: pointer;
 }
-.settings-btn:hover { background: rgba(255,255,255,.18); }
+.settings-btn:hover { background: rgba(255,255,255,.2); transform: translateY(-1px); }
 
 /* MAIN */
 .container { max-width: 1100px; margin: auto; padding: 32px 24px; }
 .hero {
     text-align: left; padding: 28px 32px; margin-bottom: 28px;
-    background: white; border: 1px solid var(--border); border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    animation: slideUp 0.45s ease;
 }
 .hero h1 { font-size: 26px; margin-bottom: 6px; color: #0f172a; font-weight: 700; }
 .hero p { color: var(--muted); font-size: 15px; }
 .categories { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
 .cat-btn {
-    padding: 7px 16px; color: var(--muted); background: white;
-    border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 18px; color: var(--muted); background: white;
+    border: 1px solid var(--border); border-radius: 8px;
     font-weight: 600; font-size: 13px; cursor: pointer;
 }
-.cat-btn:hover { border-color: var(--primary-light); color: var(--primary); }
-.cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.cat-btn:hover { border-color: var(--primary-light); color: var(--primary); transform: translateY(-1px); }
+.cat-btn.active {
+    background: var(--primary); color: white; border-color: var(--primary);
+    box-shadow: 0 3px 12px rgba(30,64,175,.25);
+}
 .grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 20px; }
 .card {
-    background: white; border: 1px solid var(--border); border-radius: 10px;
-    overflow: hidden; cursor: pointer; transition: box-shadow .15s, border-color .15s;
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; cursor: pointer;
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.2s ease;
+    animation: cardIn 0.4s ease backwards;
 }
-.card:hover { border-color: #93c5fd; box-shadow: 0 4px 12px rgba(30,64,175,.08); }
-.card-image { height: 140px; background: #e2e8f0; }
-.card-image img { width: 100%; height: 100%; object-fit: cover; }
-.card-content { padding: 14px 16px; }
+.card:nth-child(1) { animation-delay: 0.04s; }
+.card:nth-child(2) { animation-delay: 0.08s; }
+.card:nth-child(3) { animation-delay: 0.12s; }
+.card:nth-child(4) { animation-delay: 0.16s; }
+.card:nth-child(5) { animation-delay: 0.20s; }
+.card:nth-child(6) { animation-delay: 0.24s; }
+.card:nth-child(7) { animation-delay: 0.28s; }
+.card:nth-child(8) { animation-delay: 0.32s; }
+.card:hover {
+    transform: translateY(-7px);
+    border-color: #93c5fd;
+    box-shadow: 0 14px 30px rgba(30,64,175,.13);
+}
+.card-image { height: 150px; background: #e2e8f0; overflow: hidden; }
+.card-image img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.45s ease;
+}
+.card:hover .card-image img { transform: scale(1.07); }
+.card-content { padding: 15px 16px; }
 .card-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #0f172a; }
 .card-category {
-    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    display: inline-block; padding: 2px 9px; border-radius: 4px;
     color: var(--primary); background: var(--primary-soft);
     font-size: 11px; font-weight: 700;
 }
@@ -135,8 +163,9 @@ header .logo-x { color: #93c5fd; }
 /* CHAT */
 .chat-wrapper {
     display: none; grid-template-columns: 240px 1fr; height: 640px; overflow: hidden;
-    background: white; border: 1px solid var(--border); border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    animation: slideUp 0.35s ease;
 }
 .chat-sidebar {
     display: flex; flex-direction: column; background: #f8fafc;
@@ -148,16 +177,17 @@ header .logo-x { color: #93c5fd; }
 }
 .sidebar-title { color: var(--primary); font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
 .create-btn {
-    padding: 5px 10px; background: var(--primary); color: white;
-    border-radius: 5px; font-size: 12px; font-weight: 600; border: 0; cursor: pointer;
+    padding: 5px 11px; background: var(--primary); color: white;
+    border-radius: 6px; font-size: 12px; font-weight: 600; border: 0; cursor: pointer;
 }
+.create-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 .channel-list { list-style: none; padding: 10px; overflow-y: auto; flex: 1; }
 .channel {
     width: 100%; padding: 10px 12px; margin-bottom: 2px; text-align: left;
-    color: var(--muted); background: transparent; border: 0; border-radius: 6px;
+    color: var(--muted); background: transparent; border: 0; border-radius: 7px;
     cursor: pointer; font-size: 14px; font-weight: 500;
 }
-.channel:hover { background: #e2e8f0; color: var(--text); }
+.channel:hover { background: #e2e8f0; color: var(--text); transform: translateX(3px); }
 .channel.active { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
 .nickname-box { padding: 14px; border-top: 1px solid var(--border); }
 .nickname-box label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 5px; font-weight: 600; }
@@ -172,7 +202,7 @@ header .logo-x { color: #93c5fd; }
 }
 .status { color: var(--success); font-size: 12px; font-weight: 600; }
 .messages { flex: 1; padding: 18px; overflow-y: auto; background: var(--chat-bg); }
-.message { margin-bottom: 14px; max-width: 80%; }
+.message { margin-bottom: 14px; max-width: 80%; animation: messageIn 0.3s ease; }
 .message.self { margin-left: auto; text-align: right; }
 .message-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; color: var(--muted); font-size: 12px; }
 .message.self .message-meta { justify-content: flex-end; }
@@ -193,37 +223,40 @@ header .logo-x { color: #93c5fd; }
 }
 .chat-input input {
     flex: 1; padding: 10px 12px; color: var(--text); background: #f8fafc;
-    border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 7px; outline: none; font-size: 14px;
 }
 .send-btn {
     padding: 0 18px; background: var(--primary); color: white;
-    border-radius: 6px; font-weight: 600; border: 0; cursor: pointer;
+    border-radius: 7px; font-weight: 600; border: 0; cursor: pointer;
 }
+.send-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
 /* MODALS */
 .modal {
     display: none; position: fixed; inset: 0; z-index: 5000;
     justify-content: center; align-items: center; padding: 20px;
     background: rgba(15,23,42,.55);
+    animation: fadeIn 0.25s ease;
 }
 .modal-box {
     width: 100%; max-width: 600px; padding: 28px; background: white;
-    border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 20px 50px rgba(0,0,0,.15); max-height: 90vh; overflow-y: auto;
+    border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.18); max-height: 90vh; overflow-y: auto;
+    animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .modal-box h3 { margin-bottom: 16px; font-size: 18px; color: #0f172a; }
 .modal-input {
     width: 100%; padding: 10px 12px; margin-bottom: 10px; color: var(--text);
-    background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; outline: none;
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 7px; outline: none;
 }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .close-btn {
     padding: 9px 16px; color: white; background: var(--danger);
-    border-radius: 6px; border: 0; font-weight: 600; cursor: pointer;
+    border-radius: 7px; border: 0; font-weight: 600; cursor: pointer;
 }
 .admin-btn {
     padding: 9px 16px; color: white; background: var(--primary);
-    border-radius: 6px; border: 0; font-weight: 600; cursor: pointer;
+    border-radius: 7px; border: 0; font-weight: 600; cursor: pointer;
 }
 
 /* ADMIN PANEL (hidden unless admin) */
@@ -240,14 +273,15 @@ header .logo-x { color: #93c5fd; }
 .banned-user, .online-user {
     display: flex; justify-content: space-between; align-items: center; gap: 8px;
     padding: 10px 12px; background: #f8fafc; border: 1px solid var(--border);
-    border-radius: 6px; font-size: 13px; flex-wrap: wrap;
+    border-radius: 7px; font-size: 13px; flex-wrap: wrap;
 }
 .online-user .info { flex: 1; min-width: 170px; }
 .online-user .actions { display: flex; gap: 5px; flex-wrap: wrap; }
 .small-btn {
-    padding: 4px 9px; font-size: 11px; border-radius: 4px; border: 0;
-    cursor: pointer; font-weight: 600;
+    padding: 4px 9px; font-size: 11px; border-radius: 5px; border: 0;
+    cursor: pointer; font-weight: 600; transition: all 0.15s ease;
 }
+.small-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
 .btn-ban { background: var(--danger); color: white; }
 .btn-temp { background: #c2410c; color: white; }
 .btn-mute { background: #6d28d9; color: white; }
@@ -256,11 +290,11 @@ header .logo-x { color: #93c5fd; }
 .btn-unban { background: var(--success); color: white; }
 .warning-box {
     background: #fef2f2; border: 1px solid #fecaca;
-    padding: 10px 12px; border-radius: 6px; font-size: 12px; color: #991b1b; margin-bottom: 14px;
+    padding: 10px 12px; border-radius: 7px; font-size: 12px; color: #991b1b; margin-bottom: 14px;
 }
 .monitor-box {
     max-height: 200px; overflow-y: auto; background: #f8fafc;
-    border: 1px solid var(--border); border-radius: 6px; padding: 10px;
+    border: 1px solid var(--border); border-radius: 7px; padding: 10px;
     font-size: 12px; line-height: 1.45;
 }
 .monitor-line { margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
@@ -273,6 +307,25 @@ header .logo-x { color: #93c5fd; }
     padding: 12px 18px; background: #1e293b; color: white;
 }
 .player iframe { width: 100%; height: 100%; border: 0; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.93) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(22px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes messageIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 @media(max-width:900px) {
     header { flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 10px; }
@@ -340,9 +393,9 @@ header .logo-x { color: #93c5fd; }
 
     <div class="categories" id="categories">
         <button class="cat-btn active" data-category="All">All Modules</button>
-        <button class="cat-btn" data-category="Adventure">Adventure</button>
-        <button class="cat-btn" data-category="Arcade">Arcade</button>
         <button class="cat-btn" data-category="Classic">Classic</button>
+        <button class="cat-btn" data-category="Arcade">Arcade</button>
+        <button class="cat-btn" data-category="Adventure">Adventure</button>
     </div>
 
     <div class="grid" id="gameGrid"></div>
@@ -376,7 +429,7 @@ header .logo-x { color: #93c5fd; }
     </section>
 </main>
 
-<!-- SETTINGS (admin panel hidden inside, only for admins) -->
+<!-- SETTINGS (admin panel hidden inside) -->
 <div class="modal" id="settingsModal">
     <div class="modal-box">
         <h3>Account Settings</h3>
@@ -387,7 +440,7 @@ header .logo-x { color: #93c5fd; }
             </p>
         </div>
 
-        <!-- ADMIN PANEL – only shown when isAdmin() is true -->
+        <!-- ADMIN PANEL – only visible to admins -->
         <div id="adminSettings" class="admin-panel">
             <div class="warning-box">
                 <strong>Administrator Tools</strong> — Visible only to authorized staff. Actions are stored locally in this browser (prototype).
@@ -609,7 +662,7 @@ function isAdmin() {
     return !!(currentUser && getAllAdmins().includes(currentUser.email.toLowerCase()));
 }
 function getAdminTag(email) {
-    return getAllAdmins().includes(String(email).toLowerCase()) ? "ADMIN" : "";
+    return getAllAdmins().includes(String(email).toLowerCase()) ? "STAFF" : "";
 }
 
 function openSettings() {
@@ -830,7 +883,7 @@ function renderOnlineList() {
         const row = document.createElement("div");
         row.className = "online-user";
         const status = [];
-        if (getAdminTag(u.email)) status.push("ADMIN");
+        if (getAdminTag(u.email)) status.push("STAFF");
         if (isBanned(u.email)) status.push("BANNED");
         if (isMuted(u.email)) status.push("MUTED");
         const info = document.createElement("div");
@@ -1061,43 +1114,18 @@ function createGroup() {
 }
 
 const games = [
-    {
-        title: "Super Mario 64",
-        category: "Adventure",
-        image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Super+Mario+64",
-        url: "sm64/index.html"
-    },
-    {
-        title: "Craft",
-        category: "Adventure",
-        image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Craft",
-        url: "craft.html"
-    },
-    {
-        title: "Dash",
-        category: "Arcade",
-        image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Dash",
-        url: "games/dash.html"
-    },
-    {
-        title: "Gulper.io",
-        category: "Arcade",
-        image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Gulper.io",
-        url: "https://gulper.io/"
-    },
-    {
-        title: "Flappy Bird",
-        category: "Classic",
-        image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Flappy+Bird",
-        url: "games/flappy.html"
-    },
-    {
-        title: "Tetris",
-        category: "Arcade",
-        image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Tetris",
-        url: "games/tetris.html"
-    },
-
+    { title: "Snake", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Snake", url: "games/snake.html" },
+    { title: "Pong", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Pong", url: "games/pong.html" },
+    { title: "Breakout", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Breakout", url: "games/breakout.html" },
+    { title: "Memory Match", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Memory+Match", url: "games/memory.html" },
+    { title: "Tic Tac Toe", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Tic+Tac+Toe", url: "games/tictactoe.html" },
+    { title: "2048", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=2048", url: "games/2048.html" },
+    { title: "Flappy Bird", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Flappy+Bird", url: "games/flappy.html" },
+    { title: "Tetris", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Tetris", url: "games/tetris.html" },
+    { title: "Reaction Test", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Reaction+Test", url: "games/reaction.html" },
+    { title: "Math Challenge", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Math+Challenge", url: "games/math.html" },
+    { title: "Dash", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Dash", url: "games/dash.html" },
+    { title: "Craft", category: "Adventure", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Craft", url: "craft.html" }
 ];
 
 let currentTab = "Games";
