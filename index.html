@@ -63,10 +63,16 @@
             gap: 0.5rem;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
         .search-container {
             position: relative;
             width: 100%;
-            max-width: 320px;
+            max-width: 280px;
         }
 
         .search-bar {
@@ -95,6 +101,25 @@
             color: var(--text-muted);
             pointer-events: none;
             font-size: 0.9rem;
+        }
+
+        .admin-btn {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.65rem 1.2rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .admin-btn:hover {
+            border-color: var(--primary);
+            background-color: rgba(6, 182, 212, 0.1);
+            transform: translateY(-1px);
         }
 
         /* Main Layout */
@@ -275,6 +300,82 @@
             border: none;
         }
 
+        /* Numpad Modal Specifics */
+        .numpad-modal-container {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .numpad-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1.2rem;
+            padding: 2rem;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .numpad-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .pin-display {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            padding: 0.8rem 1rem;
+            border-radius: 0.8rem;
+            margin-bottom: 1.2rem;
+            width: 100%;
+            text-align: center;
+            color: var(--primary);
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .numpad-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 0.9rem 0;
+            border-radius: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .numpad-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            transform: scale(1.03);
+        }
+
         /* Animations */
         @keyframes slideDown {
             from { transform: translateY(-100%); opacity: 0; }
@@ -298,8 +399,15 @@
                 gap: 1rem;
                 padding: 1rem;
             }
+            .header-right {
+                width: 100%;
+                flex-direction: column;
+            }
             .search-container {
                 max-width: 100%;
+            }
+            .admin-btn {
+                width: 100%;
             }
             .hero h1 {
                 font-size: 2.2rem;
@@ -311,9 +419,12 @@
 
     <header>
         <a href="#" class="logo">⚡ LearnMultiply</a>
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search games or videos...">
+        <div class="header-right">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-bar" placeholder="Search games or videos...">
+            </div>
+            <button class="admin-btn" onclick="openAdminModal()">Admin Code</button>
         </div>
     </header>
 
@@ -345,6 +456,29 @@
         </div>
         <div class="iframe-container">
             <iframe id="gameIframe" src="" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="pointer-lock; fullscreen; autoplay; keyboard-map; clipboard-read; clipboard-write"></iframe>
+        </div>
+    </div>
+
+    <!-- Admin Numpad Modal -->
+    <div class="numpad-modal-container" id="adminModal">
+        <div class="numpad-box">
+            <div class="numpad-title">Enter Admin Code</div>
+            <div id="pinDisplay" class="pin-display">_ _ _ _ _ _</div>
+            <div class="numpad-grid">
+                <button class="numpad-btn" onclick="pressKey('1')">1</button>
+                <button class="numpad-btn" onclick="pressKey('2')">2</button>
+                <button class="numpad-btn" onclick="pressKey('3')">3</button>
+                <button class="numpad-btn" onclick="pressKey('4')">4</button>
+                <button class="numpad-btn" onclick="pressKey('5')">5</button>
+                <button class="numpad-btn" onclick="pressKey('6')">6</button>
+                <button class="numpad-btn" onclick="pressKey('7')">7</button>
+                <button class="numpad-btn" onclick="pressKey('8')">8</button>
+                <button class="numpad-btn" onclick="pressKey('9')">9</button>
+                <button class="numpad-btn" onclick="clearPin()">C</button>
+                <button class="numpad-btn" onclick="pressKey('0')">0</button>
+                <button class="numpad-btn" onclick="submitPin()">↵</button>
+            </div>
+            <button class="close-btn" onclick="closeAdminModal()" style="width: 100%; padding: 0.7rem;">Cancel</button>
         </div>
     </div>
 
@@ -400,6 +534,7 @@
         let youtubeVideos = [];
         let currentCategory = 'All';
         let searchTimeout = null;
+        let enteredPin = "";
 
         const grid = document.getElementById('gameGrid');
         const searchInput = document.getElementById('searchInput');
@@ -407,6 +542,56 @@
         const iframe = document.getElementById('gameIframe');
         const modalTitle = document.getElementById('modalTitle');
         const categoryButtons = document.querySelectorAll('.cat-btn');
+        const adminModal = document.getElementById('adminModal');
+        const pinDisplay = document.getElementById('pinDisplay');
+
+        // Admin Numpad Functions
+        function openAdminModal() {
+            adminModal.style.display = 'flex';
+            enteredPin = "";
+            updatePinDisplay();
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAdminModal() {
+            adminModal.style.display = 'none';
+            enteredPin = "";
+            document.body.style.overflow = 'auto';
+        }
+
+        function pressKey(digit) {
+            if (enteredPin.length < 6) {
+                enteredPin += digit;
+                updatePinDisplay();
+            }
+        }
+
+        function clearPin() {
+            enteredPin = "";
+            updatePinDisplay();
+        }
+
+        function updatePinDisplay() {
+            if (enteredPin.length === 0) {
+                pinDisplay.textContent = "_ _ _ _ _ _";
+            } else {
+                let displayStr = "";
+                for (let i = 0; i < 6; i++) {
+                    displayStr += (i < enteredPin.length ? "• " : "_ ");
+                }
+                pinDisplay.textContent = displayStr.trim();
+            }
+        }
+
+        function submitPin() {
+            if (enteredPin === "370018") {
+                alert("This Website is by Christian");
+                closeAdminModal();
+            } else {
+                alert("Incorrect Code");
+                clearPin();
+            }
+        }
 
         async function fetchYouTubeVideos(query = "gaming highlights") {
             try {
