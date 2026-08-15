@@ -34,7 +34,7 @@
         .video-player { 
             width: 100%; height: 100%; 
             border: none; 
-            pointer-events: none; /* Allows gestures to pass through for smooth scrolling */
+            pointer-events: none; /* Allows gestures and sidebar scrolling to pass through */
             position: absolute; top: 0; left: 0; z-index: 1;
         }
 
@@ -279,6 +279,10 @@
         const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'];
         const SCOPES = 'https://www.googleapis.com/auth/youtube.force-ssl';
 
+        // Infinite query rotation list so content never permanently ends
+        const searchQueries = ['#shorts', 'gaming shorts', 'viral shorts', 'trending shorts', 'funny shorts', 'minecraft shorts'];
+        let queryIndex = 0;
+
         let tokenClient;
         let isAuthenticated = false;
         let activeVideoId = null;
@@ -297,7 +301,7 @@
             });
         }
 
-        // Initialize Google Identity Services
+        // Initialize Google Identity Services with Persistent Login Check
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
@@ -305,21 +309,21 @@
                 callback: (tokenResponse) => {
                     if (tokenResponse && tokenResponse.access_token) {
                         isAuthenticated = true;
-                        document.getElementById('auth-btn').innerText = 'Sign Out';
-                        document.getElementById('auth-btn').onclick = handleSignoutClick;
-                        document.getElementById('auth-status-dot').classList.add('signed-in');
-                        
-                        nextPageToken = null;
-                        document.getElementById('feed').innerHTML = '<div class="loading-screen"><div class="spinner"></div><span>Loading your subscribed feed...</span></div>';
-                        loadShorts();
+                        localStorage.setItem('isLoggedIn', 'true');
+                        updateAuthUI(true);
                     }
                 },
             });
+
+            // Automatically attempt silent login if previously signed in
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                tokenClient.requestAccessToken({ prompt: '' });
+            }
         }
 
         function handleAuthClick() {
             if (tokenClient) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
+                tokenClient.requestAccessToken({ prompt: 'consent' });
             }
         }
 
@@ -329,9 +333,8 @@
                 google.accounts.oauth2.revoke(token.access_token, () => {
                     gapi.client.setToken('');
                     isAuthenticated = false;
-                    document.getElementById('auth-btn').innerText = 'Sign In';
-                    document.getElementById('auth-btn').onclick = handleAuthClick;
-                    document.getElementById('auth-status-dot').classList.remove('signed-in');
+                    localStorage.removeItem('isLoggedIn');
+                    updateAuthUI(false);
                     
                     nextPageToken = null;
                     document.getElementById('feed').innerHTML = '<div class="loading-screen"><div class="spinner"></div><span>Loading feed...</span></div>';
@@ -340,7 +343,21 @@
             }
         }
 
-        // Infinite Scroll YouTube Shorts Feed Loader
+        function updateAuthUI(signedIn) {
+            const btn = document.getElementById('auth-btn');
+            const dot = document.getElementById('auth-status-dot');
+            if (signedIn) {
+                btn.innerText = 'Sign Out';
+                btn.onclick = handleSignoutClick;
+                dot.classList.add('signed-in');
+            } else {
+                btn.innerText = 'Sign In';
+                btn.onclick = handleAuthClick;
+                dot.classList.remove('signed-in');
+            }
+        }
+
+        // Endless YouTube Shorts Feed Loader with Query Rotation
         async function loadShorts() {
             if (isFetching) return;
             isFetching = true;
@@ -355,10 +372,9 @@
             try {
                 let items = [];
 
-                // Use YouTube search list with pagination token
                 let searchParams = {
                     part: 'snippet',
-                    q: '#shorts',
+                    q: searchQueries[queryIndex],
                     maxResults: 12,
                     type: 'video',
                     videoDuration: 'short',
@@ -373,6 +389,11 @@
                 const response = await gapi.client.youtube.search.list(searchParams);
                 items = response.result.items || [];
                 nextPageToken = response.result.nextPageToken || null;
+
+                // If pagination token runs out for this query, rotate to the next search query seamlessly
+                if (!nextPageToken) {
+                    queryIndex = (queryIndex + 1) % searchQueries.length;
+                }
 
                 if (isInitial) {
                     feed.innerHTML = ''; 
@@ -439,11 +460,11 @@
             isFetching = false;
         }
 
-        // Listen for scroll to trigger infinite loading near the bottom
+        // Listen for scroll (works whether using wheel, swipe, or dragging the PC sidebar scrollbar)
         document.getElementById('feed').addEventListener('scroll', () => {
             const feed = document.getElementById('feed');
-            if (feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 400) {
-                if (nextPageToken && !isFetching) {
+            if (feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 600) {
+                if (!isFetching) {
                     loadShorts();
                 }
             }
