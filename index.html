@@ -33,7 +33,8 @@
 
         .video-player { 
             width: 100%; height: 100%; 
-            border: none; pointer-events: auto;
+            border: none; 
+            pointer-events: none; /* Allows gestures to pass through for smooth scrolling */
             position: absolute; top: 0; left: 0; z-index: 1;
         }
 
@@ -114,6 +115,7 @@
             cursor: pointer; backdrop-filter: blur(12px); 
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
+            pointer-events: auto;
         }
         .action-btn:active { transform: scale(0.85); background: rgba(255, 0, 0, 0.6); border-color: rgba(255,0,0,0.4); }
         .action-btn svg { width: 22px; height: 22px; fill: currentColor; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
@@ -223,7 +225,7 @@
     <div class="feed" id="feed">
         <div class="loading-screen">
             <div class="spinner"></div>
-            <span>Loading your personalized feed...</span>
+            <span>Loading your shorts feed...</span>
         </div>
     </div>
 
@@ -280,6 +282,9 @@
         let tokenClient;
         let isAuthenticated = false;
         let activeVideoId = null;
+        let nextPageToken = null;
+        let isFetching = false;
+        let scrollObserver;
 
         // Initialize Google API Client
         async function gapiLoaded() {
@@ -304,6 +309,7 @@
                         document.getElementById('auth-btn').onclick = handleSignoutClick;
                         document.getElementById('auth-status-dot').classList.add('signed-in');
                         
+                        nextPageToken = null;
                         document.getElementById('feed').innerHTML = '<div class="loading-screen"><div class="spinner"></div><span>Loading your subscribed feed...</span></div>';
                         loadShorts();
                     }
@@ -327,75 +333,56 @@
                     document.getElementById('auth-btn').onclick = handleAuthClick;
                     document.getElementById('auth-status-dot').classList.remove('signed-in');
                     
+                    nextPageToken = null;
                     document.getElementById('feed').innerHTML = '<div class="loading-screen"><div class="spinner"></div><span>Loading feed...</span></div>';
                     loadShorts();
                 });
             }
         }
 
-        // Fetch Multi-Channel Mixed YouTube Shorts Feed with Fallbacks
+        // Infinite Scroll YouTube Shorts Feed Loader
         async function loadShorts() {
+            if (isFetching) return;
+            isFetching = true;
+
             const feed = document.getElementById('feed');
+            const isInitial = feed.querySelectorAll('.short-container').length === 0;
+
+            if (isInitial) {
+                feed.innerHTML = '<div class="loading-screen"><div class="spinner"></div><span>Loading shorts...</span></div>';
+            }
 
             try {
                 let items = [];
 
-                if (isAuthenticated) {
-                    try {
-                        const subsResponse = await gapi.client.youtube.subscriptions.list({
-                            part: 'snippet',
-                            mine: true,
-                            maxResults: 10
-                        });
-                        const channels = subsResponse.result.items;
-                        
-                        if (channels && channels.length > 0) {
-                            for (let channel of channels.slice(0, 5)) {
-                                try {
-                                    const subVideos = await gapi.client.youtube.search.list({
-                                        part: 'snippet',
-                                        channelId: channel.snippet.resourceId.channelId,
-                                        maxResults: 3,
-                                        type: 'video',
-                                        videoDuration: 'short',
-                                        videoEmbeddable: 'true',
-                                        order: 'date'
-                                    });
-                                    if (subVideos.result.items) {
-                                        items.push(...subVideos.result.items);
-                                    }
-                                } catch (e) {
-                                    // Skip channel if error occurs
-                                }
-                            }
-                        }
-                    } catch (subErr) {
-                        console.warn('Subscription batch fetch fallback triggered:', subErr);
-                    }
+                // Use YouTube search list with pagination token
+                let searchParams = {
+                    part: 'snippet',
+                    q: '#shorts',
+                    maxResults: 12,
+                    type: 'video',
+                    videoDuration: 'short',
+                    videoEmbeddable: 'true',
+                    order: 'relevance'
+                };
+
+                if (nextPageToken) {
+                    searchParams.pageToken = nextPageToken;
                 }
 
-                if (items.length === 0) {
-                    const generalResponse = await gapi.client.youtube.search.list({
-                        part: 'snippet',
-                        q: '#shorts',
-                        maxResults: 15,
-                        type: 'video',
-                        videoDuration: 'short',
-                        videoEmbeddable: 'true',
-                        order: 'relevance'
-                    });
-                    items = generalResponse.result.items || [];
-                }
-                
-                feed.innerHTML = ''; 
+                const response = await gapi.client.youtube.search.list(searchParams);
+                items = response.result.items || [];
+                nextPageToken = response.result.nextPageToken || null;
 
-                if (items.length === 0) {
+                if (isInitial) {
+                    feed.innerHTML = ''; 
+                }
+
+                if (items.length === 0 && isInitial) {
                     feed.innerHTML = '<div class="loading-screen"><span>No videos found. Check API quota or permissions.</span></div>';
+                    isFetching = false;
                     return;
                 }
-
-                // Shuffle items to create a mixed feed
-                items.sort(() => Math.random() - 0.5);
 
                 items.forEach((item, index) => {
                     if (!item.id || item.id.kind !== 'youtube#video') return; 
@@ -404,7 +391,7 @@
                     const channelId = item.snippet.channelId;
                     const title = item.snippet.title;
                     const channelTitle = item.snippet.channelTitle;
-                    const autoplayVal = index === 0 ? 1 : 0;
+                    const autoplayVal = (isInitial && index === 0) ? 1 : 0;
 
                     const shortHtml = `
                         <div class="short-container" data-videoid="${videoId}">
@@ -448,13 +435,25 @@
 
             } catch (err) {
                 console.error('Error loading shorts', err);
-                feed.innerHTML = '<div class="loading-screen"><span>Error loading videos. Check API Key & Quota.</span></div>';
             }
+            isFetching = false;
         }
+
+        // Listen for scroll to trigger infinite loading near the bottom
+        document.getElementById('feed').addEventListener('scroll', () => {
+            const feed = document.getElementById('feed');
+            if (feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 400) {
+                if (nextPageToken && !isFetching) {
+                    loadShorts();
+                }
+            }
+        });
 
         // Intersection Observer for seamless auto-play & pause on scroll
         function setupScrollAutoplay() {
-            const observer = new IntersectionObserver((entries) => {
+            if (scrollObserver) scrollObserver.disconnect();
+
+            scrollObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const iframe = entry.target.querySelector('iframe');
                     if (!iframe || !iframe.contentWindow) return;
@@ -476,7 +475,7 @@
             }, { threshold: 0.65 });
 
             document.querySelectorAll('.short-container').forEach(container => {
-                observer.observe(container);
+                scrollObserver.observe(container);
             });
         }
 
