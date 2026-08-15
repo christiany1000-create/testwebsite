@@ -105,7 +105,6 @@
 
     <script>
         // === CONFIGURATION ===
-        // Replace these with your actual credentials from Google Cloud Console
         const CLIENT_ID = '787259726635-ldace8nm63t3ehiog8189pekts6138dc.apps.googleusercontent.com'; 
         const API_KEY = 'AIzaSyDw9lwxRVpxFOMAAsd8dotB4Nf1aiuyOBE';
         const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'];
@@ -121,7 +120,7 @@
                     apiKey: API_KEY,
                     discoveryDocs: DISCOVERY_DOCS,
                 });
-                loadShorts(); // Load initial videos without auth
+                loadShorts(); // Load initial videos
             });
         }
 
@@ -136,6 +135,10 @@
                         document.getElementById('auth-btn').innerText = 'Sign Out';
                         document.getElementById('auth-btn').onclick = handleSignoutClick;
                         document.getElementById('auth-status').innerText = 'Signed In';
+                        
+                        // Reload the feed to show personalized content once signed in
+                        document.getElementById('feed').innerHTML = '';
+                        loadShorts();
                     }
                 },
             });
@@ -156,26 +159,70 @@
                     document.getElementById('auth-btn').innerText = 'Sign In';
                     document.getElementById('auth-btn').onclick = handleAuthClick;
                     document.getElementById('auth-status').innerText = 'Not Signed In';
+                    
+                    // Reload the feed to show general content
+                    document.getElementById('feed').innerHTML = '';
+                    loadShorts();
                 });
             }
         }
 
-        // Fetch YouTube Shorts
+        // Fetch YouTube Shorts from the user's Subscribed Channels
         async function loadShorts() {
+            const feed = document.getElementById('feed');
+            
+            // Only show a loading message if the feed is empty
+            if (feed.children.length === 0) {
+                feed.innerHTML = '<div style="margin: 100px; text-align: center;">Loading feed...</div>';
+            }
+
             try {
-                const response = await gapi.client.youtube.search.list({
+                let searchParams = {
                     part: 'snippet',
-                    q: '#shorts',
                     maxResults: 10,
                     type: 'video',
                     videoDuration: 'short',
-                    videoEmbeddable: 'true' // Filters out videos that disable embedding
-                });
+                    videoEmbeddable: 'true'
+                };
 
-                const feed = document.getElementById('feed');
-                feed.innerHTML = ''; 
+                // If signed in, build a feed from their subscriptions
+                if (isAuthenticated) {
+                    const subsResponse = await gapi.client.youtube.subscriptions.list({
+                        part: 'snippet',
+                        mine: true,
+                        maxResults: 50 // Fetch up to 50 of their subscriptions
+                    });
 
+                    const channels = subsResponse.result.items;
+                    
+                    if (channels && channels.length > 0) {
+                        // Pick a random subscribed channel to pull recent Shorts from
+                        const randomChannel = channels[Math.floor(Math.random() * channels.length)];
+                        searchParams.channelId = randomChannel.snippet.resourceId.channelId;
+                        searchParams.order = 'date'; // Get their most recent uploads
+                    } else {
+                        // Fallback if they are signed in but have zero subscriptions
+                        searchParams.q = '#shorts'; 
+                        searchParams.order = 'relevance';
+                    }
+                } else {
+                    // Fallback for users who are not signed in
+                    searchParams.q = '#shorts';
+                    searchParams.order = 'relevance';
+                }
+
+                const response = await gapi.client.youtube.search.list(searchParams);
+                
+                // Clear the loading message if it's the first load
+                if (feed.innerHTML.includes("Loading feed...")) {
+                    feed.innerHTML = ''; 
+                }
+
+                // Inject the videos
                 response.result.items.forEach(item => {
+                    // Search endpoint sometimes returns channels or playlists, ensure it's a video
+                    if (item.id.kind !== 'youtube#video') return; 
+
                     const videoId = item.id.videoId;
                     const channelId = item.snippet.channelId;
                     const title = item.snippet.title;
@@ -203,7 +250,7 @@
                 });
             } catch (err) {
                 console.error('Error loading shorts', err);
-                document.getElementById('feed').innerHTML = '<div style="margin: 100px; text-align: center;">Error loading videos. Check API Key.</div>';
+                feed.innerHTML = '<div style="margin: 100px; text-align: center;">Error loading videos. Check API Key and Quota.</div>';
             }
         }
 
