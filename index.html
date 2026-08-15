@@ -1,1223 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LearnMultiply | Student Portal</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<style>
-:root {
-    --bg: #f4f6f9;
-    --surface: #ffffff;
-    --surface2: #f8fafc;
-    --primary: #1e40af;
-    --primary-light: #3b82f6;
-    --primary-soft: #eff6ff;
-    --accent: #0f766e;
-    --danger: #dc2626;
-    --success: #059669;
-    --text: #1e293b;
-    --muted: #64748b;
-    --border: #e2e8f0;
-    --header-bg: #1e3a5f;
-    --chat-bg: #f8fafc;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    line-height: 1.5;
-}
-body.locked { overflow: hidden; }
-
-/* Smooth transitions */
-button, .card, .nav-tab, .cat-btn, .channel, .settings-btn, .create-btn, .send-btn {
-    transition: all 0.22s ease;
-}
-
-/* AUTH */
-.auth-gate {
-    position: fixed; inset: 0; z-index: 99999;
-    display: flex; justify-content: center; align-items: center;
-    padding: 20px; background: #0f172a;
-}
-.auth-card {
-    width: 100%; max-width: 420px; padding: 40px 32px;
-    background: white; border-radius: 14px;
-    text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,.3);
-    animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.logo { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-weight: 700; }
-.logo-x { color: var(--primary); font-size: 28px; }
-.logo-text { font-size: 20px; letter-spacing: -0.3px; }
-.auth-card .logo { justify-content: center; margin-bottom: 24px; }
-.auth-card h2 { margin-bottom: 8px; font-size: 22px; color: #0f172a; }
-.auth-card p { color: var(--muted); margin-bottom: 24px; font-size: 15px; }
-.auth-error { display: none; margin-top: 14px; color: var(--danger); font-size: 13px; }
-
-/* HEADER */
-header {
-    position: sticky; top: 0; z-index: 100;
-    display: flex; justify-content: space-between; align-items: center; gap: 20px;
-    padding: 0 28px; height: 62px;
-    background: var(--header-bg); color: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,.15);
-}
-.header-left, .header-right { display: flex; align-items: center; gap: 16px; }
-header .logo { color: white; }
-header .logo-x { color: #93c5fd; }
-.school-badge {
-    padding: 3px 10px; border-radius: 4px;
-    background: rgba(255,255,255,.12); color: #bfdbfe;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.4px;
-    text-transform: uppercase;
-}
-.top-nav { display: flex; gap: 2px; }
-.nav-tab {
-    padding: 8px 16px; border-radius: 7px; border: 0;
-    background: transparent; color: #94a3b8;
-    font-weight: 600; font-size: 14px; cursor: pointer;
-}
-.nav-tab:hover { color: white; background: rgba(255,255,255,.1); }
-.nav-tab.active { background: rgba(255,255,255,.18); color: white; }
-.search {
-    width: 200px; padding: 8px 12px;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    border-radius: 7px; color: white; outline: none; font-size: 14px;
-}
-.search::placeholder { color: #94a3b8; }
-.user-profile {
-    display: flex; align-items: center; gap: 8px;
-    padding: 4px 10px 4px 4px; border-radius: 20px;
-    background: rgba(255,255,255,.1);
-}
-.user-profile img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-.user-name { max-width: 110px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; font-weight: 600; color: white; }
-.logout { color: #fca5a5; background: transparent; border: 0; cursor: pointer; font-size: 14px; }
-.settings-btn {
-    padding: 8px 14px; background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.15); border-radius: 7px;
-    color: white; font-weight: 600; font-size: 13px; cursor: pointer;
-}
-.settings-btn:hover { background: rgba(255,255,255,.2); transform: translateY(-1px); }
-
-/* MAIN */
-.container { max-width: 1100px; margin: auto; padding: 32px 24px; }
-.hero {
-    text-align: left; padding: 28px 32px; margin-bottom: 28px;
-    background: white; border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.04);
-    animation: slideUp 0.45s ease;
-}
-.hero h1 { font-size: 26px; margin-bottom: 6px; color: #0f172a; font-weight: 700; }
-.hero p { color: var(--muted); font-size: 15px; }
-.categories { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-.cat-btn {
-    padding: 8px 18px; color: var(--muted); background: white;
-    border: 1px solid var(--border); border-radius: 8px;
-    font-weight: 600; font-size: 13px; cursor: pointer;
-}
-.cat-btn:hover { border-color: var(--primary-light); color: var(--primary); transform: translateY(-1px); }
-.cat-btn.active {
-    background: var(--primary); color: white; border-color: var(--primary);
-    box-shadow: 0 3px 12px rgba(30,64,175,.25);
-}
-.grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 20px; }
-.card {
-    background: white; border: 1px solid var(--border); border-radius: 12px;
-    overflow: hidden; cursor: pointer;
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.2s ease;
-    animation: cardIn 0.4s ease backwards;
-}
-.card:nth-child(1) { animation-delay: 0.04s; }
-.card:nth-child(2) { animation-delay: 0.08s; }
-.card:nth-child(3) { animation-delay: 0.12s; }
-.card:nth-child(4) { animation-delay: 0.16s; }
-.card:nth-child(5) { animation-delay: 0.20s; }
-.card:nth-child(6) { animation-delay: 0.24s; }
-.card:nth-child(7) { animation-delay: 0.28s; }
-.card:nth-child(8) { animation-delay: 0.32s; }
-.card:hover {
-    transform: translateY(-7px);
-    border-color: #93c5fd;
-    box-shadow: 0 14px 30px rgba(30,64,175,.13);
-}
-.card-image { height: 150px; background: #e2e8f0; overflow: hidden; }
-.card-image img {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform 0.45s ease;
-}
-.card:hover .card-image img { transform: scale(1.07); }
-.card-content { padding: 15px 16px; }
-.card-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #0f172a; }
-.card-category {
-    display: inline-block; padding: 2px 9px; border-radius: 4px;
-    color: var(--primary); background: var(--primary-soft);
-    font-size: 11px; font-weight: 700;
-}
-
-/* CHAT */
-.chat-wrapper {
-    display: none; grid-template-columns: 240px 1fr; height: 640px; overflow: hidden;
-    background: white; border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.04);
-    animation: slideUp 0.35s ease;
-}
-.chat-sidebar {
-    display: flex; flex-direction: column; background: #f8fafc;
-    border-right: 1px solid var(--border);
-}
-.sidebar-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 16px; border-bottom: 1px solid var(--border);
-}
-.sidebar-title { color: var(--primary); font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
-.create-btn {
-    padding: 5px 11px; background: var(--primary); color: white;
-    border-radius: 6px; font-size: 12px; font-weight: 600; border: 0; cursor: pointer;
-}
-.create-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-.channel-list { list-style: none; padding: 10px; overflow-y: auto; flex: 1; }
-.channel {
-    width: 100%; padding: 10px 12px; margin-bottom: 2px; text-align: left;
-    color: var(--muted); background: transparent; border: 0; border-radius: 7px;
-    cursor: pointer; font-size: 14px; font-weight: 500;
-}
-.channel:hover { background: #e2e8f0; color: var(--text); transform: translateX(3px); }
-.channel.active { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
-.nickname-box { padding: 14px; border-top: 1px solid var(--border); }
-.nickname-box label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 5px; font-weight: 600; }
-.nickname-box input {
-    width: 100%; padding: 8px 10px; color: var(--text); background: white;
-    border: 1px solid var(--border); border-radius: 6px; font-size: 14px;
-}
-.chat-main { display: flex; flex-direction: column; background: white; }
-.chat-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 18px; border-bottom: 1px solid var(--border); background: #f8fafc;
-}
-.status { color: var(--success); font-size: 12px; font-weight: 600; }
-.messages { flex: 1; padding: 18px; overflow-y: auto; background: var(--chat-bg); }
-.message { margin-bottom: 14px; max-width: 80%; animation: messageIn 0.3s ease; }
-.message.self { margin-left: auto; text-align: right; }
-.message-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; color: var(--muted); font-size: 12px; }
-.message.self .message-meta { justify-content: flex-end; }
-.author { color: var(--primary); font-weight: 700; }
-.admin-tag {
-    padding: 1px 6px; border-radius: 3px; color: white; background: var(--accent);
-    font-size: 9px; font-weight: 700; letter-spacing: 0.3px;
-}
-.message-body {
-    display: inline-block; padding: 9px 13px; color: var(--text);
-    background: white; border: 1px solid var(--border); border-radius: 8px;
-    text-align: left; word-break: break-word; font-size: 14px;
-}
-.message.self .message-body { background: var(--primary-soft); border-color: #bfdbfe; }
-.chat-input {
-    display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border);
-    background: white;
-}
-.chat-input input {
-    flex: 1; padding: 10px 12px; color: var(--text); background: #f8fafc;
-    border: 1px solid var(--border); border-radius: 7px; outline: none; font-size: 14px;
-}
-.send-btn {
-    padding: 0 18px; background: var(--primary); color: white;
-    border-radius: 7px; font-weight: 600; border: 0; cursor: pointer;
-}
-.send-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-/* MODALS */
-.modal {
-    display: none; position: fixed; inset: 0; z-index: 5000;
-    justify-content: center; align-items: center; padding: 20px;
-    background: rgba(15,23,42,.55);
-    animation: fadeIn 0.25s ease;
-}
-.modal-box {
-    width: 100%; max-width: 600px; padding: 28px; background: white;
-    border: 1px solid var(--border); border-radius: 14px;
-    box-shadow: 0 25px 60px rgba(0,0,0,.18); max-height: 90vh; overflow-y: auto;
-    animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.modal-box h3 { margin-bottom: 16px; font-size: 18px; color: #0f172a; }
-.modal-input {
-    width: 100%; padding: 10px 12px; margin-bottom: 10px; color: var(--text);
-    background: #f8fafc; border: 1px solid var(--border); border-radius: 7px; outline: none;
-}
-.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.close-btn {
-    padding: 9px 16px; color: white; background: var(--danger);
-    border-radius: 7px; border: 0; font-weight: 600; cursor: pointer;
-}
-.admin-btn {
-    padding: 9px 16px; color: white; background: var(--primary);
-    border-radius: 7px; border: 0; font-weight: 600; cursor: pointer;
-}
-
-/* ADMIN PANEL (hidden unless admin) */
-.admin-panel { display: none; }
-.admin-section { margin-bottom: 22px; }
-.admin-section h4 { margin-bottom: 6px; font-size: 14px; color: #0f172a; }
-.admin-section p { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
-.ban-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.ban-row input {
-    flex: 1; min-width: 140px; padding: 9px 11px; color: var(--text);
-    background: #f8fafc; border: 1px solid var(--border); border-radius: 6px;
-}
-.ban-list, .online-list { display: flex; flex-direction: column; gap: 6px; }
-.banned-user, .online-user {
-    display: flex; justify-content: space-between; align-items: center; gap: 8px;
-    padding: 10px 12px; background: #f8fafc; border: 1px solid var(--border);
-    border-radius: 7px; font-size: 13px; flex-wrap: wrap;
-}
-.online-user .info { flex: 1; min-width: 170px; }
-.online-user .actions { display: flex; gap: 5px; flex-wrap: wrap; }
-.small-btn {
-    padding: 4px 9px; font-size: 11px; border-radius: 5px; border: 0;
-    cursor: pointer; font-weight: 600; transition: all 0.15s ease;
-}
-.small-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
-.btn-ban { background: var(--danger); color: white; }
-.btn-temp { background: #c2410c; color: white; }
-.btn-mute { background: #6d28d9; color: white; }
-.btn-admin { background: var(--accent); color: white; }
-.btn-copy { background: white; color: var(--text); border: 1px solid var(--border); }
-.btn-unban { background: var(--success); color: white; }
-.warning-box {
-    background: #fef2f2; border: 1px solid #fecaca;
-    padding: 10px 12px; border-radius: 7px; font-size: 12px; color: #991b1b; margin-bottom: 14px;
-}
-.monitor-box {
-    max-height: 200px; overflow-y: auto; background: #f8fafc;
-    border: 1px solid var(--border); border-radius: 7px; padding: 10px;
-    font-size: 12px; line-height: 1.45;
-}
-.monitor-line { margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-.monitor-line .meta { color: var(--muted); font-size: 11px; }
-
-/* PLAYER */
-.player { display: none; position: fixed; inset: 0; z-index: 4000; flex-direction: column; background: #0f172a; }
-.player-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 18px; background: #1e293b; color: white;
-}
-.player iframe { width: 100%; height: 100%; border: 0; }
-
-/* Animations */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.93) translateY(12px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-}
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-@keyframes cardIn {
-    from { opacity: 0; transform: translateY(22px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-@keyframes messageIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@media(max-width:900px) {
-    header { flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 10px; }
-    .search { display: none; }
-    .chat-wrapper { grid-template-columns: 1fr; }
-    .chat-sidebar { display: none; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HTML5 Mobile Shorts Client</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            background-color: #000; color: #fff; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            overflow: hidden; 
+        }
+        .feed { 
+            height: 100vh; overflow-y: scroll; 
+            scroll-snap-type: y mandatory; 
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .short-container { 
+            height: 100vh; width: 100vw; 
+            position: relative; 
+            scroll-snap-align: start; 
+            display: flex; justify-content: center; align-items: center; 
+            background: #111;
+        }
+        .video-player { 
+            width: 100%; height: 100%; 
+            border: none; pointer-events: auto;
+        }
+        .overlay-actions { 
+            position: absolute; bottom: 80px; right: 10px; 
+            display: flex; flex-direction: column; gap: 20px; 
+            align-items: center; z-index: 10; 
+        }
+        .info-panel { 
+            position: absolute; bottom: 30px; left: 15px; 
+            z-index: 10; max-width: 75%; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+        .info-panel h3 { margin: 0 0 5px 0; font-size: 1.1rem; cursor: pointer; }
+        .info-panel p { margin: 0; font-size: 0.9rem; line-height: 1.3; }
+        .action-btn { 
+            background: rgba(0,0,0,0.6); border: none; color: white; 
+            border-radius: 50%; width: 50px; height: 50px; 
+            display: flex; justify-content: center; align-items: center; 
+            cursor: pointer; font-size: 22px; backdrop-filter: blur(4px);
+        }
+        .top-nav {
+            position: fixed; top: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+        }
+        .auth-btn { 
+            background: #ff0000; color: #fff; border: none; 
+            padding: 8px 16px; border-radius: 20px; 
+            font-weight: bold; cursor: pointer; font-size: 14px;
+        }
+        .status { font-size: 14px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+        
+        /* Modal for Channel View */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            z-index: 200; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: #222; padding: 20px; border-radius: 12px;
+            text-align: center; width: 80%; max-width: 300px;
+        }
+        .modal-content h2 { margin-top: 0; }
+        .close-btn {
+            background: #444; color: white; border: none;
+            padding: 8px 16px; border-radius: 8px; margin-top: 15px; cursor: pointer;
+        }
+    </style>
 </head>
-<body class="locked">
+<body>
 
-<!-- AUTH -->
-<div class="auth-gate" id="authGate">
-    <div class="auth-card">
-        <div class="logo">
-            <span class="logo-x">✕</span>
-            <span class="logo-text">LearnMultiply</span>
-        </div>
-        <h2>Student Sign-In</h2>
-        <p>Use your school Google account to access the student portal.</p>
-        <div id="g_id_onload"
-             data-client_id="787259726635-ldace8nm63t3ehiog8189pekts6138dc.apps.googleusercontent.com"
-             data-callback="handleGoogleLogin"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin"
-             data-type="standard"
-             data-shape="rectangular"
-             data-theme="outline"
-             data-size="large">
-        </div>
-        <div class="auth-error" id="authError"></div>
-    </div>
-</div>
-
-<header>
-    <div class="header-left">
-        <a class="logo" href="#">
-            <span class="logo-x">✕</span>
-            <span class="logo-text">LearnMultiply</span>
-        </a>
-        <span class="school-badge">Student Portal</span>
-        <nav class="top-nav">
-            <button class="nav-tab active" id="navGames" onclick="switchMainTab('Games')">Modules</button>
-            <button class="nav-tab" id="navVideos" onclick="switchMainTab('Videos')">Videos</button>
-            <button class="nav-tab" id="navChat" onclick="switchMainTab('Chat')">Study Groups</button>
-        </nav>
-    </div>
-    <div class="header-right">
-        <input class="search" id="searchInput" placeholder="Search modules...">
-        <div class="user-profile">
-            <img id="userAvatar" alt="Profile">
-            <span class="user-name" id="userName">Student</span>
-            <button class="logout" onclick="logout()" title="Sign out">✕</button>
-        </div>
-        <button class="settings-btn" onclick="openSettings()">Settings</button>
-    </div>
-</header>
-
-<main class="container">
-    <section class="hero">
-        <h1 id="heroTitle">Learning Modules & Study Resources</h1>
-        <p id="heroSubtitle">Select a module to begin. All activity is intended for educational use during approved study periods.</p>
-    </section>
-
-    <div class="categories" id="categories">
-        <button class="cat-btn active" data-category="All">All Modules</button>
-        <button class="cat-btn" data-category="Classic">Classic</button>
-        <button class="cat-btn" data-category="Arcade">Arcade</button>
-        <button class="cat-btn" data-category="Adventure">Adventure</button>
+    <div class="top-nav">
+        <div class="status" id="auth-status">Not Signed In</div>
+        <button id="auth-btn" class="auth-btn" onclick="handleAuthClick()">Sign In</button>
     </div>
 
-    <div class="grid" id="gameGrid"></div>
+    <div class="feed" id="feed">
+        <!-- Videos injected dynamically -->
+    </div>
 
-    <!-- CHAT -->
-    <section class="chat-wrapper" id="chatContainer">
-        <aside class="chat-sidebar">
-            <div class="sidebar-header">
-                <span class="sidebar-title">Study Groups</span>
-                <button class="create-btn" onclick="openCreateGroup()">+ New</button>
-            </div>
-            <ul class="channel-list" id="channelList"></ul>
-            <div class="nickname-box">
-                <label>Display Name</label>
-                <input id="nickname" maxlength="30">
-            </div>
-        </aside>
-        <div class="chat-main">
-            <div class="chat-header">
-                <div>
-                    <strong id="currentRoom">General Lounge</strong>
-                    <div class="status" id="status">Connecting…</div>
-                </div>
-            </div>
-            <div class="messages" id="messages"></div>
-            <form class="chat-input" onsubmit="sendMessage(event)">
-                <input id="messageInput" autocomplete="off" maxlength="500" placeholder="Type a message…">
-                <button class="send-btn">Send</button>
-            </form>
-        </div>
-    </section>
-</main>
-
-<!-- SETTINGS (admin panel hidden inside) -->
-<div class="modal" id="settingsModal">
-    <div class="modal-box">
-        <h3>Account Settings</h3>
-
-        <div id="normalSettings">
-            <p style="color:var(--muted);font-size:14px;margin-bottom:8px;">
-                You are signed in with your Google account.
-            </p>
-        </div>
-
-        <!-- ADMIN PANEL – only visible to admins -->
-        <div id="adminSettings" class="admin-panel">
-            <div class="warning-box">
-                <strong>Administrator Tools</strong> — Visible only to authorized staff. Actions are stored locally in this browser (prototype).
-            </div>
-
-            <div class="admin-section">
-                <h4>Online Students <span id="onlineCount" style="color:var(--muted);font-weight:400;"></span></h4>
-                <p>Currently active users. Use the buttons for moderation.</p>
-                <div class="online-list" id="onlineList">
-                    <span style="color:var(--muted);font-size:12px;">Waiting for presence data…</span>
-                </div>
-            </div>
-
-            <div class="admin-section">
-                <h4>Chat Monitor</h4>
-                <p>Recent messages seen by this session.</p>
-                <div class="monitor-box" id="chatMonitor">
-                    <div style="color:var(--muted);">No messages captured yet.</div>
-                </div>
-            </div>
-
-            <div class="admin-section">
-                <h4>Manual Actions</h4>
-                <div class="ban-row" style="margin-bottom:10px;">
-                    <input id="actionEmail" type="email" placeholder="student@school.edu">
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                    <button class="small-btn btn-ban" onclick="manualBan(false)">Ban</button>
-                    <button class="small-btn btn-temp" onclick="manualBan(true)">Temp Ban (1h)</button>
-                    <button class="small-btn btn-mute" onclick="manualMute(true)">Mute</button>
-                    <button class="small-btn btn-unban" onclick="manualMute(false)">Unmute</button>
-                    <button class="small-btn btn-admin" onclick="manualGiveAdmin(true)">Give Admin</button>
-                    <button class="small-btn btn-ban" onclick="manualGiveAdmin(false)">Remove Admin</button>
-                </div>
-            </div>
-
-            <div class="admin-section">
-                <h4>Banned Accounts</h4>
-                <div class="ban-list" id="banList"></div>
-            </div>
-
-            <div class="admin-section">
-                <h4>Muted Students</h4>
-                <div class="ban-list" id="muteList"></div>
-            </div>
-
-            <div class="admin-section">
-                <h4>Additional Admins</h4>
-                <div class="ban-list" id="extraAdminList"></div>
-            </div>
-        </div>
-
-        <div class="modal-actions">
-            <button class="close-btn" onclick="closeSettings()">Close</button>
+    <!-- Channel Info Modal -->
+    <div class="modal" id="channel-modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Channel Name</h2>
+            <p>Subscribers: <span id="modal-subs">0</span></p>
+            <p>Total Views: <span id="modal-views">0</span></p>
+            <p>Videos: <span id="modal-videos">0</span></p>
+            <button class="close-btn" onclick="closeModal()">Close</button>
         </div>
     </div>
-</div>
 
-<!-- CREATE GROUP -->
-<div class="modal" id="groupModal">
-    <div class="modal-box">
-        <h3>Create Study Group</h3>
-        <input class="modal-input" id="groupName" placeholder="Group name">
-        <input class="modal-input" id="groupPassword" type="password" placeholder="Password (optional)">
-        <div class="modal-actions">
-            <button class="close-btn" onclick="closeCreateGroup()">Cancel</button>
-            <button class="admin-btn" onclick="createGroup()">Create</button>
-        </div>
-    </div>
-</div>
+    <!-- Google Identity Services and Google API Client Library -->
+    <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+    <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
 
-<!-- PLAYER -->
-<div class="player" id="player">
-    <div class="player-header">
-        <strong id="playerTitle">Module</strong>
-        <button class="close-btn" onclick="closePlayer()">Exit</button>
-    </div>
-    <iframe id="playerFrame" allowfullscreen></iframe>
-</div>
+    <script>
+        // === CONFIGURATION ===
+        // Replace these with your actual credentials from Google Cloud Console
+        const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'; 
+        const API_KEY = 'YOUR_YOUTUBE_API_KEY';
+        const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'];
+        const SCOPES = 'https://www.googleapis.com/auth/youtube.force-ssl';
 
-<script>
-/* ============================================================
-   ADMIN CONFIG
-   ============================================================ */
-const HARDCODED_ADMINS = [
-    "yates.christian@norwinsd.org",
-    "christiany1000@gmail.com"
-];
+        let tokenClient;
+        let isAuthenticated = false;
 
-let bannedUsers = JSON.parse(localStorage.getItem("learnmultiply_bans") || "[]");
-let mutedUsers  = JSON.parse(localStorage.getItem("learnmultiply_mutes") || "[]");
-let extraAdmins = JSON.parse(localStorage.getItem("learnmultiply_extra_admins") || "[]");
-
-function getAllAdmins() {
-    return [...new Set([...HARDCODED_ADMINS, ...extraAdmins.map(e => e.toLowerCase())])];
-}
-function isBanned(email) {
-    email = (email || "").toLowerCase();
-    const entry = bannedUsers.find(b => b.email === email);
-    if (!entry) return false;
-    if (entry.until && Date.now() > entry.until) {
-        bannedUsers = bannedUsers.filter(b => b.email !== email);
-        saveBans();
-        return false;
-    }
-    return true;
-}
-function isMuted(email) {
-    return mutedUsers.includes((email || "").toLowerCase());
-}
-
-/* ============================================================
-   AUTH
-   ============================================================ */
-let currentUser = null;
-let myPublicIP  = "unknown";
-let presenceInterval = null;
-let chatMonitorLog = [];
-
-async function fetchPublicIP() {
-    try {
-        const res = await fetch("https://api.ipify.org?format=json");
-        const data = await res.json();
-        return data.ip || "unknown";
-    } catch { return "unknown"; }
-}
-
-function handleGoogleLogin(response) {
-    try {
-        const payload = parseJwt(response.credential);
-        const user = {
-            name: payload.name || "Student",
-            email: (payload.email || "").toLowerCase(),
-            picture: payload.picture || ""
-        };
-        if (isBanned(user.email)) {
-            showBannedScreen(user.email);
-            return;
+        // Initialize Google API Client
+        async function gapiLoaded() {
+            await gapi.load('client', async () => {
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: DISCOVERY_DOCS,
+                });
+                loadShorts(); // Load initial videos without auth
+            });
         }
-        currentUser = user;
-        localStorage.setItem("learnmultiply_user", JSON.stringify(user));
-        fetchPublicIP().then(ip => {
-            myPublicIP = ip;
-            applyUser(user);
-            startPresence();
-        });
-    } catch (error) {
-        console.error(error);
-        showAuthError("Sign-in could not be verified.");
-    }
-}
 
-function parseJwt(token) {
-    const parts = token.split(".");
-    if (parts.length !== 3) throw new Error("Invalid credential");
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
-    return JSON.parse(json);
-}
-
-function applyUser(user) {
-    document.getElementById("authGate").style.display = "none";
-    document.body.classList.remove("locked");
-    document.getElementById("userName").textContent = user.name;
-    document.getElementById("userAvatar").src = user.picture || "";
-    document.getElementById("nickname").value = user.name;
-}
-
-function logout() {
-    stopPresence();
-    localStorage.removeItem("learnmultiply_user");
-    currentUser = null;
-    document.body.classList.add("locked");
-    document.getElementById("authGate").style.display = "flex";
-}
-
-function checkExistingLogin() {
-    const saved = localStorage.getItem("learnmultiply_user");
-    if (!saved) return;
-    try {
-        const user = JSON.parse(saved);
-        if (isBanned(user.email)) {
-            showBannedScreen(user.email);
-            return;
+        // Initialize Google Identity Services
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        isAuthenticated = true;
+                        document.getElementById('auth-btn').innerText = 'Sign Out';
+                        document.getElementById('auth-btn').onclick = handleSignoutClick;
+                        document.getElementById('auth-status').innerText = 'Signed In';
+                    }
+                },
+            });
         }
-        currentUser = user;
-        fetchPublicIP().then(ip => {
-            myPublicIP = ip;
-            applyUser(user);
-            startPresence();
-        });
-    } catch {
-        localStorage.removeItem("learnmultiply_user");
-    }
-}
 
-function showAuthError(message) {
-    const error = document.getElementById("authError");
-    error.textContent = message;
-    error.style.display = "block";
-}
-
-function showBannedScreen(email) {
-    document.getElementById("authGate").innerHTML = `
-        <div class="auth-card">
-            <div class="logo"><span class="logo-x">✕</span><span class="logo-text">LearnMultiply</span></div>
-            <h2 style="color:#dc2626;">Access Restricted</h2>
-            <p>The account <strong>${escapeHtml(email)}</strong> is currently restricted from this portal.</p>
-            <p style="font-size:13px;color:#64748b;">Contact a teacher or administrator if you believe this is an error.</p>
-        </div>`;
-    document.getElementById("authGate").style.display = "flex";
-    document.body.classList.add("locked");
-}
-
-/* ============================================================
-   SETTINGS + HIDDEN ADMIN PANEL
-   ============================================================ */
-function isAdmin() {
-    return !!(currentUser && getAllAdmins().includes(currentUser.email.toLowerCase()));
-}
-function getAdminTag(email) {
-    return getAllAdmins().includes(String(email).toLowerCase()) ? "STAFF" : "";
-}
-
-function openSettings() {
-    document.getElementById("settingsModal").style.display = "flex";
-    const adminPanel = document.getElementById("adminSettings");
-    if (isAdmin()) {
-        adminPanel.style.display = "block";
-        renderAllAdminLists();
-        renderOnlineList();
-        renderChatMonitor();
-    } else {
-        adminPanel.style.display = "none";
-    }
-}
-function closeSettings() {
-    document.getElementById("settingsModal").style.display = "none";
-}
-
-function renderAllAdminLists() {
-    renderBanList();
-    renderMuteList();
-    renderExtraAdminList();
-}
-
-function banEmail(email, tempHours = null) {
-    email = (email || "").toLowerCase().trim();
-    if (!email || HARDCODED_ADMINS.includes(email)) return;
-    bannedUsers = bannedUsers.filter(b => b.email !== email);
-    bannedUsers.push({ email, until: tempHours ? Date.now() + tempHours * 3600 * 1000 : null });
-    saveBans();
-    renderBanList();
-}
-function unbanEmail(email) {
-    bannedUsers = bannedUsers.filter(b => b.email !== (email || "").toLowerCase());
-    saveBans();
-    renderBanList();
-}
-function saveBans() { localStorage.setItem("learnmultiply_bans", JSON.stringify(bannedUsers)); }
-
-function renderBanList() {
-    const list = document.getElementById("banList");
-    if (!list) return;
-    bannedUsers = bannedUsers.filter(b => !b.until || b.until > Date.now());
-    saveBans();
-    list.innerHTML = "";
-    if (!bannedUsers.length) {
-        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No banned accounts.</span>`;
-        return;
-    }
-    bannedUsers.forEach(entry => {
-        const row = document.createElement("div");
-        row.className = "banned-user";
-        const label = entry.until ? `${entry.email} (until ${new Date(entry.until).toLocaleTimeString()})` : entry.email;
-        row.innerHTML = `<span>${escapeHtml(label)}</span>`;
-        const btn = document.createElement("button");
-        btn.className = "small-btn btn-unban";
-        btn.textContent = "Unban";
-        btn.onclick = () => unbanEmail(entry.email);
-        row.appendChild(btn);
-        list.appendChild(row);
-    });
-}
-
-function muteEmail(email) {
-    email = (email || "").toLowerCase().trim();
-    if (!email || HARDCODED_ADMINS.includes(email)) return;
-    if (!mutedUsers.includes(email)) mutedUsers.push(email);
-    saveMutes();
-    renderMuteList();
-}
-function unmuteEmail(email) {
-    mutedUsers = mutedUsers.filter(e => e !== (email || "").toLowerCase());
-    saveMutes();
-    renderMuteList();
-}
-function saveMutes() { localStorage.setItem("learnmultiply_mutes", JSON.stringify(mutedUsers)); }
-
-function renderMuteList() {
-    const list = document.getElementById("muteList");
-    if (!list) return;
-    list.innerHTML = "";
-    if (!mutedUsers.length) {
-        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No muted students.</span>`;
-        return;
-    }
-    mutedUsers.forEach(email => {
-        const row = document.createElement("div");
-        row.className = "banned-user";
-        row.innerHTML = `<span>${escapeHtml(email)}</span>`;
-        const btn = document.createElement("button");
-        btn.className = "small-btn btn-unban";
-        btn.textContent = "Unmute";
-        btn.onclick = () => unmuteEmail(email);
-        row.appendChild(btn);
-        list.appendChild(row);
-    });
-}
-
-function giveAdmin(email) {
-    email = (email || "").toLowerCase().trim();
-    if (!email) return;
-    if (!extraAdmins.includes(email)) extraAdmins.push(email);
-    saveExtraAdmins();
-    renderExtraAdminList();
-}
-function removeAdmin(email) {
-    email = (email || "").toLowerCase();
-    if (HARDCODED_ADMINS.includes(email)) return;
-    extraAdmins = extraAdmins.filter(e => e !== email);
-    saveExtraAdmins();
-    renderExtraAdminList();
-}
-function saveExtraAdmins() { localStorage.setItem("learnmultiply_extra_admins", JSON.stringify(extraAdmins)); }
-
-function renderExtraAdminList() {
-    const list = document.getElementById("extraAdminList");
-    if (!list) return;
-    list.innerHTML = "";
-    if (!extraAdmins.length) {
-        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No additional admins.</span>`;
-        return;
-    }
-    extraAdmins.forEach(email => {
-        const row = document.createElement("div");
-        row.className = "banned-user";
-        row.innerHTML = `<span>${escapeHtml(email)}</span>`;
-        const btn = document.createElement("button");
-        btn.className = "small-btn btn-ban";
-        btn.textContent = "Remove";
-        btn.onclick = () => removeAdmin(email);
-        row.appendChild(btn);
-        list.appendChild(row);
-    });
-}
-
-function manualBan(temp) {
-    if (!isAdmin()) return;
-    const email = document.getElementById("actionEmail").value.trim();
-    if (!email) return alert("Enter an email");
-    banEmail(email, temp ? 1 : null);
-    alert(email + (temp ? " temporarily restricted for 1 hour." : " restricted."));
-}
-function manualMute(mute) {
-    if (!isAdmin()) return;
-    const email = document.getElementById("actionEmail").value.trim();
-    if (!email) return alert("Enter an email");
-    if (mute) { muteEmail(email); alert(email + " muted."); }
-    else { unmuteEmail(email); alert(email + " unmuted."); }
-}
-function manualGiveAdmin(give) {
-    if (!isAdmin()) return;
-    const email = document.getElementById("actionEmail").value.trim();
-    if (!email) return alert("Enter an email");
-    if (give) { giveAdmin(email); alert(email + " granted admin access."); }
-    else { removeAdmin(email); alert(email + " admin access removed."); }
-}
-
-/* ============================================================
-   PRESENCE
-   ============================================================ */
-const PRESENCE_TOPIC = "learnmultiply/v3/presence";
-const PRESENCE_TTL_MS = 90 * 1000;
-let onlineUsers = {};
-
-function startPresence() {
-    if (presenceInterval) clearInterval(presenceInterval);
-    if (!mqttClient) initChat();
-    const publish = () => {
-        if (!mqttClient || !mqttClient.connected || !currentUser) return;
-        mqttClient.publish(PRESENCE_TOPIC, JSON.stringify({
-            clientId: mqttClient.options.clientId,
-            name: document.getElementById("nickname").value.trim() || currentUser.name,
-            email: currentUser.email,
-            ip: myPublicIP,
-            ts: Date.now()
-        }), { qos: 0 });
-    };
-    publish();
-    presenceInterval = setInterval(publish, 25000);
-}
-function stopPresence() {
-    if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
-}
-
-function handlePresenceMessage(data) {
-    if (!data || !data.clientId) return;
-    onlineUsers[data.clientId] = {
-        clientId: data.clientId,
-        name: data.name || "Student",
-        email: (data.email || "").toLowerCase(),
-        ip: data.ip || "unknown",
-        lastSeen: data.ts || Date.now()
-    };
-    const now = Date.now();
-    Object.keys(onlineUsers).forEach(id => {
-        if (now - onlineUsers[id].lastSeen > PRESENCE_TTL_MS) delete onlineUsers[id];
-    });
-    if (document.getElementById("settingsModal").style.display === "flex" && isAdmin()) {
-        renderOnlineList();
-    }
-}
-
-function renderOnlineList() {
-    const list = document.getElementById("onlineList");
-    const countEl = document.getElementById("onlineCount");
-    if (!list) return;
-    const now = Date.now();
-    const users = Object.values(onlineUsers)
-        .filter(u => now - u.lastSeen <= PRESENCE_TTL_MS)
-        .sort((a, b) => a.name.localeCompare(b.name));
-    countEl.textContent = `(${users.length})`;
-    list.innerHTML = "";
-    if (!users.length) {
-        list.innerHTML = `<span style="color:var(--muted);font-size:12px;">No active students detected.</span>`;
-        return;
-    }
-    users.forEach(u => {
-        const row = document.createElement("div");
-        row.className = "online-user";
-        const status = [];
-        if (getAdminTag(u.email)) status.push("STAFF");
-        if (isBanned(u.email)) status.push("BANNED");
-        if (isMuted(u.email)) status.push("MUTED");
-        const info = document.createElement("div");
-        info.className = "info";
-        info.innerHTML = `
-            <strong>${escapeHtml(u.name)}</strong>
-            ${status.length ? `<span style="color:#0f766e;font-size:11px;"> [${status.join(", ")}]</span>` : ""}<br>
-            <span style="color:var(--muted)">${escapeHtml(u.email)}</span><br>
-            <span style="font-family:monospace;font-size:12px">${escapeHtml(u.ip)}</span>
-            <span style="color:var(--muted);font-size:11px"> · ${Math.round((now - u.lastSeen)/1000)}s ago</span>`;
-        const actions = document.createElement("div");
-        actions.className = "actions";
-        if (!HARDCODED_ADMINS.includes(u.email)) {
-            const banBtn = document.createElement("button");
-            banBtn.className = "small-btn btn-ban"; banBtn.textContent = "Ban";
-            banBtn.onclick = () => { banEmail(u.email); alert("Restricted"); };
-            const tempBtn = document.createElement("button");
-            tempBtn.className = "small-btn btn-temp"; tempBtn.textContent = "Temp 1h";
-            tempBtn.onclick = () => { banEmail(u.email, 1); alert("Temporarily restricted"); };
-            const muteBtn = document.createElement("button");
-            muteBtn.className = "small-btn btn-mute";
-            muteBtn.textContent = isMuted(u.email) ? "Unmute" : "Mute";
-            muteBtn.onclick = () => { isMuted(u.email) ? unmuteEmail(u.email) : muteEmail(u.email); renderOnlineList(); };
-            const adminBtn = document.createElement("button");
-            adminBtn.className = "small-btn btn-admin";
-            adminBtn.textContent = getAdminTag(u.email) ? "Remove Admin" : "Make Admin";
-            adminBtn.onclick = () => { getAdminTag(u.email) ? removeAdmin(u.email) : giveAdmin(u.email); renderOnlineList(); };
-            actions.append(banBtn, tempBtn, muteBtn, adminBtn);
-        }
-        const copyBtn = document.createElement("button");
-        copyBtn.className = "small-btn btn-copy"; copyBtn.textContent = "Copy";
-        copyBtn.onclick = () => {
-            const text = `Name: ${u.name}\nEmail: ${u.email}\nIP: ${u.ip}`;
-            navigator.clipboard.writeText(text).then(() => alert("Copied")).catch(() => prompt("Copy:", text));
-        };
-        actions.appendChild(copyBtn);
-        row.append(info, actions);
-        list.appendChild(row);
-    });
-}
-
-function addToChatMonitor(author, email, text, time) {
-    chatMonitorLog.unshift({ author, email, text, time });
-    if (chatMonitorLog.length > 40) chatMonitorLog.pop();
-    if (document.getElementById("settingsModal").style.display === "flex" && isAdmin()) renderChatMonitor();
-}
-function renderChatMonitor() {
-    const box = document.getElementById("chatMonitor");
-    if (!box) return;
-    if (!chatMonitorLog.length) {
-        box.innerHTML = `<div style="color:var(--muted);">No messages captured yet.</div>`;
-        return;
-    }
-    box.innerHTML = chatMonitorLog.map(m => `
-        <div class="monitor-line">
-            <div class="meta">${escapeHtml(m.time || "")} · ${escapeHtml(m.author)} (${escapeHtml(m.email)})</div>
-            <div>${escapeHtml(m.text)}</div>
-        </div>`).join("");
-}
-
-/* ============================================================
-   CHAT
-   ============================================================ */
-const MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
-const TOPIC_PREFIX = "learnmultiply/v3/";
-const DISCOVERY_TOPIC = TOPIC_PREFIX + "rooms";
-
-let mqttClient = null;
-let currentRoom = "general";
-let rooms = { general: { name: "General Lounge", locked: false, password: "" } };
-let messages = { general: [] };
-
-function initChat() {
-    if (mqttClient) return;
-    const clientId = "learnmultiply_" + Math.random().toString(16).slice(2);
-    mqttClient = mqtt.connect(MQTT_BROKER, { clientId, clean: true, keepalive: 60 });
-    mqttClient.on("connect", () => {
-        document.getElementById("status").textContent = "● Connected";
-        mqttClient.subscribe(DISCOVERY_TOPIC);
-        mqttClient.subscribe(TOPIC_PREFIX + "chat/general");
-        mqttClient.subscribe(PRESENCE_TOPIC);
-        renderChannels();
-        if (currentUser) startPresence();
-    });
-    mqttClient.on("offline", () => { document.getElementById("status").textContent = "● Reconnecting…"; });
-    mqttClient.on("message", (topic, payload) => {
-        try {
-            const data = JSON.parse(payload.toString());
-            if (topic === PRESENCE_TOPIC) { handlePresenceMessage(data); return; }
-            if (topic === DISCOVERY_TOPIC) {
-                if (!rooms[data.key]) {
-                    rooms[data.key] = { name: data.name, locked: !!data.locked, password: "" };
-                    messages[data.key] = [];
-                    renderChannels();
-                }
-            } else if (topic.startsWith(TOPIC_PREFIX + "chat/")) {
-                const key = topic.replace(TOPIC_PREFIX + "chat/", "");
-                if (!messages[key]) messages[key] = [];
-                let text = data.text || "";
-                if (data.encrypted) {
-                    try {
-                        const bytes = CryptoJS.AES.decrypt(text, rooms[key]?.password || "");
-                        text = bytes.toString(CryptoJS.enc.Utf8) || "🔒 Encrypted message";
-                    } catch { text = "🔒 Unable to decrypt"; }
-                }
-                messages[key].push({ author: data.author, email: data.email, text, time: data.time });
-                addToChatMonitor(data.author, data.email, text, data.time);
-                if (key === currentRoom) renderMessages();
+        function handleAuthClick() {
+            if (tokenClient) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
             }
-        } catch (e) { console.error(e); }
-    });
-    renderChannels();
-    renderMessages();
-}
-
-function sendMessage(event) {
-    event.preventDefault();
-    if (!currentUser) return;
-    if (isBanned(currentUser.email)) return alert("Your account is restricted.");
-    if (isMuted(currentUser.email)) return alert("You are currently muted.");
-    if (!mqttClient) return alert("Not connected.");
-    const input = document.getElementById("messageInput");
-    const text = input.value.trim();
-    if (!text) return;
-    const room = rooms[currentRoom];
-    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    let outgoingText = text, encrypted = false;
-    if (room.locked && room.password) {
-        outgoingText = CryptoJS.AES.encrypt(text, room.password).toString();
-        encrypted = true;
-    }
-    mqttClient.publish(TOPIC_PREFIX + "chat/" + currentRoom, JSON.stringify({
-        author: document.getElementById("nickname").value.trim() || currentUser.name,
-        email: currentUser.email,
-        text: outgoingText,
-        encrypted,
-        time: now
-    }));
-    input.value = "";
-}
-
-function renderMessages() {
-    const container = document.getElementById("messages");
-    container.innerHTML = "";
-    const list = messages[currentRoom] || [];
-    if (!list.length) {
-        container.innerHTML = `<div style="text-align:center;color:var(--muted);padding:30px;">No messages yet. Be the first to say hello.</div>`;
-        return;
-    }
-    list.forEach(message => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "message" + (currentUser && message.email === currentUser.email ? " self" : "");
-        const meta = document.createElement("div");
-        meta.className = "message-meta";
-        const author = document.createElement("span");
-        author.className = "author";
-        author.textContent = message.author || "Student";
-        meta.appendChild(author);
-        if (getAdminTag(message.email)) {
-            const tag = document.createElement("span");
-            tag.className = "admin-tag";
-            tag.textContent = "STAFF";
-            meta.appendChild(tag);
         }
-        const time = document.createElement("span");
-        time.textContent = "· " + (message.time || "");
-        meta.appendChild(time);
-        const body = document.createElement("div");
-        body.className = "message-body";
-        body.textContent = message.text || "";
-        wrapper.append(meta, body);
-        container.appendChild(wrapper);
-    });
-    container.scrollTop = container.scrollHeight;
-}
 
-function renderChannels() {
-    const list = document.getElementById("channelList");
-    list.innerHTML = "";
-    Object.entries(rooms).forEach(([key, room]) => {
-        const li = document.createElement("li");
-        const button = document.createElement("button");
-        button.className = "channel" + (key === currentRoom ? " active" : "");
-        button.textContent = room.name + (room.locked ? " 🔒" : "");
-        button.onclick = () => selectRoom(key);
-        li.appendChild(button);
-        list.appendChild(li);
-    });
-}
+        function handleSignoutClick() {
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token, () => {
+                    gapi.client.setToken('');
+                    isAuthenticated = false;
+                    document.getElementById('auth-btn').innerText = 'Sign In';
+                    document.getElementById('auth-btn').onclick = handleAuthClick;
+                    document.getElementById('auth-status').innerText = 'Not Signed In';
+                });
+            }
+        }
 
-function selectRoom(key) {
-    const room = rooms[key];
-    if (!room) return;
-    if (room.locked && !room.password) {
-        const password = prompt("Enter the password for " + room.name);
-        if (password === null) return;
-        room.password = password;
-    }
-    currentRoom = key;
-    document.getElementById("currentRoom").textContent = room.name;
-    if (mqttClient) mqttClient.subscribe(TOPIC_PREFIX + "chat/" + key);
-    renderChannels();
-    renderMessages();
-}
+        // Fetch YouTube Shorts
+        async function loadShorts() {
+            try {
+                const response = await gapi.client.youtube.search.list({
+                    part: 'snippet',
+                    q: '#shorts',
+                    maxResults: 10,
+                    type: 'video',
+                    videoDuration: 'short'
+                });
 
-/* ============================================================
-   GROUPS / MODULES / TABS
-   ============================================================ */
-function openCreateGroup() { document.getElementById("groupModal").style.display = "flex"; }
-function closeCreateGroup() { document.getElementById("groupModal").style.display = "none"; }
-function createGroup() {
-    const name = document.getElementById("groupName").value.trim();
-    const password = document.getElementById("groupPassword").value.trim();
-    if (!name) return alert("Enter a group name.");
-    const key = "group_" + Date.now().toString(36);
-    rooms[key] = { name, locked: !!password, password };
-    messages[key] = [];
-    if (mqttClient) {
-        mqttClient.publish(DISCOVERY_TOPIC, JSON.stringify({ key, name, locked: !!password }), { retain: true });
-    }
-    currentRoom = key;
-    document.getElementById("currentRoom").textContent = name;
-    renderChannels();
-    renderMessages();
-    document.getElementById("groupName").value = "";
-    document.getElementById("groupPassword").value = "";
-    closeCreateGroup();
-}
+                const feed = document.getElementById('feed');
+                feed.innerHTML = ''; 
 
-const games = [
-    { title: "Snake", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Snake", url: "games/snake.html" },
-    { title: "Pong", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Pong", url: "games/pong.html" },
-    { title: "Breakout", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Breakout", url: "games/breakout.html" },
-    { title: "Memory Match", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Memory+Match", url: "games/memory.html" },
-    { title: "Tic Tac Toe", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Tic+Tac+Toe", url: "games/tictactoe.html" },
-    { title: "SM64", category: "Emulation", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=SM64", url: "sm64/index.html" },
-    { title: "Flappy Bird", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Flappy+Bird", url: "games/flappy.html" },
-    { title: "Tetris", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Tetris", url: "games/tetris.html" },
-    { title: "Reaction Test", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Reaction+Test", url: "games/reaction.html" },
-    { title: "Math Challenge", category: "Classic", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Math+Challenge", url: "games/math.html" },
-    { title: "Dash", category: "Arcade", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Dash", url: "games/dash.html" },
-    { title: "Craft", category: "Adventure", image: "https://placehold.co/400x250/1e3a5f/93c5fd?text=Craft", url: "craft.html" }
-];
+                response.result.items.forEach(item => {
+                    const videoId = item.id.videoId;
+                    const channelId = item.snippet.channelId;
+                    const title = item.snippet.title;
+                    const channelTitle = item.snippet.channelTitle;
 
-let currentTab = "Games";
-let category = "All";
+                    const shortHtml = `
+                        <div class="short-container">
+                            <iframe class="video-player" 
+                                src="https://www.youtube.com/embed/${videoId}?autoplay=0&loop=1&controls=0&modestbranding=1&rel=0&playsinline=1" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                            <div class="info-panel">
+                                <h3 onclick="viewChannel('${channelId}')">@${channelTitle}</h3>
+                                <p>${title}</p>
+                            </div>
+                            <div class="overlay-actions">
+                                <button class="action-btn" onclick="likeVideo('${videoId}')" title="Like">👍</button>
+                                <button class="action-btn" onclick="commentVideo('${videoId}')" title="Comment">💬</button>
+                                <button class="action-btn" onclick="subscribeChannel('${channelId}')" title="Subscribe">➕</button>
+                            </div>
+                        </div>
+                    `;
+                    feed.insertAdjacentHTML('beforeend', shortHtml);
+                });
+            } catch (err) {
+                console.error('Error loading shorts', err);
+                document.getElementById('feed').innerHTML = '<div style="margin: 100px; text-align: center;">Error loading videos. Check API Key.</div>';
+            }
+        }
 
-function renderGames() {
-    const grid = document.getElementById("gameGrid");
-    const search = document.getElementById("searchInput").value.toLowerCase();
-    const filtered = games.filter(g =>
-        (category === "All" || g.category === category) &&
-        g.title.toLowerCase().includes(search)
-    );
-    grid.innerHTML = "";
-    filtered.forEach(game => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-            <div class="card-image"><img src="${game.image}" alt=""></div>
-            <div class="card-content">
-                <div class="card-title">${escapeHtml(game.title)}</div>
-                <span class="card-category">${escapeHtml(game.category)}</span>
-            </div>`;
-        card.onclick = () => openGame(game);
-        grid.appendChild(card);
-    });
-}
+        async function likeVideo(videoId) {
+            if (!isAuthenticated) return alert('Please sign in to like videos');
+            try {
+                await gapi.client.youtube.videos.rate({
+                    id: videoId,
+                    rating: 'like'
+                });
+                alert('Video liked!');
+            } catch (err) {
+                console.error('Like error:', err);
+                alert('Error liking video. Ensure your app has proper permissions.');
+            }
+        }
 
-function openGame(game) {
-    if (game.url.startsWith("http") || game.url.endsWith(".html")) {
-        document.getElementById("playerTitle").textContent = game.title;
-        document.getElementById("playerFrame").src = game.url;
-        document.getElementById("player").style.display = "flex";
-    }
-}
-function closePlayer() {
-    document.getElementById("player").style.display = "none";
-    document.getElementById("playerFrame").src = "";
-}
+        async function commentVideo(videoId) {
+            if (!isAuthenticated) return alert('Please sign in to comment');
+            const text = prompt('Enter your comment:');
+            if (!text) return;
+            try {
+                await gapi.client.youtube.commentThreads.insert({
+                    part: 'snippet',
+                    resource: {
+                        snippet: {
+                            videoId: videoId,
+                            topLevelComment: {
+                                snippet: { textOriginal: text }
+                            }
+                        }
+                    }
+                });
+                alert('Comment posted successfully!');
+            } catch (err) {
+                console.error('Comment error:', err);
+                alert('Error posting comment.');
+            }
+        }
 
-function switchMainTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
-    document.getElementById("nav" + tab).classList.add("active");
-    const grid = document.getElementById("gameGrid");
-    const categories = document.getElementById("categories");
-    const chat = document.getElementById("chatContainer");
+        async function subscribeChannel(channelId) {
+            if (!isAuthenticated) return alert('Please sign in to subscribe');
+            try {
+                await gapi.client.youtube.subscriptions.insert({
+                    part: 'snippet',
+                    resource: {
+                        snippet: {
+                            resourceId: {
+                                kind: 'youtube#channel',
+                                channelId: channelId
+                            }
+                        }
+                    }
+                });
+                alert('Subscribed to channel!');
+            } catch (err) {
+                console.error('Subscribe error:', err);
+                alert('Error subscribing or already subscribed.');
+            }
+        }
 
-    if (tab === "Games") {
-        grid.style.display = "grid";
-        categories.style.display = "flex";
-        chat.style.display = "none";
-        document.getElementById("heroTitle").textContent = "Learning Modules & Study Resources";
-        document.getElementById("heroSubtitle").textContent = "Select a module to begin. All activity is intended for educational use during approved study periods.";
-        renderGames();
-    } else if (tab === "Videos") {
-        grid.style.display = "grid";
-        categories.style.display = "none";
-        chat.style.display = "none";
-        document.getElementById("heroTitle").textContent = "Educational Videos";
-        document.getElementById("heroSubtitle").textContent = "Video resources will appear here when added by staff.";
-        grid.innerHTML = `<div class="card"><div class="card-content"><div class="card-title">Video library</div><p style="color:var(--muted);font-size:13px;margin-top:6px;">Coming soon.</p></div></div>`;
-    } else if (tab === "Chat") {
-        grid.style.display = "none";
-        categories.style.display = "none";
-        chat.style.display = "grid";
-        document.getElementById("heroTitle").textContent = "Student Study Groups";
-        document.getElementById("heroSubtitle").textContent = "Collaborate with classmates in real-time study groups. Keep conversations respectful and on-topic.";
-        initChat();
-    }
-}
+        async function viewChannel(channelId) {
+            try {
+                const response = await gapi.client.youtube.channels.list({
+                    part: 'snippet,statistics',
+                    id: channelId
+                });
+                const channel = response.result.items[0];
+                
+                document.getElementById('modal-title').innerText = channel.snippet.title;
+                document.getElementById('modal-subs').innerText = Number(channel.statistics.subscriberCount).toLocaleString();
+                document.getElementById('modal-views').innerText = Number(channel.statistics.viewCount).toLocaleString();
+                document.getElementById('modal-videos').innerText = Number(channel.statistics.videoCount).toLocaleString();
+                
+                document.getElementById('channel-modal').style.display = 'flex';
+            } catch (err) {
+                console.error('Channel info error:', err);
+                alert('Could not load channel info.');
+            }
+        }
 
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-document.getElementById("searchInput").addEventListener("input", renderGames);
-document.querySelectorAll(".cat-btn").forEach(button => {
-    button.addEventListener("click", () => {
-        document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
-        button.classList.add("active");
-        category = button.dataset.category;
-        renderGames();
-    });
-});
-
-checkExistingLogin();
-renderGames();
-</script>
+        function closeModal() {
+            document.getElementById('channel-modal').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
