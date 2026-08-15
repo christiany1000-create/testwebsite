@@ -120,7 +120,7 @@
                     apiKey: API_KEY,
                     discoveryDocs: DISCOVERY_DOCS,
                 });
-                loadShorts(); // Load initial videos
+                loadShorts();
             });
         }
 
@@ -136,7 +136,6 @@
                         document.getElementById('auth-btn').onclick = handleSignoutClick;
                         document.getElementById('auth-status').innerText = 'Signed In';
                         
-                        // Reload the feed to show personalized content once signed in
                         document.getElementById('feed').innerHTML = '';
                         loadShorts();
                     }
@@ -160,68 +159,78 @@
                     document.getElementById('auth-btn').onclick = handleAuthClick;
                     document.getElementById('auth-status').innerText = 'Not Signed In';
                     
-                    // Reload the feed to show general content
                     document.getElementById('feed').innerHTML = '';
                     loadShorts();
                 });
             }
         }
 
-        // Fetch YouTube Shorts from the user's Subscribed Channels
+        // Robust Shorts Feed Loader with Fallbacks
         async function loadShorts() {
             const feed = document.getElementById('feed');
             
-            // Only show a loading message if the feed is empty
             if (feed.children.length === 0) {
                 feed.innerHTML = '<div style="margin: 100px; text-align: center;">Loading feed...</div>';
             }
 
             try {
-                let searchParams = {
-                    part: 'snippet',
-                    maxResults: 10,
-                    type: 'video',
-                    videoDuration: 'short',
-                    videoEmbeddable: 'true'
-                };
+                let items = [];
 
-                // If signed in, build a feed from their subscriptions
+                // Try fetching from subscriptions if authenticated
                 if (isAuthenticated) {
-                    const subsResponse = await gapi.client.youtube.subscriptions.list({
-                        part: 'snippet',
-                        mine: true,
-                        maxResults: 50 // Fetch up to 50 of their subscriptions
-                    });
-
-                    const channels = subsResponse.result.items;
-                    
-                    if (channels && channels.length > 0) {
-                        // Pick a random subscribed channel to pull recent Shorts from
-                        const randomChannel = channels[Math.floor(Math.random() * channels.length)];
-                        searchParams.channelId = randomChannel.snippet.resourceId.channelId;
-                        searchParams.order = 'date'; // Get their most recent uploads
-                    } else {
-                        // Fallback if they are signed in but have zero subscriptions
-                        searchParams.q = '#shorts'; 
-                        searchParams.order = 'relevance';
+                    try {
+                        const subsResponse = await gapi.client.youtube.subscriptions.list({
+                            part: 'snippet',
+                            mine: true,
+                            maxResults: 20
+                        });
+                        const channels = subsResponse.result.items;
+                        if (channels && channels.length > 0) {
+                            const randomChannel = channels[Math.floor(Math.random() * channels.length)];
+                            const subVideos = await gapi.client.youtube.search.list({
+                                part: 'snippet',
+                                channelId: randomChannel.snippet.resourceId.channelId,
+                                maxResults: 10,
+                                type: 'video',
+                                videoDuration: 'short',
+                                videoEmbeddable: 'true',
+                                order: 'date'
+                            });
+                            if (subVideos.result.items && subVideos.result.items.length > 0) {
+                                items = subVideos.result.items;
+                            }
+                        }
+                    } catch (subErr) {
+                        console.warn('Subscription fetch fallback triggered:', subErr);
                     }
-                } else {
-                    // Fallback for users who are not signed in
-                    searchParams.q = '#shorts';
-                    searchParams.order = 'relevance';
                 }
 
-                const response = await gapi.client.youtube.search.list(searchParams);
+                // Fallback to general hashtag search if subscription search returned nothing
+                if (items.length === 0) {
+                    const generalResponse = await gapi.client.youtube.search.list({
+                        part: 'snippet',
+                        q: '#shorts',
+                        maxResults: 15,
+                        type: 'video',
+                        videoDuration: 'short',
+                        videoEmbeddable: 'true',
+                        order: 'relevance'
+                    });
+                    items = generalResponse.result.items || [];
+                }
                 
-                // Clear the loading message if it's the first load
                 if (feed.innerHTML.includes("Loading feed...")) {
                     feed.innerHTML = ''; 
                 }
 
+                if (items.length === 0) {
+                    feed.innerHTML = '<div style="margin: 100px; text-align: center;">No videos found. Check API quota or restrictions.</div>';
+                    return;
+                }
+
                 // Inject the videos
-                response.result.items.forEach(item => {
-                    // Search endpoint sometimes returns channels or playlists, ensure it's a video
-                    if (item.id.kind !== 'youtube#video') return; 
+                items.forEach(item => {
+                    if (!item.id || item.id.kind !== 'youtube#video') return; 
 
                     const videoId = item.id.videoId;
                     const channelId = item.snippet.channelId;
@@ -231,7 +240,7 @@
                     const shortHtml = `
                         <div class="short-container">
                             <iframe class="video-player" 
-                                src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&loop=1&controls=0&modestbranding=1&rel=0&playsinline=1&origin=${window.location.origin}" 
+                                src="https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&autoplay=0&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&playsinline=1&origin=${window.location.origin}" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                 allowfullscreen>
                             </iframe>
@@ -248,10 +257,42 @@
                     `;
                     feed.insertAdjacentHTML('beforeend', shortHtml);
                 });
+
+                // Initialize Intersection Observer for Auto-Play / Pause on Scroll
+                setupScrollAutoplay();
+
             } catch (err) {
                 console.error('Error loading shorts', err);
                 feed.innerHTML = '<div style="margin: 100px; text-align: center;">Error loading videos. Check API Key and Quota.</div>';
             }
+        }
+
+        // Intersection Observer to Auto-Play active short and Pause off-screen shorts
+        function setupScrollAutoplay() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const iframe = entry.target.querySelector('iframe');
+                    if (!iframe || !iframe.contentWindow) return;
+
+                    if (entry.isIntersecting) {
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'playVideo',
+                            args: ''
+                        }), '*');
+                    } else {
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'pauseVideo',
+                            args: ''
+                        }), '*');
+                    }
+                });
+            }, { threshold: 0.6 });
+
+            document.querySelectorAll('.short-container').forEach(container => {
+                observer.observe(container);
+            });
         }
 
         async function likeVideo(videoId) {
