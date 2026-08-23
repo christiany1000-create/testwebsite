@@ -13,16 +13,10 @@
             font-style: normal;
         }
 
-        /* Classic Dirt Background */
+        /* OLED Black Background */
         body {
-            /* Fallback dark brown, but uses dirt.png if you add it to the folder */
-            background-color: #3f2a14;
-            background-image: url('dirt.png'); 
-            background-size: 64px 64px; /* Scales up a 16x16 texture perfectly */
-            background-repeat: repeat;
-            image-rendering: pixelated;
-            
-            color: #ffffff;
+            background-color: #000000;
+            color: #AAAAAA; /* Secondary Light Gray */
             font-family: 'MinecraftFont', monospace, sans-serif;
             margin: 0;
             padding: 0;
@@ -52,20 +46,20 @@
 
         .logo {
             font-size: 4.5rem;
-            color: #ffffff;
-            text-shadow: 4px 4px 0px #3f3f3f;
+            color: #3388FF; /* Primary Blue */
+            text-shadow: 4px 4px 0px #001133;
             margin: 0;
             letter-spacing: 2px;
         }
 
-        /* Yellow Splashtext */
+        /* Yellow Splashtext -> Now Light Gray */
         .splash {
             position: absolute;
             bottom: -20px;
             right: -40px;
-            color: #ffff55;
+            color: #AAAAAA; /* Secondary Light Gray */
             font-size: 1.5rem;
-            text-shadow: 2px 2px 0px #3f3f3f;
+            text-shadow: 2px 2px 0px #111111;
             transform: rotate(-20deg);
             animation: splashThrob 0.4s infinite alternate;
             white-space: nowrap;
@@ -90,17 +84,17 @@
             width: 100%;
         }
 
-        /* Authentic CSS Minecraft Buttons */
+        /* OLED MC Buttons */
         .mc-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #7D7D7D;
-            border: 2px solid #000000;
-            /* Creates the 3D bevel effect natively in CSS */
-            box-shadow: inset 2px 2px 0px 0px #9E9E9E, inset -2px -2px 0px 0px #585858;
-            color: #ffffff;
-            text-shadow: 2px 2px 0px #3F3F3F;
+            background-color: #000000; /* Pitch black for OLED */
+            border: 2px solid #111111;
+            /* Subtle gray 3D bevel to keep the MC shape on a black background */
+            box-shadow: inset 2px 2px 0px 0px #333333, inset -2px -2px 0px 0px #0a0a0a;
+            color: #AAAAAA; /* Secondary Light Gray */
+            text-shadow: 2px 2px 0px #000000;
             font-family: 'MinecraftFont', monospace;
             font-size: 1.2rem;
             text-decoration: none;
@@ -108,18 +102,20 @@
             cursor: pointer;
             width: 100%;
             box-sizing: border-box;
+            transition: all 0.1s ease-in-out;
         }
 
         /* Half-width buttons */
         .mc-btn.half {
-            width: 48%; /* Leaves a small gap between them */
+            width: 48%; 
         }
 
-        /* Hover Effect (Turns text yellow) */
+        /* Hover Effect (Turns Primary Blue) */
         .mc-btn:hover {
-            color: #ffffaa;
-            /* Minecraft buttons usually get a slight outline highlight on hover in newer versions */
-            border-color: #ffffff;
+            color: #3388FF; /* Primary Blue */
+            border-color: #3388FF; /* Outlines the button in blue */
+            /* Blue glowing 3D bevel */
+            box-shadow: inset 2px 2px 0px 0px #55AAFF, inset -2px -2px 0px 0px #0044AA;
         }
 
         /* Footer Text Overlay */
@@ -127,8 +123,8 @@
             position: fixed;
             bottom: 5px;
             left: 5px;
-            color: #ffffff;
-            text-shadow: 2px 2px 0px #3f3f3f;
+            color: #AAAAAA; /* Secondary Light Gray */
+            text-shadow: 2px 2px 0px #000000;
             font-size: 1rem;
         }
 
@@ -136,8 +132,8 @@
             position: fixed;
             bottom: 5px;
             right: 5px;
-            color: #ffffff;
-            text-shadow: 2px 2px 0px #3f3f3f;
+            color: #AAAAAA; /* Secondary Light Gray */
+            text-shadow: 2px 2px 0px #000000;
             font-size: 1rem;
         }
     </style>
@@ -166,7 +162,6 @@
 
     </div>
 
-    <!-- Bottom corners text, like the real game -->
     <div class="footer-left">Raidingdud Web v1.0</div>
     <div class="footer-right">Copyright DOC. Do not distribute!</div>
 
