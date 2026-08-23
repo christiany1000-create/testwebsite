@@ -70,6 +70,14 @@
             line-height: 1.6;
             margin-bottom: 50px;
         }
+        
+        /* Container for keeping buttons tidy */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
 
         /* Blocky Minecraft-style Buttons */
         .btn {
@@ -89,14 +97,14 @@
         /* Hover effect for main button */
         .btn:hover {
             background-color: #9400D3;
-            color: #ffffff; /* Switched to white on hover for better contrast against purple */
+            color: #ffffff; 
             transform: translateY(-5px);
             box-shadow: 0 10px 15px rgba(148, 0, 211, 0.3);
         }
 
         /* Specific styling for the Modrinth button */
         .btn-modrinth {
-            border-color: #1bd96a; /* Kept Modrinth's official brand green */
+            border-color: #1bd96a; 
             color: #1bd96a;
         }
 
@@ -123,11 +131,16 @@
         
         <p>Welcome to the official page for [Mod Name]. Add a brief description of what your mod does, the features it adds to the game, and any dependencies (like Fabric API) it might need.</p>
         
-        <!-- Direct File Download -->
-        <a href="YOUR_MOD_FILE.jar" download class="btn">Download .JAR</a>
+        <div class="button-group">
+            <!-- Direct File Download -->
+            <a href="YOUR_MOD_FILE.jar" download class="btn">Download .JAR</a>
 
-        <!-- Modrinth Link -->
-        <a href="YOUR_MODRINTH_LINK_HERE" target="_blank" rel="noopener noreferrer" class="btn btn-modrinth">View on Modrinth</a>
+            <!-- Modrinth Link -->
+            <a href="YOUR_MODRINTH_LINK_HERE" target="_blank" rel="noopener noreferrer" class="btn btn-modrinth">View on Modrinth</a>
+            
+            <!-- Installation Docs Link -->
+            <a href="installation.html" class="btn">Installation Guide</a>
+        </div>
     </div>
 
     <footer>
