@@ -13,9 +13,9 @@
             font-style: normal;
         }
 
-        /* Core styling matching the home page */
+        /* Core styling matching the home page (Gold) */
         body {
-            background: radial-gradient(circle at top, #1b0525 0%, #000000 80%);
+            background: radial-gradient(circle at top, #261a00 0%, #000000 80%);
             background-attachment: fixed;
             color: #ffffff;
             font-family: 'MinecraftFont', monospace, sans-serif;
@@ -40,15 +40,15 @@
             animation: fadeInSlide 1.2s ease-out forwards;
         }
 
-        /* Continuous glowing animation for the title (Purple) */
+        /* Continuous glowing animation for the title (Gold) */
         @keyframes pulseGlow {
-            0% { text-shadow: 0 0 5px #3a005c; }
-            50% { text-shadow: 0 0 15px #9400D3, 0 0 25px #9400D3; }
-            100% { text-shadow: 0 0 5px #3a005c; }
+            0% { text-shadow: 0 0 5px #3d2600; }
+            50% { text-shadow: 0 0 15px #FFAA00, 0 0 25px #FFAA00; }
+            100% { text-shadow: 0 0 5px #3d2600; }
         }
 
         h1 {
-            color: #9400D3; /* Vibrant dark purple */
+            color: #FFAA00;
             font-size: 3.5rem;
             margin-bottom: 10px;
             text-align: center;
@@ -58,10 +58,10 @@
 
         /* Section headers */
         h2 {
-            color: #9400D3;
+            color: #FFAA00;
             font-size: 2rem;
             margin-top: 40px;
-            border-bottom: 2px solid #3a005c;
+            border-bottom: 2px solid #3d2600;
             padding-bottom: 10px;
         }
 
@@ -82,11 +82,11 @@
 
         /* Code/Filepath blocks */
         .code-block {
-            background-color: #0d0213;
-            border: 2px solid #3a005c;
+            background-color: #140d00;
+            border: 2px solid #3d2600;
             padding: 10px;
             font-family: monospace;
-            color: #d896ff; /* Lighter purple for contrast */
+            color: #ffd27f; 
             display: block;
             margin-top: 10px;
             border-radius: 4px;
@@ -98,21 +98,21 @@
             width: max-content;
             margin: 20px auto 40px auto;
             background-color: transparent;
-            color: #9400D3;
+            color: #FFAA00;
             text-decoration: none;
             padding: 12px 25px;
             font-size: 1.1rem;
-            border: 3px solid #9400D3;
+            border: 3px solid #FFAA00;
             transition: all 0.3s ease-in-out;
             text-align: center;
             text-transform: uppercase;
         }
 
         .btn-back:hover {
-            background-color: #9400D3;
-            color: #ffffff;
+            background-color: #FFAA00;
+            color: #000000;
             transform: translateY(-3px);
-            box-shadow: 0 8px 12px rgba(148, 0, 211, 0.3);
+            box-shadow: 0 8px 12px rgba(255, 170, 0, 0.3);
         }
 
         footer {
@@ -129,7 +129,6 @@
     <div class="container">
         <h1>Installation Guide</h1>
         
-        <!-- Button to go back to the main index.html page -->
         <a href="index.html" class="btn-back">← Back to Home</a>
         
         <h2>Prerequisites</h2>
