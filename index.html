@@ -13,11 +13,11 @@
             font-style: normal;
         }
 
-        /* Core styling with subtle green gradient */
+        /* Core styling with dark purple gradient */
         body {
-            /* A very dark green in the center fading to pure black at the edges */
-            background: radial-gradient(circle at center, #052205 0%, #000000 70%);
-            background-attachment: fixed; /* Keeps the gradient in place when scrolling */
+            /* A deep, dark purple in the center fading to pure black at the edges */
+            background: radial-gradient(circle at center, #1b0525 0%, #000000 70%);
+            background-attachment: fixed;
             color: #ffffff;
             font-family: 'MinecraftFont', monospace, sans-serif;
             text-align: center;
@@ -44,29 +44,28 @@
             max-width: 800px;
             margin: 80px auto;
             padding: 20px;
-            /* Applies the fade-in animation */
             animation: fadeInSlide 1.2s ease-out forwards;
         }
 
-        /* Continuous glowing animation for the title */
+        /* Continuous glowing animation for the title (Purple) */
         @keyframes pulseGlow {
-            0% { text-shadow: 0 0 5px #115511; }
-            50% { text-shadow: 0 0 15px #55FF55, 0 0 25px #55FF55; }
-            100% { text-shadow: 0 0 5px #115511; }
+            0% { text-shadow: 0 0 5px #3a005c; }
+            50% { text-shadow: 0 0 15px #9400D3, 0 0 25px #9400D3; }
+            100% { text-shadow: 0 0 5px #3a005c; }
         }
 
-        /* Green heading */
+        /* Dark Purple heading */
         h1 {
-            color: #55FF55;
+            color: #9400D3; /* Vibrant dark purple */
             font-size: 4rem;
             margin-bottom: 20px;
             letter-spacing: 2px;
-            /* Applies the glowing animation */
             animation: pulseGlow 3s infinite alternate;
         }
 
         /* White text */
         p {
+            color: #ffffff;
             font-size: 1.2rem;
             line-height: 1.6;
             margin-bottom: 50px;
@@ -76,28 +75,28 @@
         .btn {
             display: inline-block;
             background-color: transparent;
-            color: #55FF55;
+            color: #9400D3;
             text-decoration: none;
             padding: 15px 30px;
             font-size: 1.2rem;
-            border: 4px solid #55FF55;
+            border: 4px solid #9400D3;
             margin: 10px;
             transition: all 0.3s ease-in-out;
             cursor: pointer;
             text-transform: uppercase;
         }
 
-        /* Hover effect for buttons */
+        /* Hover effect for main button */
         .btn:hover {
-            background-color: #55FF55;
-            color: #000000;
-            transform: translateY(-5px); /* Makes the button "pop" up */
-            box-shadow: 0 10px 15px rgba(85, 255, 85, 0.2);
+            background-color: #9400D3;
+            color: #ffffff; /* Switched to white on hover for better contrast against purple */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(148, 0, 211, 0.3);
         }
 
         /* Specific styling for the Modrinth button */
         .btn-modrinth {
-            border-color: #1bd96a;
+            border-color: #1bd96a; /* Kept Modrinth's official brand green */
             color: #1bd96a;
         }
 
@@ -124,7 +123,7 @@
         
         <p>Welcome to the official page for [Mod Name]. Add a brief description of what your mod does, the features it adds to the game, and any dependencies (like Fabric API) it might need.</p>
         
-        <!-- Direct File Download. Point the href to your actual .jar file -->
+        <!-- Direct File Download -->
         <a href="YOUR_MOD_FILE.jar" download class="btn">Download .JAR</a>
 
         <!-- Modrinth Link -->
