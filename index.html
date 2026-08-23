@@ -13,9 +13,11 @@
             font-style: normal;
         }
 
-        /* Core styling */
+        /* Core styling with subtle green gradient */
         body {
-            background-color: #000000;
+            /* A very dark green in the center fading to pure black at the edges */
+            background: radial-gradient(circle at center, #052205 0%, #000000 70%);
+            background-attachment: fixed; /* Keeps the gradient in place when scrolling */
             color: #ffffff;
             font-family: 'MinecraftFont', monospace, sans-serif;
             text-align: center;
@@ -26,18 +28,41 @@
             min-height: 100vh;
         }
 
+        /* Page load animation */
+        @keyframes fadeInSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .container {
             max-width: 800px;
             margin: 80px auto;
             padding: 20px;
+            /* Applies the fade-in animation */
+            animation: fadeInSlide 1.2s ease-out forwards;
+        }
+
+        /* Continuous glowing animation for the title */
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 5px #115511; }
+            50% { text-shadow: 0 0 15px #55FF55, 0 0 25px #55FF55; }
+            100% { text-shadow: 0 0 5px #115511; }
         }
 
         /* Green heading */
         h1 {
-            color: #55FF55; /* Classic Minecraft Green */
+            color: #55FF55;
             font-size: 4rem;
             margin-bottom: 20px;
             letter-spacing: 2px;
+            /* Applies the glowing animation */
+            animation: pulseGlow 3s infinite alternate;
         }
 
         /* White text */
@@ -50,14 +75,14 @@
         /* Blocky Minecraft-style Buttons */
         .btn {
             display: inline-block;
-            background-color: #000000;
+            background-color: transparent;
             color: #55FF55;
             text-decoration: none;
             padding: 15px 30px;
             font-size: 1.2rem;
             border: 4px solid #55FF55;
             margin: 10px;
-            transition: all 0.2s ease-in-out;
+            transition: all 0.3s ease-in-out;
             cursor: pointer;
             text-transform: uppercase;
         }
@@ -66,18 +91,20 @@
         .btn:hover {
             background-color: #55FF55;
             color: #000000;
-            transform: scale(1.05);
+            transform: translateY(-5px); /* Makes the button "pop" up */
+            box-shadow: 0 10px 15px rgba(85, 255, 85, 0.2);
         }
 
         /* Specific styling for the Modrinth button */
         .btn-modrinth {
-            border-color: #1bd96a; /* Modrinth's brand green */
+            border-color: #1bd96a;
             color: #1bd96a;
         }
 
         .btn-modrinth:hover {
             background-color: #1bd96a;
             color: #000000;
+            box-shadow: 0 10px 15px rgba(27, 217, 106, 0.2);
         }
 
         footer {
@@ -85,6 +112,7 @@
             padding: 20px;
             font-size: 0.9rem;
             color: #666666;
+            animation: fadeInSlide 1.5s ease-out forwards;
         }
     </style>
 </head>
