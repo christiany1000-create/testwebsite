@@ -3,227 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raidingdud | Developer Portfolio</title>
+    <title>Raidingdud | Developer Menu</title>
     <style>
-        /* Core modern developer styling */
-        :root {
-            --bg-color: #0d0d0d;
-            --card-bg: #1a1a1a;
-            --text-main: #f0f0f0;
-            --text-muted: #a0a0a0;
-            --accent-color: #FFAA00; /* Keeping the gold accent */
-            --accent-hover: #ffcc55;
+        /* Loads the Minecraft font */
+        @font-face {
+            font-family: 'MinecraftFont';
+            src: url('minecraft.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
         }
 
+        /* Classic Dirt Background */
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Fallback dark brown, but uses dirt.png if you add it to the folder */
+            background-color: #3f2a14;
+            background-image: url('dirt.png'); 
+            background-size: 64px 64px; /* Scales up a 16x16 texture perfectly */
+            background-repeat: repeat;
+            image-rendering: pixelated;
+            
+            color: #ffffff;
+            font-family: 'MinecraftFont', monospace, sans-serif;
             margin: 0;
             padding: 0;
-            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            user-select: none;
         }
 
-        /* Smooth fade-in for the whole page */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Main Menu Container */
+        .menu-container {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -50px;
         }
 
-        header {
+        /* Logo Area */
+        .logo-container {
+            position: relative;
+            margin-bottom: 60px;
             text-align: center;
-            padding: 100px 20px 50px;
-            animation: fadeIn 1s ease-out;
         }
 
-        h1 {
-            font-size: 3.5rem;
+        .logo {
+            font-size: 4.5rem;
+            color: #ffffff;
+            text-shadow: 4px 4px 0px #3f3f3f;
             margin: 0;
             letter-spacing: 2px;
-            color: var(--text-main);
         }
 
-        h1 span {
-            color: var(--accent-color);
-        }
-
-        .tagline {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 20px auto;
-        }
-
-        /* Social/Contact Links */
-        .contact-links {
-            margin-top: 30px;
-        }
-
-        .contact-links a {
-            color: var(--accent-color);
-            text-decoration: none;
-            margin: 0 15px;
-            font-size: 1.1rem;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .contact-links a:hover {
-            color: var(--accent-hover);
-            border-bottom: 2px solid var(--accent-hover);
-        }
-
-        /* Projects Section */
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 50px 20px;
-            animation: fadeIn 1.2s ease-out forwards;
-        }
-
-        h2.section-title {
-            font-size: 2.2rem;
-            border-left: 4px solid var(--accent-color);
-            padding-left: 15px;
-            margin-bottom: 40px;
-        }
-
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        /* Project Cards */
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border-top: 3px solid transparent;
-            transition: transform 0.3s ease, border-top 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-            border-top: 3px solid var(--accent-color);
-        }
-
-        .card h3 {
-            margin-top: 0;
-            color: var(--accent-color);
+        /* Yellow Splashtext */
+        .splash {
+            position: absolute;
+            bottom: -20px;
+            right: -40px;
+            color: #ffff55;
             font-size: 1.5rem;
+            text-shadow: 2px 2px 0px #3f3f3f;
+            transform: rotate(-20deg);
+            animation: splashThrob 0.4s infinite alternate;
+            white-space: nowrap;
         }
 
-        .card p {
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-bottom: 20px;
+        @keyframes splashThrob {
+            from { transform: rotate(-20deg) scale(1); }
+            to { transform: rotate(-20deg) scale(1.1); }
         }
 
-        /* Tech Stack Tags */
-        .tags {
+        /* Button Layout */
+        .button-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
         }
 
-        .tag {
-            background-color: #2a2a2a;
-            color: #d0d0d0;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-family: monospace;
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
         }
 
-        footer {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            border-top: 1px solid #222;
-            margin-top: 50px;
+        /* Authentic CSS Minecraft Buttons */
+        .mc-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #7D7D7D;
+            border: 2px solid #000000;
+            /* Creates the 3D bevel effect natively in CSS */
+            box-shadow: inset 2px 2px 0px 0px #9E9E9E, inset -2px -2px 0px 0px #585858;
+            color: #ffffff;
+            text-shadow: 2px 2px 0px #3F3F3F;
+            font-family: 'MinecraftFont', monospace;
+            font-size: 1.2rem;
+            text-decoration: none;
+            height: 40px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Half-width buttons */
+        .mc-btn.half {
+            width: 48%; /* Leaves a small gap between them */
+        }
+
+        /* Hover Effect (Turns text yellow) */
+        .mc-btn:hover {
+            color: #ffffaa;
+            /* Minecraft buttons usually get a slight outline highlight on hover in newer versions */
+            border-color: #ffffff;
+        }
+
+        /* Footer Text Overlay */
+        .footer-left {
+            position: fixed;
+            bottom: 5px;
+            left: 5px;
+            color: #ffffff;
+            text-shadow: 2px 2px 0px #3f3f3f;
+            font-size: 1rem;
+        }
+
+        .footer-right {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+            color: #ffffff;
+            text-shadow: 2px 2px 0px #3f3f3f;
+            font-size: 1rem;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Hi, I'm <span>Raidingdud</span></h1>
-        <p class="tagline">Software & Game Developer building web portals, desktop utilities, and custom gameplay mechanics.</p>
+    <div class="menu-container">
         
-        <div class="contact-links">
-            <a href="#">GitHub</a>
-            <a href="#">Discord</a>
-            <a href="#">Email Me</a>
+        <!-- Title & Splash Text -->
+        <div class="logo-container">
+            <h1 class="logo">Raidingdud</h1>
+            <div class="splash">Developer Edition!</div>
         </div>
-    </header>
 
-    <div class="container">
-        <h2 class="section-title">Featured Projects</h2>
-        
-        <div class="project-grid">
+        <!-- Classic Menu Buttons -->
+        <div class="button-group">
+            <a href="#" class="mc-btn">My Projects & Mods</a>
+            <a href="#" class="mc-btn">GitHub Profile</a>
+            <a href="#" class="mc-btn">Discord Server</a>
             
-            <!-- Project 1 -->
-            <div class="card">
-                <h3>LearnMultiply</h3>
-                <p>A school-themed web portal featuring embedded custom web games, YouTube API video searching, Google Sign-In authentication, and a live group chat system.</p>
-                <div class="tags">
-                    <span class="tag">Web Dev</span>
-                    <span class="tag">APIs</span>
-                    <span class="tag">Authentication</span>
-                </div>
+            <div class="button-row">
+                <a href="#" class="mc-btn half">About Me</a>
+                <a href="#" class="mc-btn half">Contact</a>
             </div>
-
-            <!-- Project 2 -->
-            <div class="card">
-                <h3>SCRAT_DP601 (Action RPG)</h3>
-                <p>A 90s low-poly isometric action RPG. Play as a maintenance robot battling an AI named LOGIC. Features custom hacking mechanics and distinct enemy variants (OV, CRT, and Desktop).</p>
-                <div class="tags">
-                    <span class="tag">Game Design</span>
-                    <span class="tag">3D Modeling</span>
-                </div>
-            </div>
-
-            <!-- Project 3 -->
-            <div class="card">
-                <h3>"Client" Desktop Utility</h3>
-                <p>A CustomTkinter desktop app with an OLED dark theme. It scrapes Steam game sales, tracks console inventory with hardware filtering, and automates Discord alerts via webhooks.</p>
-                <div class="tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">CustomTkinter</span>
-                    <span class="tag">GitHub Actions</span>
-                </div>
-            </div>
-
-            <!-- Project 4 -->
-            <div class="card">
-                <h3>Roblox Game Systems</h3>
-                <p>Custom Lua scripting for advanced mechanics, including wall-hopping physics, gravity inversion, and dynamic base allocation logic where bases remain completely unspawned when no player is assigned.</p>
-                <div class="tags">
-                    <span class="tag">Luau</span>
-                    <span class="tag">Roblox Studio</span>
-                    <span class="tag">Physics</span>
-                </div>
-            </div>
-            
-             <!-- Project 5 -->
-            <div class="card">
-                <h3>Retro OS Simulators</h3>
-                <p>Python-based desktop tools simulating retro environments, including a Windows XP Luna interface with a fake boot screen, Vista clones, and a 2003-style Caine (TADC) desktop assistant.</p>
-                <div class="tags">
-                    <span class="tag">Python</span>
-                    <span class="tag">UI/UX</span>
-                </div>
-            </div>
-
         </div>
+
     </div>
 
-    <footer>
-        <p>&copy; 2026 Raidingdud. Built from scratch.</p>
-    </footer>
+    <!-- Bottom corners text, like the real game -->
+    <div class="footer-left">Raidingdud Web v1.0</div>
+    <div class="footer-right">Copyright DOC. Do not distribute!</div>
 
 </body>
 </html>
