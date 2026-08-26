@@ -3,175 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raidingdud | Developer Menu</title>
+    <title>LearnMultiply</title>
     <style>
-        /* Loads the Minecraft font */
+        /* Load the local Minecraft font */
         @font-face {
-            font-family: 'MinecraftFont';
-            src: url('minecraft.otf') format('opentype');
+            font-family: 'Minecraft';
+            /* Note: If the file is actually .otf, make sure the name matches exactly */
+            src: url('minecraft.oft') format('opentype');
             font-weight: normal;
             font-style: normal;
         }
 
-        /* OLED Black Background */
+        /* Base Theme */
         body {
-            background-color: #000000;
-            color: #AAAAAA; /* Secondary Light Gray */
-            font-family: 'MinecraftFont', monospace, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Minecraft', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
-            user-select: none;
         }
 
-        /* Main Menu Container */
-        .menu-container {
-            width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: -50px;
-        }
-
-        /* Logo Area */
-        .logo-container {
-            position: relative;
-            margin-bottom: 60px;
+        /* Header / Navbar */
+        header {
+            width: 100%;
+            background-color: #1e1e2f;
+            padding: 25px 0;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            border-bottom: 3px solid #4CAF50;
+            animation: slideDown 0.6s ease-out;
         }
 
-        .logo {
-            font-size: 4.5rem;
-            color: #3388FF; /* Primary Blue */
-            text-shadow: 4px 4px 0px #001133;
+        h1 {
             margin: 0;
-            letter-spacing: 2px;
+            font-size: 3.5rem;
+            letter-spacing: 3px;
+            color: #4CAF50; /* A green accent to fit the 'learning' disguise */
+            text-shadow: 4px 4px 0px #000000;
+            animation: float 4s ease-in-out infinite;
         }
 
-        /* Yellow Splashtext -> Now Light Gray */
-        .splash {
-            position: absolute;
-            bottom: -20px;
-            right: -40px;
-            color: #AAAAAA; /* Secondary Light Gray */
-            font-size: 1.5rem;
-            text-shadow: 2px 2px 0px #111111;
-            transform: rotate(-20deg);
-            animation: splashThrob 0.4s infinite alternate;
-            white-space: nowrap;
+        /* Grid Layout for Games */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 35px;
+            padding: 50px 20px;
+            width: 90%;
+            max-width: 1200px;
         }
 
-        @keyframes splashThrob {
-            from { transform: rotate(-20deg) scale(1); }
-            to { transform: rotate(-20deg) scale(1.1); }
-        }
-
-        /* Button Layout */
-        .button-group {
+        /* Individual Game Card Button */
+        .game-card {
+            background-color: #1e1e2f;
+            border: 2px solid #2a2a40;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            width: 100%;
+            /* Smooth transitions for hover animations */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
+            animation: fadeIn 0.8s ease-out backwards;
         }
 
-        .button-row {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
+        /* Staggered entrance animation for multiple cards */
+        .game-card:nth-child(1) { animation-delay: 0.1s; }
+        .game-card:nth-child(2) { animation-delay: 0.2s; }
+        .game-card:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Hover Animation */
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
         }
 
-        /* OLED MC Buttons */
-        .mc-btn {
+        /* Placeholder image area */
+        .thumbnail {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, #2c2c44, #1a1a2a);
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #000000; /* Pitch black for OLED */
-            border: 2px solid #111111;
-            /* Subtle gray 3D bevel to keep the MC shape on a black background */
-            box-shadow: inset 2px 2px 0px 0px #333333, inset -2px -2px 0px 0px #0a0a0a;
-            color: #AAAAAA; /* Secondary Light Gray */
-            text-shadow: 2px 2px 0px #000000;
-            font-family: 'MinecraftFont', monospace;
-            font-size: 1.2rem;
-            text-decoration: none;
-            height: 40px;
-            cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
-            transition: all 0.1s ease-in-out;
+            border-bottom: 2px solid #2a2a40;
+            transition: background 0.3s ease;
         }
 
-        /* Half-width buttons */
-        .mc-btn.half {
-            width: 48%; 
+        .game-card:hover .thumbnail {
+            background: linear-gradient(135deg, #3a3a5c, #24243e);
         }
 
-        /* Hover Effect (Turns Primary Blue) */
-        .mc-btn:hover {
-            color: #3388FF; /* Primary Blue */
-            border-color: #3388FF; /* Outlines the button in blue */
-            /* Blue glowing 3D bevel */
-            box-shadow: inset 2px 2px 0px 0px #55AAFF, inset -2px -2px 0px 0px #0044AA;
+        .thumbnail-icon {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Specific Hover Effect for YouTube */
-        .mc-btn.yt-btn:hover {
-            color: #FF0000; /* YouTube Red */
-            border-color: #FF0000; /* Outlines the button in red */
-            /* Red glowing 3D bevel */
-            box-shadow: inset 2px 2px 0px 0px #FF5555, inset -2px -2px 0px 0px #AA0000;
+        .game-title {
+            padding: 20px 15px;
+            text-align: center;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
         }
 
-        /* Footer Text Overlay */
-        .footer-left {
-            position: fixed;
-            bottom: 5px;
-            left: 5px;
-            color: #AAAAAA; /* Secondary Light Gray */
-            text-shadow: 2px 2px 0px #000000;
-            font-size: 1rem;
+        /* Keyframe Animations */
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        .footer-right {
-            position: fixed;
-            bottom: 5px;
-            right: 5px;
-            color: #AAAAAA; /* Secondary Light Gray */
-            text-shadow: 2px 2px 0px #000000;
-            font-size: 1rem;
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
 
-    <div class="menu-container">
+    <header>
+        <h1>LearnMultiply</h1>
+    </header>
+
+    <main class="games-grid">
         
-        <!-- Title & Splash Text -->
-        <div class="logo-container">
-            <h1 class="logo">Raidingdud</h1>
-            <div class="splash">Developer Edition!</div>
-        </div>
-
-        <!-- Classic Menu Buttons -->
-        <div class="button-group">
-            <a href="#" class="mc-btn">My Projects & Mods</a>
-            <a href="#" class="mc-btn">GitHub Profile</a>
-            <a href="#" class="mc-btn yt-btn">YouTube</a>
-            
-            <div class="button-row">
-                <a href="#" class="mc-btn half">About Me</a>
-                <a href="#" class="mc-btn half">Contact</a>
+        <!-- Example Game Button 1 -->
+        <a href="#" class="game-card">
+            <div class="thumbnail">
+                <span class="thumbnail-icon">?</span>
             </div>
-        </div>
+            <div class="game-title">Example Game 1</div>
+        </a>
 
-    </div>
+        <!-- Example Game Button 2 -->
+        <a href="#" class="game-card">
+            <div class="thumbnail">
+                <span class="thumbnail-icon">?</span>
+            </div>
+            <div class="game-title">Example Game 2</div>
+        </a>
 
-    <div class="footer-left">Raidingdud Web v1.0</div>
-    <div class="footer-right">Copyright DOC. Do not distribute!</div>
+        <!-- Example Game Button 3 -->
+        <a href="#" class="game-card">
+            <div class="thumbnail">
+                <span class="thumbnail-icon">?</span>
+            </div>
+            <div class="game-title">Example Game 3</div>
+        </a>
+
+    </main>
 
 </body>
 </html>
