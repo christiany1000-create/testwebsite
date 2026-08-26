@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply</title>
+    
+    <!-- Browser Tab Logo (Favicon) -->
+    <link rel="icon" type="image/png" href="assets/sitelogo.png">
+
     <style>
         /* --- Font Setup --- */
         @font-face {
@@ -69,6 +73,17 @@
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            height: 40px;
+            width: auto;
         }
 
         .logo {
@@ -218,7 +233,11 @@
 <body>
 
     <header>
-        <div class="logo">LearnMultiply</div>
+        <div class="logo-container">
+            <img src="assets/sitelogo.png" alt="Logo" class="logo-icon">
+            <div class="logo">LearnMultiply</div>
+        </div>
+        
         <div class="nav-controls">
             <!-- View Toggle -->
             <div class="toggle-group">
@@ -250,10 +269,10 @@
                     <div class="play-btn">▶ Play Now</div>
                 </a>
 
-                <!-- Super Mario 64 Game -->
-                <a href="sm64/index.html" class="game-card">
+                <!-- Example Game 2 -->
+                <a href="#" class="game-card">
                     <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
-                    <div class="game-title">Super Mario 64</div>
+                    <div class="game-title">Example Game 2</div>
                     <div class="play-btn">▶ Play Now</div>
                 </a>
 
