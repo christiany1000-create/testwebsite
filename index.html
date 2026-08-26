@@ -5,19 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply</title>
     <style>
-        /* Load the local Minecraft font */
         @font-face {
             font-family: 'Minecraft';
-            /* Note: If the file is actually .otf, make sure the name matches exactly */
             src: url('minecraft.oft') format('opentype');
             font-weight: normal;
             font-style: normal;
         }
 
-        /* Base Theme */
+        /* --- CSS Variables for Light/Dark Mode --- */
+        :root {
+            --bg-base: #121212;
+            --bg-surface: #1e1e2f;
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --border-color: #2a2a40;
+            --accent: #4CAF50;
+            --accent-hover: #45a049;
+            --shadow: rgba(0, 0, 0, 0.6);
+            --thumb-bg: #2c2c44;
+            --thumb-bg-hover: #3a3a5c;
+        }
+
+        /* Light Mode Overrides */
+        .light-mode {
+            --bg-base: #f0f2f5;
+            --bg-surface: #ffffff;
+            --text-main: #1c1e21;
+            --text-muted: rgba(0, 0, 0, 0.6);
+            --border-color: #d1d5db;
+            --accent: #3b82f6; /* Blue accent for light mode */
+            --accent-hover: #2563eb;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --thumb-bg: #e5e7eb;
+            --thumb-bg-hover: #d1d5db;
+        }
+
         body {
-            background-color: #121212;
-            color: #ffffff;
+            background-color: var(--bg-base);
+            color: var(--text-main);
             font-family: 'Minecraft', sans-serif;
             margin: 0;
             padding: 0;
@@ -25,144 +50,456 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* Header / Navbar */
+        /* --- Top Navigation Bar --- */
         header {
             width: 100%;
-            background-color: #1e1e2f;
-            padding: 25px 0;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-            border-bottom: 3px solid #4CAF50;
-            animation: slideDown 0.6s ease-out;
+            background-color: var(--bg-surface);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px var(--shadow);
+            border-bottom: 3px solid var(--accent);
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background-color 0.4s ease, border-color 0.4s ease;
         }
 
-        h1 {
-            margin: 0;
-            font-size: 3.5rem;
-            letter-spacing: 3px;
-            color: #4CAF50; /* A green accent to fit the 'learning' disguise */
-            text-shadow: 4px 4px 0px #000000;
-            animation: float 4s ease-in-out infinite;
+        .logo {
+            font-size: 2rem;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
         }
 
-        /* Grid Layout for Games */
+        .nav-controls {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* --- Sliders (Toggle Switches) --- */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* --- Content Container --- */
+        .content-area {
+            width: 95%;
+            max-width: 1200px;
+            margin-top: 30px;
+            flex-grow: 1;
+        }
+
+        /* Animation for Views */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* --- Games View --- */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 35px;
-            padding: 50px 20px;
-            width: 90%;
-            max-width: 1200px;
+            gap: 30px;
         }
 
-        /* Individual Game Card Button */
         .game-card {
-            background-color: #1e1e2f;
-            border: 2px solid #2a2a40;
+            background-color: var(--bg-surface);
+            border: 2px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
             text-decoration: none;
-            color: white;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
-            /* Smooth transitions for hover animations */
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
-            animation: fadeIn 0.8s ease-out backwards;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.4s ease;
         }
 
-        /* Staggered entrance animation for multiple cards */
-        .game-card:nth-child(1) { animation-delay: 0.1s; }
-        .game-card:nth-child(2) { animation-delay: 0.2s; }
-        .game-card:nth-child(3) { animation-delay: 0.3s; }
-
-        /* Hover Animation */
         .game-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.2);
-            border-color: #4CAF50;
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-color: var(--accent);
         }
 
-        /* Placeholder image area */
         .thumbnail {
             width: 100%;
             height: 140px;
-            background: linear-gradient(135deg, #2c2c44, #1a1a2a);
+            background: var(--thumb-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 2px solid #2a2a40;
+            border-bottom: 2px solid var(--border-color);
             transition: background 0.3s ease;
         }
 
         .game-card:hover .thumbnail {
-            background: linear-gradient(135deg, #3a3a5c, #24243e);
+            background: var(--thumb-bg-hover);
         }
 
         .thumbnail-icon {
             font-size: 3rem;
-            color: rgba(255, 255, 255, 0.2);
+            color: var(--text-muted);
         }
 
         .game-title {
-            padding: 20px 15px;
+            padding: 15px;
             text-align: center;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             letter-spacing: 1px;
         }
 
-        /* Keyframe Animations */
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        /* --- Live Chat View --- */
+        #chat-view {
+            height: 75vh;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        .chat-container {
+            display: flex;
+            height: 100%;
+            background-color: var(--bg-surface);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        /* Chat Sidebar */
+        .chat-sidebar {
+            width: 250px;
+            background-color: var(--bg-surface);
+            border-right: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.5rem;
+        }
+
+        .create-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .create-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .group-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        .group-list li {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+
+        .group-list li:hover {
+            background-color: var(--thumb-bg);
+        }
+
+        .group-list li.active-group {
+            border-left: 5px solid var(--accent);
+            background-color: var(--thumb-bg);
+            font-weight: bold;
+        }
+
+        /* Chat Main Area */
+        .chat-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-base);
+        }
+
+        .chat-header {
+            padding: 20px;
+            background-color: var(--bg-surface);
+            border-bottom: 2px solid var(--border-color);
+            font-size: 1.5rem;
+        }
+
+        .messages-area {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            background-color: var(--bg-surface);
+            padding: 12px 15px;
+            border-radius: 8px;
+            max-width: 70%;
+            align-self: flex-start;
+            border: 1px solid var(--border-color);
+        }
+
+        .message.own-message {
+            align-self: flex-end;
+            border-color: var(--accent);
+            background-color: var(--thumb-bg);
+        }
+
+        .message-author {
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background-color: var(--bg-surface);
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            gap: 15px;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input input:focus {
+            border-color: var(--accent);
+        }
+
+        .chat-input button {
+            padding: 0 25px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .chat-input button:active {
+            transform: scale(0.95);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>LearnMultiply</h1>
+        <div class="logo">LearnMultiply</div>
+        <div class="nav-controls">
+            
+            <!-- Games / Chat Toggle -->
+            <div class="toggle-group">
+                <span>Games</span>
+                <label class="switch">
+                    <input type="checkbox" id="view-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>Live Chat</span>
+            </div>
+
+            <!-- Light / Dark Mode Toggle -->
+            <div class="toggle-group">
+                <span>☀️</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+
+        </div>
     </header>
 
-    <main class="games-grid">
+    <main class="content-area">
         
-        <!-- Example Game Button 1 -->
-        <a href="#" class="game-card">
-            <div class="thumbnail">
-                <span class="thumbnail-icon">?</span>
+        <!-- ================= GAMES VIEW ================= -->
+        <div id="games-view" class="view-section active">
+            <div class="games-grid">
+                <!-- Game 1 -->
+                <a href="#" class="game-card">
+                    <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
+                    <div class="game-title">Example Game 1</div>
+                </a>
+                <!-- Game 2 -->
+                <a href="#" class="game-card">
+                    <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
+                    <div class="game-title">Example Game 2</div>
+                </a>
+                <!-- Game 3 -->
+                <a href="#" class="game-card">
+                    <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
+                    <div class="game-title">Example Game 3</div>
+                </a>
             </div>
-            <div class="game-title">Example Game 1</div>
-        </a>
+        </div>
 
-        <!-- Example Game Button 2 -->
-        <a href="#" class="game-card">
-            <div class="thumbnail">
-                <span class="thumbnail-icon">?</span>
-            </div>
-            <div class="game-title">Example Game 2</div>
-        </a>
+        <!-- ================= LIVE CHAT VIEW ================= -->
+        <div id="chat-view" class="view-section">
+            <div class="chat-container">
+                
+                <!-- Groups Sidebar -->
+                <div class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <h2>Groups</h2>
+                        <button class="create-btn" onclick="alert('In the future, this will open a modal to name a new group!')">+ New Group</button>
+                    </div>
+                    <ul class="group-list">
+                        <li class="active-group"># Main Hub</li>
+                        <li># Math Homework</li>
+                        <li># Off-Topic</li>
+                    </ul>
+                </div>
 
-        <!-- Example Game Button 3 -->
-        <a href="#" class="game-card">
-            <div class="thumbnail">
-                <span class="thumbnail-icon">?</span>
+                <!-- Chat Area -->
+                <div class="chat-main">
+                    <div class="chat-header">
+                        # Main Hub
+                    </div>
+                    <div class="messages-area">
+                        <!-- Example messages -->
+                        <div class="message">
+                            <div class="message-author">System</div>
+                            <div>Welcome to the Main Hub. Be nice!</div>
+                        </div>
+                        <div class="message own-message">
+                            <div class="message-author">You</div>
+                            <div>Hey everyone, testing the new chat feature!</div>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="Send a message to # Main Hub...">
+                        <button>Send</button>
+                    </div>
+                </div>
+
             </div>
-            <div class="game-title">Example Game 3</div>
-        </a>
+        </div>
 
     </main>
+
+    <script>
+        // --- View Toggling Logic ---
+        const viewToggle = document.getElementById('view-toggle');
+        const gamesView = document.getElementById('games-view');
+        const chatView = document.getElementById('chat-view');
+
+        viewToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                // Switch to Chat
+                gamesView.classList.remove('active');
+                setTimeout(() => chatView.classList.add('active'), 50); // slight delay for smooth transition
+            } else {
+                // Switch to Games
+                chatView.classList.remove('active');
+                setTimeout(() => gamesView.classList.add('active'), 50);
+            }
+        });
+
+        // --- Theme Toggling Logic ---
+        // By default the switch is off (Dark Mode). Checking it turns on Light Mode.
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        themeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.remove('light-mode'); // Assuming Moon = checked = Dark Mode
+            } else {
+                document.body.classList.add('light-mode');    // Assuming Sun = unchecked = Light Mode
+            }
+        });
+
+        // Set default state for the theme toggle (we start in Dark mode, so check the moon box)
+        themeToggle.checked = true; 
+    </script>
 
 </body>
 </html>
