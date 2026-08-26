@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply</title>
     <style>
+        /* --- Font Setup --- */
         @font-face {
             font-family: 'Minecraft';
             src: url('minecraft.oft') format('opentype');
@@ -26,14 +27,13 @@
             --thumb-bg-hover: #3a3a5c;
         }
 
-        /* Light Mode Overrides */
         .light-mode {
             --bg-base: #f0f2f5;
             --bg-surface: #ffffff;
             --text-main: #1c1e21;
             --text-muted: rgba(0, 0, 0, 0.6);
             --border-color: #d1d5db;
-            --accent: #3b82f6; /* Blue accent for light mode */
+            --accent: #3b82f6; 
             --accent-hover: #2563eb;
             --shadow: rgba(0, 0, 0, 0.1);
             --thumb-bg: #e5e7eb;
@@ -53,7 +53,7 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* --- Top Navigation Bar --- */
+        /* --- Header --- */
         header {
             width: 100%;
             background-color: var(--bg-surface);
@@ -67,7 +67,6 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            transition: background-color 0.4s ease, border-color 0.4s ease;
         }
 
         .logo {
@@ -90,285 +89,63 @@
             font-size: 1.1rem;
         }
 
-        /* --- Sliders (Toggle Switches) --- */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
+        /* --- Sliders --- */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(24px); }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--border-color);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--accent);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        /* --- Content Container --- */
-        .content-area {
-            width: 95%;
-            max-width: 1200px;
-            margin-top: 30px;
-            flex-grow: 1;
-        }
-
-        /* Animation for Views */
-        .view-section {
-            display: none;
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        .view-section.active {
-            display: block;
-        }
+        /* --- Layout --- */
+        .content-area { width: 95%; max-width: 1200px; margin-top: 30px; flex-grow: 1; }
+        .view-section { display: none; animation: fadeIn 0.5s ease forwards; }
+        .view-section.active { display: block; }
 
         /* --- Games View --- */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 30px;
-        }
-
-        .game-card {
-            background-color: var(--bg-surface);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.4s ease;
-        }
-
-        .game-card:hover {
-            transform: translateY(-8px) scale(1.03);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            border-color: var(--accent);
-        }
-
-        .thumbnail {
-            width: 100%;
-            height: 140px;
-            background: var(--thumb-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-bottom: 2px solid var(--border-color);
-            transition: background 0.3s ease;
-        }
-
-        .game-card:hover .thumbnail {
-            background: var(--thumb-bg-hover);
-        }
-
-        .thumbnail-icon {
-            font-size: 3rem;
-            color: var(--text-muted);
-        }
-
-        .game-title {
-            padding: 15px;
-            text-align: center;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-        }
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; }
+        .game-card { background-color: var(--bg-surface); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; }
+        .game-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-color: var(--accent); }
+        .thumbnail { width: 100%; height: 140px; background: var(--thumb-bg); display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--border-color); transition: background 0.3s; }
+        .game-card:hover .thumbnail { background: var(--thumb-bg-hover); }
+        .thumbnail-icon { font-size: 3rem; color: var(--text-muted); }
+        .game-title { padding: 15px; text-align: center; font-size: 1.2rem; }
 
         /* --- Live Chat View --- */
-        #chat-view {
-            height: 75vh;
-        }
+        #chat-view { height: 75vh; }
+        .chat-container { display: flex; height: 100%; background-color: var(--bg-surface); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px var(--shadow); position: relative; }
+        
+        /* Auth Overlay */
+        #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; }
+        #login-btn { padding: 15px 30px; font-size: 1.2rem; background-color: #4285F4; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 20px; transition: background 0.2s; }
+        #login-btn:hover { background-color: #3367D6; }
 
-        .chat-container {
-            display: flex;
-            height: 100%;
-            background-color: var(--bg-surface);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px var(--shadow);
-        }
+        .chat-sidebar { width: 250px; background-color: var(--bg-surface); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 2px solid var(--border-color); }
+        .sidebar-header h2 { margin: 0 0 15px 0; font-size: 1.5rem; }
+        .create-btn { width: 100%; padding: 10px; background-color: var(--accent); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1rem; cursor: pointer; transition: background-color 0.2s; }
+        .create-btn:hover { background-color: var(--accent-hover); }
+        .group-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; }
+        .group-list li { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
+        .group-list li:hover { background-color: var(--thumb-bg); }
+        .group-list li.active-group { border-left: 5px solid var(--accent); background-color: var(--thumb-bg); font-weight: bold; }
 
-        /* Chat Sidebar */
-        .chat-sidebar {
-            width: 250px;
-            background-color: var(--bg-surface);
-            border-right: 2px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-        }
+        .chat-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-base); }
+        .chat-header { padding: 20px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; }
+        #logout-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+        
+        .messages-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { background-color: var(--bg-surface); padding: 12px 15px; border-radius: 8px; max-width: 70%; align-self: flex-start; border: 1px solid var(--border-color); word-wrap: break-word;}
+        .message.own-message { align-self: flex-end; border-color: var(--accent); background-color: var(--thumb-bg); }
+        .message-author { font-size: 0.9rem; color: var(--accent); margin-bottom: 5px; }
+        
+        .chat-input { padding: 20px; background-color: var(--bg-surface); border-top: 2px solid var(--border-color); display: flex; gap: 15px; }
+        .chat-input input { flex-grow: 1; padding: 12px 15px; border-radius: 6px; border: 2px solid var(--border-color); background-color: var(--bg-base); color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; }
+        .chat-input input:focus { border-color: var(--accent); }
+        .chat-input button { padding: 0 25px; background-color: var(--accent); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
+        .chat-input button:active { transform: scale(0.95); }
 
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .sidebar-header h2 {
-            margin: 0 0 15px 0;
-            font-size: 1.5rem;
-        }
-
-        .create-btn {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .create-btn:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .group-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            overflow-y: auto;
-        }
-
-        .group-list li {
-            padding: 15px 20px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s;
-        }
-
-        .group-list li:hover {
-            background-color: var(--thumb-bg);
-        }
-
-        .group-list li.active-group {
-            border-left: 5px solid var(--accent);
-            background-color: var(--thumb-bg);
-            font-weight: bold;
-        }
-
-        /* Chat Main Area */
-        .chat-main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: var(--bg-base);
-        }
-
-        .chat-header {
-            padding: 20px;
-            background-color: var(--bg-surface);
-            border-bottom: 2px solid var(--border-color);
-            font-size: 1.5rem;
-        }
-
-        .messages-area {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            background-color: var(--bg-surface);
-            padding: 12px 15px;
-            border-radius: 8px;
-            max-width: 70%;
-            align-self: flex-start;
-            border: 1px solid var(--border-color);
-        }
-
-        .message.own-message {
-            align-self: flex-end;
-            border-color: var(--accent);
-            background-color: var(--thumb-bg);
-        }
-
-        .message-author {
-            font-size: 0.9rem;
-            color: var(--accent);
-            margin-bottom: 5px;
-        }
-
-        .chat-input {
-            padding: 20px;
-            background-color: var(--bg-surface);
-            border-top: 2px solid var(--border-color);
-            display: flex;
-            gap: 15px;
-        }
-
-        .chat-input input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border-radius: 6px;
-            border: 2px solid var(--border-color);
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            font-family: inherit;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .chat-input input:focus {
-            border-color: var(--accent);
-        }
-
-        .chat-input button {
-            padding: 0 25px;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
-        }
-
-        .chat-input button:active {
-            transform: scale(0.95);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -376,129 +153,214 @@
     <header>
         <div class="logo">LearnMultiply</div>
         <div class="nav-controls">
-            
-            <!-- Games / Chat Toggle -->
             <div class="toggle-group">
                 <span>Games</span>
-                <label class="switch">
-                    <input type="checkbox" id="view-toggle">
-                    <span class="slider"></span>
-                </label>
+                <label class="switch"><input type="checkbox" id="view-toggle"><span class="slider"></span></label>
                 <span>Live Chat</span>
             </div>
-
-            <!-- Light / Dark Mode Toggle -->
             <div class="toggle-group">
                 <span>☀️</span>
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider"></span>
-                </label>
+                <label class="switch"><input type="checkbox" id="theme-toggle" checked><span class="slider"></span></label>
                 <span>🌙</span>
             </div>
-
         </div>
     </header>
 
     <main class="content-area">
         
-        <!-- ================= GAMES VIEW ================= -->
         <div id="games-view" class="view-section active">
             <div class="games-grid">
-                <!-- Game 1 -->
                 <a href="#" class="game-card">
                     <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
                     <div class="game-title">Example Game 1</div>
                 </a>
-                <!-- Game 2 -->
                 <a href="#" class="game-card">
                     <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
                     <div class="game-title">Example Game 2</div>
                 </a>
-                <!-- Game 3 -->
-                <a href="#" class="game-card">
-                    <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
-                    <div class="game-title">Example Game 3</div>
-                </a>
             </div>
         </div>
 
-        <!-- ================= LIVE CHAT VIEW ================= -->
         <div id="chat-view" class="view-section">
             <div class="chat-container">
                 
-                <!-- Groups Sidebar -->
+                <div id="auth-overlay">
+                    <h2>Classroom Chat</h2>
+                    <p>Please sign in with your Google account to chat.</p>
+                    <button id="login-btn">Sign in with Google</button>
+                </div>
+
                 <div class="chat-sidebar">
                     <div class="sidebar-header">
                         <h2>Groups</h2>
-                        <button class="create-btn" onclick="alert('In the future, this will open a modal to name a new group!')">+ New Group</button>
+                        <button class="create-btn" onclick="alert('Creating groups coming soon!')">+ New Group</button>
                     </div>
                     <ul class="group-list">
                         <li class="active-group"># Main Hub</li>
-                        <li># Math Homework</li>
-                        <li># Off-Topic</li>
                     </ul>
                 </div>
 
-                <!-- Chat Area -->
                 <div class="chat-main">
                     <div class="chat-header">
-                        # Main Hub
+                        <span># Main Hub</span>
+                        <button id="logout-btn" style="display:none;">Log Out</button>
                     </div>
-                    <div class="messages-area">
-                        <!-- Example messages -->
-                        <div class="message">
-                            <div class="message-author">System</div>
-                            <div>Welcome to the Main Hub. Be nice!</div>
+                    <div class="messages-area" id="messages-container">
                         </div>
-                        <div class="message own-message">
-                            <div class="message-author">You</div>
-                            <div>Hey everyone, testing the new chat feature!</div>
-                        </div>
-                    </div>
                     <div class="chat-input">
-                        <input type="text" placeholder="Send a message to # Main Hub...">
-                        <button>Send</button>
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+                        <button id="send-btn">Send</button>
                     </div>
                 </div>
 
             </div>
         </div>
-
     </main>
 
     <script>
-        // --- View Toggling Logic ---
+        // View Toggle Logic
         const viewToggle = document.getElementById('view-toggle');
         const gamesView = document.getElementById('games-view');
         const chatView = document.getElementById('chat-view');
 
         viewToggle.addEventListener('change', (e) => {
             if (e.target.checked) {
-                // Switch to Chat
                 gamesView.classList.remove('active');
-                setTimeout(() => chatView.classList.add('active'), 50); // slight delay for smooth transition
+                setTimeout(() => chatView.classList.add('active'), 50);
             } else {
-                // Switch to Games
                 chatView.classList.remove('active');
                 setTimeout(() => gamesView.classList.add('active'), 50);
             }
         });
 
-        // --- Theme Toggling Logic ---
-        // By default the switch is off (Dark Mode). Checking it turns on Light Mode.
+        // Theme Toggle Logic
         const themeToggle = document.getElementById('theme-toggle');
-        
         themeToggle.addEventListener('change', (e) => {
             if (e.target.checked) {
-                document.body.classList.remove('light-mode'); // Assuming Moon = checked = Dark Mode
+                document.body.classList.remove('light-mode');
             } else {
-                document.body.classList.add('light-mode');    // Assuming Sun = unchecked = Light Mode
+                document.body.classList.add('light-mode');
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        // ==============================================================
+        // ⚠️ PASTE YOUR FIREBASE CONFIGURATION HERE ⚠️
+        // ==============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyATd0AhKa4v8rS4viCXETkjZ16V6e1VjsY",
+            authDomain: "learnmultiply.firebaseapp.com",
+            projectId: "learnmultiply",
+            storageBucket: "learnmultiply.firebasestorage.app",
+            messagingSenderId: "328977544347",
+            appId: "1:328977544347:web:1330f41590b4805854423e"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const authOverlay = document.getElementById('auth-overlay');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        let currentUser = null;
+
+        // --- AUTHENTICATION ---
+        loginBtn.addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider).catch(error => console.error("Login failed:", error));
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // Listen for login/logout state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                authOverlay.style.display = 'none'; // Hide login screen
+                logoutBtn.style.display = 'block';  // Show logout button
+                loadMessages();                     // Start fetching messages
+            } else {
+                currentUser = null;
+                authOverlay.style.display = 'flex'; // Show login screen
+                logoutBtn.style.display = 'none';   // Hide logout button
+                messagesContainer.innerHTML = '';   // Clear messages
             }
         });
 
-        // Set default state for the theme toggle (we start in Dark mode, so check the moon box)
-        themeToggle.checked = true; 
+        // --- DATABASE LOGIC (Sending & Receiving) ---
+
+        // Send a message
+        const sendMessage = async () => {
+            const text = messageInput.value.trim();
+            if (text === "" || !currentUser) return;
+            
+            messageInput.value = ''; // Clear input immediately
+            
+            try {
+                await addDoc(collection(db, "messages"), {
+                    text: text,
+                    uid: currentUser.uid,
+                    author: currentUser.displayName,
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error writing message: ", error);
+            }
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Load and display messages in real-time
+        let unsubscribe = null; // Used to stop listening to old messages when logging out
+        
+        function loadMessages() {
+            if (unsubscribe) unsubscribe(); // clear existing listeners
+
+            // Query the last 50 messages, ordered by time
+            const q = query(collection(db, "messages"), orderBy("createdAt", "asc"), limit(50));
+            
+            // onSnapshot listens for real-time updates from Firestore
+            unsubscribe = onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = ''; // Clear chat window
+                
+                snapshot.forEach((doc) => {
+                    const message = doc.data();
+                    const isOwnMessage = message.uid === currentUser.uid;
+                    
+                    // Create HTML element for message
+                    const msgElement = document.createElement('div');
+                    msgElement.classList.add('message');
+                    if (isOwnMessage) msgElement.classList.add('own-message');
+                    
+                    msgElement.innerHTML = `
+                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
+                        <div>${message.text}</div>
+                    `;
+                    
+                    messagesContainer.appendChild(msgElement);
+                });
+                
+                // Auto-scroll to the bottom of the chat
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
     </script>
 
 </body>
