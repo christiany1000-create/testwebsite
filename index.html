@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply</title>
-    <style>/* --- Font Setup --- */
+    <style>
+        /* --- Font Setup --- */
         @font-face {
             font-family: 'Minecraft';
             src: url('minecraft.otf') format('opentype');
@@ -101,25 +102,88 @@
         input:checked + .slider:before { transform: translateX(24px); }
 
         /* --- Layout --- */
-        .content-area { width: 95%; max-width: 1200px; margin-top: 30px; flex-grow: 1; }
+        .content-area { width: 95%; max-width: 1200px; margin-top: 30px; margin-bottom: 60px; flex-grow: 1; }
         .view-section { display: none; animation: fadeIn 0.5s ease forwards; }
         .view-section.active { display: block; }
 
         /* --- Games View --- */
         .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; }
-        .game-card { background-color: var(--bg-surface); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; cursor: pointer; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; }
-        .game-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 10px 20px rgba(255, 87, 34, 0.2); border-color: var(--accent); }
-        .thumbnail { width: 100%; height: 140px; background: var(--thumb-bg); display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--border-color); transition: background 0.3s; }
+        
+        .game-card { 
+            background-color: var(--bg-surface); 
+            border: 2px solid var(--border-color); 
+            border-radius: 12px; 
+            cursor: pointer; 
+            text-decoration: none; 
+            color: var(--text-main); 
+            display: flex; 
+            flex-direction: column; 
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; 
+            position: relative; /* Required for the sliding drawer */
+        }
+        
+        .game-card:hover { 
+            transform: translateY(-12px) scale(1.03); 
+            box-shadow: 0 15px 25px rgba(255, 87, 34, 0.2); 
+            border-color: var(--accent); 
+            z-index: 10; /* Ensures the drawer overlaps any games below it */
+        }
+        
+        .thumbnail { 
+            width: 100%; 
+            height: 140px; 
+            background: var(--thumb-bg); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-bottom: 2px solid var(--border-color); 
+            transition: background 0.3s; 
+            position: relative;
+            z-index: 2; /* Keeps thumbnail above the button */
+            border-radius: 10px 10px 0 0; 
+            overflow: hidden;
+        }
+        
         .game-card:hover .thumbnail { background: var(--thumb-bg-hover); }
         .thumbnail-icon { font-size: 3rem; color: var(--text-muted); }
-        .game-title { padding: 15px; text-align: center; font-size: 1.2rem; }
+        
+        .game-title { 
+            padding: 15px; 
+            text-align: center; 
+            font-size: 1.2rem; 
+            background-color: var(--bg-surface); 
+            position: relative;
+            z-index: 2; /* Hides the play button behind this */
+            border-radius: 0 0 10px 10px; 
+        }
+
+        /* --- Play Button Sliding Drawer --- */
+        .play-btn {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--accent-gradient);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 0 0 10px 10px;
+            font-size: 1.1rem;
+            z-index: 1; /* Sits completely BEHIND the game title */
+            transform: translateY(0); /* Tucked away */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy slide animation */
+        }
+        
+        .game-card:hover .play-btn {
+            transform: translateY(100%); /* Glides down and out of the card */
+        }
 
         /* --- Live Chat View --- */
         #chat-view { height: 75vh; }
         .chat-container { display: flex; height: 100%; background-color: var(--bg-surface); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px var(--shadow); position: relative; }
         
         /* Auth Overlay */
-        #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; }
+        #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; text-align: center;}
         #login-btn { padding: 15px 30px; font-size: 1.2rem; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 20px; transition: opacity 0.2s; }
         #login-btn:hover { opacity: 0.9; }
 
@@ -148,18 +212,21 @@
         .chat-input button { padding: 0 25px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
         .chat-input button:active { transform: scale(0.95); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }</style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
 
     <header>
         <div class="logo">LearnMultiply</div>
         <div class="nav-controls">
+            <!-- View Toggle -->
             <div class="toggle-group">
                 <span>Games</span>
                 <label class="switch"><input type="checkbox" id="view-toggle"><span class="slider"></span></label>
                 <span>Live Chat</span>
             </div>
+            <!-- Theme Toggle -->
             <div class="toggle-group">
                 <span>☀️</span>
                 <label class="switch"><input type="checkbox" id="theme-toggle" checked><span class="slider"></span></label>
@@ -170,7 +237,7 @@
 
     <main class="content-area">
         
-<!-- === GAMES VIEW === -->
+        <!-- === GAMES VIEW === -->
         <div id="games-view" class="view-section active">
             <div class="games-grid">
                 
@@ -180,24 +247,31 @@
                         <img src="assets/mclogo.webp" alt="Eaglercraft" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="game-title">Eaglercraft</div>
+                    <div class="play-btn">▶ Play Now</div>
                 </a>
+
                 <!-- Example Game 2 -->
                 <a href="#" class="game-card">
                     <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
                     <div class="game-title">Example Game 2</div>
+                    <div class="play-btn">▶ Play Now</div>
                 </a>
+
             </div>
         </div>
 
+        <!-- === LIVE CHAT VIEW === -->
         <div id="chat-view" class="view-section">
             <div class="chat-container">
                 
+                <!-- Authentication Overlay -->
                 <div id="auth-overlay">
                     <h2>Classroom Chat</h2>
                     <p>Please sign in with your Google account to chat.</p>
                     <button id="login-btn">Sign in with Google</button>
                 </div>
 
+                <!-- Chat UI -->
                 <div class="chat-sidebar">
                     <div class="sidebar-header">
                         <h2>Groups</h2>
@@ -214,7 +288,8 @@
                         <button id="logout-btn" style="display:none;">Log Out</button>
                     </div>
                     <div class="messages-area" id="messages-container">
-                        </div>
+                        <!-- Messages will load here via JS -->
+                    </div>
                     <div class="chat-input">
                         <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
                         <button id="send-btn">Send</button>
@@ -225,6 +300,9 @@
         </div>
     </main>
 
+    <!-- ========================================== -->
+    <!-- FRONTEND JAVASCRIPT (Toggles & UI)         -->
+    <!-- ========================================== -->
     <script>
         // View Toggle Logic
         const viewToggle = document.getElementById('view-toggle');
@@ -252,14 +330,15 @@
         });
     </script>
 
+    <!-- ========================================== -->
+    <!-- FIREBASE JAVASCRIPT (Backend logic)        -->
+    <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-        // ==============================================================
-        // ⚠️ PASTE YOUR FIREBASE CONFIGURATION HERE ⚠️
-        // ==============================================================
+        // Your exact Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATd0AhKa4v8rS4viCXETkjZ16V6e1VjsY",
             authDomain: "learnmultiply.firebaseapp.com",
@@ -298,25 +377,23 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
-                authOverlay.style.display = 'none'; // Hide login screen
-                logoutBtn.style.display = 'block';  // Show logout button
-                loadMessages();                     // Start fetching messages
+                authOverlay.style.display = 'none';
+                logoutBtn.style.display = 'block';
+                loadMessages();
             } else {
                 currentUser = null;
-                authOverlay.style.display = 'flex'; // Show login screen
-                logoutBtn.style.display = 'none';   // Hide logout button
-                messagesContainer.innerHTML = '';   // Clear messages
+                authOverlay.style.display = 'flex';
+                logoutBtn.style.display = 'none';
+                messagesContainer.innerHTML = '';
             }
         });
 
         // --- DATABASE LOGIC (Sending & Receiving) ---
-
-        // Send a message
         const sendMessage = async () => {
             const text = messageInput.value.trim();
             if (text === "" || !currentUser) return;
             
-            messageInput.value = ''; // Clear input immediately
+            messageInput.value = '';
             
             try {
                 await addDoc(collection(db, "messages"), {
@@ -335,24 +412,20 @@
             if (e.key === 'Enter') sendMessage();
         });
 
-        // Load and display messages in real-time
-        let unsubscribe = null; // Used to stop listening to old messages when logging out
+        let unsubscribe = null;
         
         function loadMessages() {
-            if (unsubscribe) unsubscribe(); // clear existing listeners
+            if (unsubscribe) unsubscribe();
 
-            // Query the last 50 messages, ordered by time
             const q = query(collection(db, "messages"), orderBy("createdAt", "asc"), limit(50));
             
-            // onSnapshot listens for real-time updates from Firestore
             unsubscribe = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = ''; // Clear chat window
+                messagesContainer.innerHTML = '';
                 
                 snapshot.forEach((doc) => {
                     const message = doc.data();
                     const isOwnMessage = message.uid === currentUser.uid;
                     
-                    // Create HTML element for message
                     const msgElement = document.createElement('div');
                     msgElement.classList.add('message');
                     if (isOwnMessage) msgElement.classList.add('own-message');
@@ -365,11 +438,9 @@
                     messagesContainer.appendChild(msgElement);
                 });
                 
-                // Auto-scroll to the bottom of the chat
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
         }
     </script>
-
 </body>
 </html>
