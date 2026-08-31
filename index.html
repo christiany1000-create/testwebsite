@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LearnMultiply</title>
     
-    <!-- Browser Tab Logo (Favicon) -->
     <link rel="icon" type="image/png" href="assets/sitelogo.png">
 
     <style>
@@ -24,8 +23,8 @@
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.5);
             --border-color: #2a2a40;
-            --accent: #FF5722; /* Solid Deep Orange for borders */
-            --accent-gradient: linear-gradient(135deg, #FF3D00, #FFCA28); /* Firebase Red to Yellow */
+            --accent: #FF5722; 
+            --accent-gradient: linear-gradient(135deg, #FF3D00, #FFCA28); 
             --accent-hover: linear-gradient(135deg, #DD2C00, #FF9800);
             --shadow: rgba(0, 0, 0, 0.6);
             --thumb-bg: #2c2c44;
@@ -38,9 +37,6 @@
             --text-main: #1c1e21;
             --text-muted: rgba(0, 0, 0, 0.6);
             --border-color: #d1d5db;
-            --accent: #FF3D00; 
-            --accent-gradient: linear-gradient(135deg, #FF3D00, #FF9800);
-            --accent-hover: linear-gradient(135deg, #DD2C00, #F57C00);
             --shadow: rgba(0, 0, 0, 0.1);
             --thumb-bg: #e5e7eb;
             --thumb-bg-hover: #d1d5db;
@@ -89,26 +85,42 @@
         .logo {
             font-size: 2.2rem;
             letter-spacing: 2px;
-            /* Text Gradient Magic */
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
+        /* --- Navigation Tabs --- */
         .nav-controls {
             display: flex;
-            gap: 30px;
+            gap: 15px;
             align-items: center;
         }
 
-        .toggle-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .nav-btn {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 20px;
+            font-family: inherit;
             font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        /* --- Sliders --- */
+        .nav-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .nav-btn.active {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* --- Sliders (Moved to Settings) --- */
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px; }
@@ -120,6 +132,42 @@
         .content-area { width: 95%; max-width: 1200px; margin-top: 30px; margin-bottom: 60px; flex-grow: 1; }
         .view-section { display: none; animation: fadeIn 0.5s ease forwards; }
         .view-section.active { display: block; }
+
+        /* --- Settings View --- */
+        .settings-container {
+            background-color: var(--bg-surface);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .settings-container h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.2rem;
+        }
+
+        .color-picker {
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 2px;
+            height: 35px;
+            width: 60px;
+            cursor: pointer;
+            background: var(--bg-base);
+        }
 
         /* --- Games View --- */
         .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 30px; }
@@ -134,14 +182,14 @@
             display: flex; 
             flex-direction: column; 
             transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; 
-            position: relative; /* Required for the sliding drawer */
+            position: relative; 
         }
         
         .game-card:hover { 
             transform: translateY(-12px) scale(1.03); 
             box-shadow: 0 15px 25px rgba(255, 87, 34, 0.2); 
             border-color: var(--accent); 
-            z-index: 10; /* Ensures the drawer overlaps any games below it */
+            z-index: 10; 
         }
         
         .thumbnail { 
@@ -154,7 +202,7 @@
             border-bottom: 2px solid var(--border-color); 
             transition: background 0.3s; 
             position: relative;
-            z-index: 2; /* Keeps thumbnail above the button */
+            z-index: 2; 
             border-radius: 10px 10px 0 0; 
             overflow: hidden;
         }
@@ -168,11 +216,10 @@
             font-size: 1.2rem; 
             background-color: var(--bg-surface); 
             position: relative;
-            z-index: 2; /* Hides the play button behind this */
+            z-index: 2; 
             border-radius: 0 0 10px 10px; 
         }
 
-        /* --- Play Button Sliding Drawer --- */
         .play-btn {
             position: absolute;
             bottom: 0;
@@ -184,20 +231,17 @@
             padding: 10px 0;
             border-radius: 0 0 10px 10px;
             font-size: 1.1rem;
-            z-index: 1; /* Sits completely BEHIND the game title */
-            transform: translateY(0); /* Tucked away */
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy slide animation */
+            z-index: 1; 
+            transform: translateY(0); 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         
-        .game-card:hover .play-btn {
-            transform: translateY(100%); /* Glides down and out of the card */
-        }
+        .game-card:hover .play-btn { transform: translateY(100%); }
 
         /* --- Live Chat View --- */
         #chat-view { height: 75vh; }
         .chat-container { display: flex; height: 100%; background-color: var(--bg-surface); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px var(--shadow); position: relative; }
         
-        /* Auth Overlay */
         #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; text-align: center;}
         #login-btn { padding: 15px 30px; font-size: 1.2rem; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 20px; transition: opacity 0.2s; }
         #login-btn:hover { opacity: 0.9; }
@@ -206,14 +250,15 @@
         .sidebar-header { padding: 20px; border-bottom: 2px solid var(--border-color); }
         .sidebar-header h2 { margin: 0 0 15px 0; font-size: 1.5rem; }
         .create-btn { width: 100%; padding: 10px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
-        .create-btn:hover { background: var(--accent-hover); }
-        .group-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; }
+        .create-btn:hover { opacity: 0.9; }
+        
+        .group-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
         .group-list li { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
         .group-list li:hover { background-color: var(--thumb-bg); }
         .group-list li.active-group { border-left: 5px solid var(--accent); background-color: var(--thumb-bg); font-weight: bold; }
 
         .chat-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-base); }
-        .chat-header { padding: 20px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; }
+        .chat-header { padding: 20px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-family: inherit; }
         
         .messages-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
@@ -238,19 +283,11 @@
             <div class="logo">LearnMultiply</div>
         </div>
         
+        <!-- NEW NAVIGATION TABS -->
         <div class="nav-controls">
-            <!-- View Toggle -->
-            <div class="toggle-group">
-                <span>Games</span>
-                <label class="switch"><input type="checkbox" id="view-toggle"><span class="slider"></span></label>
-                <span>Live Chat</span>
-            </div>
-            <!-- Theme Toggle -->
-            <div class="toggle-group">
-                <span>☀️</span>
-                <label class="switch"><input type="checkbox" id="theme-toggle" checked><span class="slider"></span></label>
-                <span>🌙</span>
-            </div>
+            <button class="nav-btn active" data-target="games-view">🎮 Games</button>
+            <button class="nav-btn" data-target="chat-view">💬 Chat</button>
+            <button class="nav-btn" data-target="settings-view">⚙️ Settings</button>
         </div>
     </header>
 
@@ -260,20 +297,18 @@
         <div id="games-view" class="view-section active">
             <div class="games-grid">
                 
-                <!-- Eaglercraft Game Card -->
                 <a href="craft.html" class="game-card">
                     <div class="thumbnail">
-                        <img src="assets/mclogo.webp" alt="Minecraft" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="assets/mclogo.webp" alt="Eaglercraft" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="game-title">Eaglercraft</div>
-                    <div class="play-btn">Play Now</div>
+                    <div class="play-btn">▶ Play Now</div>
                 </a>
 
-                <!-- Example Game 2 -->
-                <a href="sm64/index.html" class="game-card">
+                <a href="#" class="game-card">
                     <div class="thumbnail"><span class="thumbnail-icon">?</span></div>
-                    <div class="game-title">Super Mario 64</div>
-                    <div class="play-btn">Play Now</div>
+                    <div class="game-title">Example Game 2</div>
+                    <div class="play-btn">▶ Play Now</div>
                 </a>
 
             </div>
@@ -283,69 +318,128 @@
         <div id="chat-view" class="view-section">
             <div class="chat-container">
                 
-                <!-- Authentication Overlay -->
                 <div id="auth-overlay">
                     <h2>Classroom Chat</h2>
                     <p>Please sign in with your Google account to chat.</p>
                     <button id="login-btn">Sign in with Google</button>
                 </div>
 
-                <!-- Chat UI -->
                 <div class="chat-sidebar">
                     <div class="sidebar-header">
                         <h2>Groups</h2>
-                        <button class="create-btn" onclick="alert('Creating groups coming soon!')">+ New Group</button>
+                        <button id="create-group-btn" class="create-btn">+ New Group</button>
                     </div>
-                    <ul class="group-list">
-                        <li class="active-group"># Main Hub</li>
+                    <ul class="group-list" id="sidebar-groups">
+                        <!-- Groups load dynamically here -->
                     </ul>
                 </div>
 
                 <div class="chat-main">
                     <div class="chat-header">
-                        <span># Main Hub</span>
+                        <span id="current-group-title"># Select a Group</span>
                         <button id="logout-btn" style="display:none;">Log Out</button>
                     </div>
-                    <div class="messages-area" id="messages-container">
-                        <!-- Messages will load here via JS -->
-                    </div>
+                    <div class="messages-area" id="messages-container"></div>
                     <div class="chat-input">
-                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
-                        <button id="send-btn">Send</button>
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" disabled>
+                        <button id="send-btn" disabled>Send</button>
                     </div>
                 </div>
 
             </div>
         </div>
+
+        <!-- === SETTINGS VIEW === -->
+        <div id="settings-view" class="view-section">
+            <div class="settings-container">
+                <h2>Customization</h2>
+                
+                <div class="setting-item">
+                    <span>Dark Mode</span>
+                    <label class="switch"><input type="checkbox" id="theme-toggle" checked><span class="slider"></span></label>
+                </div>
+
+                <div class="setting-item">
+                    <span>Gradient Color 1</span>
+                    <input type="color" id="color1" class="color-picker" value="#FF3D00">
+                </div>
+
+                <div class="setting-item">
+                    <span>Gradient Color 2</span>
+                    <input type="color" id="color2" class="color-picker" value="#FFCA28">
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- ========================================== -->
-    <!-- FRONTEND JAVASCRIPT (Toggles & UI)         -->
+    <!-- FRONTEND JAVASCRIPT (Navigation & Settings)-->
     <!-- ========================================== -->
     <script>
-        // View Toggle Logic
-        const viewToggle = document.getElementById('view-toggle');
-        const gamesView = document.getElementById('games-view');
-        const chatView = document.getElementById('chat-view');
+        // --- Navigation Logic ---
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const viewSections = document.querySelectorAll('.view-section');
 
-        viewToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                gamesView.classList.remove('active');
-                setTimeout(() => chatView.classList.add('active'), 50);
-            } else {
-                chatView.classList.remove('active');
-                setTimeout(() => gamesView.classList.add('active'), 50);
-            }
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and views
+                navBtns.forEach(b => b.classList.remove('active'));
+                viewSections.forEach(v => v.classList.remove('active'));
+                
+                // Add active class to clicked button and target view
+                btn.classList.add('active');
+                const targetId = btn.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+            });
         });
 
-        // Theme Toggle Logic
+        // --- Settings Logic ---
         const themeToggle = document.getElementById('theme-toggle');
+        const color1Input = document.getElementById('color1');
+        const color2Input = document.getElementById('color2');
+        const root = document.documentElement;
+
+        // Apply saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggle.checked = false;
+        }
+
+        // Apply saved colors
+        const savedC1 = localStorage.getItem('gradC1');
+        const savedC2 = localStorage.getItem('gradC2');
+        if (savedC1 && savedC2) {
+            color1Input.value = savedC1;
+            color2Input.value = savedC2;
+            applyColors(savedC1, savedC2);
+        }
+
+        // Theme Toggle Event
         themeToggle.addEventListener('change', (e) => {
             if (e.target.checked) {
                 document.body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
             } else {
                 document.body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
             }
+        });
+
+        // Color Change Events
+        function applyColors(c1, c2) {
+            root.style.setProperty('--accent', c1);
+            root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${c1}, ${c2})`);
+            root.style.setProperty('--accent-hover', `linear-gradient(135deg, ${c1}, ${c1})`);
+        }
+
+        color1Input.addEventListener('input', (e) => {
+            applyColors(e.target.value, color2Input.value);
+            localStorage.setItem('gradC1', e.target.value);
+        });
+
+        color2Input.addEventListener('input', (e) => {
+            applyColors(color1Input.value, e.target.value);
+            localStorage.setItem('gradC2', e.target.value);
         });
     </script>
 
@@ -355,9 +449,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, setDoc, doc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-        // Your exact Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyATd0AhKa4v8rS4viCXETkjZ16V6e1VjsY",
             authDomain: "learnmultiply.firebaseapp.com",
@@ -367,7 +460,6 @@
             appId: "1:328977544347:web:1330f41590b4805854423e"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -379,43 +471,144 @@
         const messagesContainer = document.getElementById('messages-container');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
+        const sidebarGroups = document.getElementById('sidebar-groups');
+        const createGroupBtn = document.getElementById('create-group-btn');
+        const currentGroupTitle = document.getElementById('current-group-title');
 
         let currentUser = null;
+        let activeGroupId = null;
+        let unsubscribeMessages = null;
 
         // --- AUTHENTICATION ---
         loginBtn.addEventListener('click', () => {
-            const provider = new GoogleAuthProvider();
-            signInWithPopup(auth, provider).catch(error => console.error("Login failed:", error));
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
         });
 
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth);
-        });
+        logoutBtn.addEventListener('click', () => signOut(auth));
 
-        // Listen for login/logout state changes
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 authOverlay.style.display = 'none';
                 logoutBtn.style.display = 'block';
-                loadMessages();
+                loadGroups(); // Start loading groups once logged in
             } else {
                 currentUser = null;
+                activeGroupId = null;
                 authOverlay.style.display = 'flex';
                 logoutBtn.style.display = 'none';
                 messagesContainer.innerHTML = '';
+                sidebarGroups.innerHTML = '';
+                if(unsubscribeMessages) unsubscribeMessages();
             }
         });
 
-        // --- DATABASE LOGIC (Sending & Receiving) ---
+        // --- GROUP LOGIC ---
+        
+        // Create a new group
+        createGroupBtn.addEventListener('click', async () => {
+            const groupName = prompt("Enter the name of the new group:");
+            if (groupName && groupName.trim()) {
+                // Create a unique ID for the group (e.g. "math_homework_12345")
+                const groupId = groupName.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
+                
+                await setDoc(doc(db, "groups", groupId), {
+                    name: groupName.trim(),
+                    createdAt: serverTimestamp()
+                });
+            }
+        });
+
+        // Load all groups into the sidebar
+        function loadGroups() {
+            const q = query(collection(db, "groups"), orderBy("createdAt", "asc"));
+            
+            onSnapshot(q, async (snapshot) => {
+                sidebarGroups.innerHTML = '';
+                
+                // If database is completely empty, auto-create a Main Hub
+                if (snapshot.empty) {
+                    await setDoc(doc(db, "groups", "main_hub"), { name: "Main Hub", createdAt: serverTimestamp() });
+                    return;
+                }
+
+                snapshot.forEach((groupDoc) => {
+                    const group = groupDoc.data();
+                    const li = document.createElement('li');
+                    li.textContent = `# ${group.name}`;
+                    
+                    if (activeGroupId === groupDoc.id) {
+                        li.classList.add('active-group');
+                    }
+
+                    li.addEventListener('click', () => {
+                        // Switch active class visually
+                        document.querySelectorAll('.group-list li').forEach(el => el.classList.remove('active-group'));
+                        li.classList.add('active-group');
+                        
+                        // Load messages for this specific group
+                        switchGroup(groupDoc.id, group.name);
+                    });
+
+                    sidebarGroups.appendChild(li);
+                });
+
+                // Auto-join the first group if we haven't joined one yet
+                if (!activeGroupId && !snapshot.empty) {
+                    const firstGroup = snapshot.docs[0];
+                    switchGroup(firstGroup.id, firstGroup.data().name);
+                    sidebarGroups.firstChild.classList.add('active-group');
+                }
+            });
+        }
+
+        // --- MESSAGING LOGIC ---
+
+        function switchGroup(groupId, groupName) {
+            activeGroupId = groupId;
+            currentGroupTitle.textContent = `# ${groupName}`;
+            
+            // Enable inputs
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+
+            // Stop listening to old group's messages
+            if (unsubscribeMessages) unsubscribeMessages();
+
+            // Start listening to new group's messages (subcollection inside the group)
+            const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
+            
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = '';
+                
+                snapshot.forEach((msgDoc) => {
+                    const message = msgDoc.data();
+                    const isOwnMessage = message.uid === currentUser.uid;
+                    
+                    const msgElement = document.createElement('div');
+                    msgElement.classList.add('message');
+                    if (isOwnMessage) msgElement.classList.add('own-message');
+                    
+                    msgElement.innerHTML = `
+                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
+                        <div>${message.text}</div>
+                    `;
+                    messagesContainer.appendChild(msgElement);
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        // Send a message to the currently active group
         const sendMessage = async () => {
             const text = messageInput.value.trim();
-            if (text === "" || !currentUser) return;
+            if (text === "" || !currentUser || !activeGroupId) return;
             
             messageInput.value = '';
             
             try {
-                await addDoc(collection(db, "messages"), {
+                await addDoc(collection(db, "groups", activeGroupId, "messages"), {
                     text: text,
                     uid: currentUser.uid,
                     author: currentUser.displayName,
@@ -430,36 +623,6 @@
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
-
-        let unsubscribe = null;
-        
-        function loadMessages() {
-            if (unsubscribe) unsubscribe();
-
-            const q = query(collection(db, "messages"), orderBy("createdAt", "asc"), limit(50));
-            
-            unsubscribe = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = '';
-                
-                snapshot.forEach((doc) => {
-                    const message = doc.data();
-                    const isOwnMessage = message.uid === currentUser.uid;
-                    
-                    const msgElement = document.createElement('div');
-                    msgElement.classList.add('message');
-                    if (isOwnMessage) msgElement.classList.add('own-message');
-                    
-                    msgElement.innerHTML = `
-                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
-                        <div>${message.text}</div>
-                    `;
-                    
-                    messagesContainer.appendChild(msgElement);
-                });
-                
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            });
-        }
     </script>
 </body>
 </html>
