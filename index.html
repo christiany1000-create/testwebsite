@@ -478,4 +478,355 @@
         let currentUserProfileId = null;
         let activeGroupId = null;
         let unsubscribeMessages = null;
-        const TWENTY_FOUR_HOURS = 24 * 60 * 60 *
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+        loginBtn.addEventListener('click', () => {
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
+        });
+
+        logoutBtn.addEventListener('click', () => signOut(auth));
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const banRef = doc(db, "banned_users", user.email);
+                const banSnap = await getDoc(banRef);
+                
+                if (banSnap.exists()) {
+                    alert("You have been banned from using the chat.");
+                    signOut(auth);
+                    return;
+                }
+
+                currentUser = user;
+
+                // Check or Generate 8-Digit Profile ID
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists() && userSnap.data().profileId) {
+                    currentUserProfileId = userSnap.data().profileId;
+                } else {
+                    // Generate random 8-digit number (between 10000000 and 99999999)
+                    currentUserProfileId = Math.floor(10000000 + Math.random() * 90000000).toString();
+                    
+                    await setDoc(userRef, {
+                        uid: user.uid,
+                        email: user.email.toLowerCase(),
+                        name: user.displayName,
+                        profileId: currentUserProfileId,
+                        lastSeen: serverTimestamp()
+                    }, { merge: true });
+                }
+
+                authOverlay.style.display = 'none';
+                logoutBtn.style.display = 'block';
+                
+                if (ADMIN_EMAILS.includes(currentUser.email)) {
+                    adminPanel.style.display = 'block';
+                }
+
+                loadGroups();
+            } else {
+                currentUser = null;
+                currentUserProfileId = null;
+                activeGroupId = null;
+                authOverlay.style.display = 'flex';
+                logoutBtn.style.display = 'none';
+                messagesContainer.innerHTML = '';
+                sidebarGroups.innerHTML = '';
+                groupSettingsBtn.style.display = 'none';
+                adminPanel.style.display = 'none';
+                if(unsubscribeMessages) unsubscribeMessages();
+            }
+        });
+
+        // --- PROFILE MODAL TRIGGERS ---
+        profileBtn.addEventListener('click', () => {
+            if (currentUser) {
+                profileDisplayName.textContent = currentUser.displayName;
+                profileDisplayEmail.textContent = currentUser.email;
+                profileDisplayId.value = currentUserProfileId;
+                profileModal.style.display = 'flex';
+            }
+        });
+
+        closeProfileModalBtn.addEventListener('click', () => { profileModal.style.display = 'none'; });
+
+        copyIdBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(profileDisplayId.value);
+            copyIdBtn.textContent = "Copied!";
+            setTimeout(() => { copyIdBtn.textContent = "Copy ID"; }, 2000);
+        });
+
+        // --- ADMIN CONTROLS ---
+        banBtn.addEventListener('click', async () => {
+            const emailToBan = banEmailInput.value.trim();
+            if (emailToBan && ADMIN_EMAILS.includes(currentUser.email)) {
+                if (ADMIN_EMAILS.includes(emailToBan)) {
+                    alert("You cannot ban another Admin!");
+                    return;
+                }
+                await setDoc(doc(db, "banned_users", emailToBan), {
+                    bannedAt: serverTimestamp(),
+                    bannedBy: currentUser.email
+                });
+                alert(`${emailToBan} has been permanently banned.`);
+                banEmailInput.value = '';
+            }
+        });
+
+        unbanBtn.addEventListener('click', async () => {
+            const emailToUnban = unbanEmailInput.value.trim();
+            if (emailToUnban && ADMIN_EMAILS.includes(currentUser.email)) {
+                await deleteDoc(doc(db, "banned_users", emailToUnban));
+                alert(`${emailToUnban} has been unbanned.`);
+                unbanEmailInput.value = '';
+            }
+        });
+
+        // --- GROUP & ID-BASED DM CREATION ---
+        createGroupBtn.addEventListener('click', async () => {
+            const groupName = prompt("Enter the name of the new group:");
+            if (groupName && groupName.trim()) {
+                const groupId = groupName.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
+                
+                await setDoc(doc(db, "groups", groupId), {
+                    name: groupName.trim(),
+                    ownerUid: currentUser.uid,
+                    password: "",
+                    isDM: false,
+                    members: [{ uid: currentUser.uid, name: currentUser.displayName }],
+                    createdAt: serverTimestamp()
+                });
+            }
+        });
+
+        createDmBtn.addEventListener('click', async () => {
+            const targetId = prompt("Enter your friend's 8-digit Profile ID:");
+            if (!targetId || targetId.trim() === "") return;
+            
+            const cleanTargetId = targetId.trim();
+            
+            if (cleanTargetId === currentUserProfileId) {
+                alert("You can't message yourself!");
+                return;
+            }
+
+            // Look up target user by their 8-digit profile ID
+            const qUsers = query(collection(db, "users"), where("profileId", "==", cleanTargetId));
+            const querySnapshot = await getDocs(qUsers);
+
+            if (querySnapshot.empty) {
+                alert("Profile ID not found! Make sure they gave you the correct 8-digit number.");
+                return;
+            }
+
+            const targetUser = querySnapshot.docs[0].data();
+            const targetUid = targetUser.uid;
+
+            const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
+
+            await setDoc(doc(db, "groups", dmId), {
+                name: "Direct Message",
+                ownerUid: "system", 
+                password: "",
+                isDM: true,
+                members: [
+                    { uid: currentUser.uid, name: currentUser.displayName },
+                    { uid: targetUid, name: targetUser.name }
+                ],
+                createdAt: serverTimestamp()
+            }, { merge: true });
+            
+            alert(`Direct message started with ${targetUser.name}!`);
+        });
+
+        // --- LOAD GROUPS ---
+        function loadGroups() {
+            const q = query(collection(db, "groups"), orderBy("createdAt", "asc"));
+            
+            onSnapshot(q, async (snapshot) => {
+                sidebarGroups.innerHTML = '';
+                const now = Date.now();
+                
+                if (snapshot.empty) {
+                    await setDoc(doc(db, "groups", "main_hub"), { 
+                        name: "Main Hub", 
+                        ownerUid: "system",
+                        password: "",
+                        isDM: false,
+                        members: [],
+                        createdAt: serverTimestamp() 
+                    });
+                    return;
+                }
+
+                snapshot.forEach((groupDoc) => {
+                    const group = groupDoc.data();
+                    const isOwnerOrAdmin = group.ownerUid === currentUser.uid || ADMIN_EMAILS.includes(currentUser.email);
+                    
+                    if (group.isDM) {
+                        const amIMember = group.members && group.members.some(m => m.uid === currentUser.uid);
+                        if (!amIMember && !ADMIN_EMAILS.includes(currentUser.email)) return; 
+                    }
+
+                    if (group.createdAt && group.ownerUid !== "system" && !group.isDM) {
+                        const age = now - group.createdAt.toMillis();
+                        if (age > TWENTY_FOUR_HOURS) {
+                            if (isOwnerOrAdmin) deleteDoc(doc(db, "groups", groupDoc.id));
+                            return; 
+                        }
+                    }
+
+                    let displayName = `# ${group.name}`;
+                    if (group.isDM) {
+                        const otherPerson = group.members.find(m => m.uid !== currentUser.uid);
+                        displayName = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
+                    }
+
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${displayName}</span> ${group.password && !group.isDM ? '<span class="lock-icon">🔒</span>' : ''}`;
+                    
+                    if (activeGroupId === groupDoc.id) {
+                        li.classList.add('active-group');
+                    }
+
+                    li.addEventListener('click', async () => {
+                        const hasJoined = group.members && group.members.some(m => m.uid === currentUser.uid);
+
+                        if (!isOwnerOrAdmin && !hasJoined && group.password && !group.isDM) {
+                            const attempt = prompt(`Enter the password for #${group.name}:`);
+                            if (attempt !== group.password) {
+                                alert("Incorrect password.");
+                                return;
+                            }
+                        }
+
+                        if (!hasJoined && !group.isDM) {
+                            await updateDoc(doc(db, "groups", groupDoc.id), {
+                                members: arrayUnion({ uid: currentUser.uid, name: currentUser.displayName })
+                            });
+                        }
+
+                        document.querySelectorAll('.group-list li').forEach(el => el.classList.remove('active-group'));
+                        li.classList.add('active-group');
+                        switchGroup(groupDoc.id, group, isOwnerOrAdmin);
+                    });
+
+                    sidebarGroups.appendChild(li);
+                });
+            });
+        }
+
+        // --- SWITCH GROUPS & MESSAGING ---
+        function switchGroup(groupId, groupData, isOwnerOrAdmin) {
+            activeGroupId = groupId;
+            
+            if (groupData.isDM) {
+                const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
+                currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
+            } else {
+                currentGroupTitle.textContent = `# ${groupData.name}`;
+            }
+            
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+
+            if (isOwnerOrAdmin && !groupData.isDM) {
+                groupSettingsBtn.style.display = 'block';
+                modalPassword.value = groupData.password || "";
+                
+                memberList.innerHTML = '';
+                (groupData.members || []).forEach(m => {
+                    const li = document.createElement('li');
+                    li.textContent = m.name;
+                    memberList.appendChild(li);
+                });
+            } else {
+                groupSettingsBtn.style.display = 'none';
+            }
+
+            if (unsubscribeMessages) unsubscribeMessages();
+
+            const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
+            
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = '';
+                
+                snapshot.forEach((msgDoc) => {
+                    const message = msgDoc.data();
+                    const isOwnMessage = message.uid === currentUser.uid;
+                    
+                    const msgElement = document.createElement('div');
+                    msgElement.classList.add('message');
+                    if (isOwnMessage) msgElement.classList.add('own-message');
+                    
+                    msgElement.innerHTML = `
+                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
+                        <div>${message.text}</div>
+                    `;
+                    messagesContainer.appendChild(msgElement);
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        const sendMessage = async () => {
+            const text = messageInput.value.trim();
+            if (text === "" || !currentUser || !activeGroupId) return;
+            
+            messageInput.value = '';
+            
+            try {
+                await addDoc(collection(db, "groups", activeGroupId, "messages"), {
+                    text: text,
+                    uid: currentUser.uid,
+                    author: currentUser.displayName,
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error writing message: ", error);
+            }
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // --- MODAL CONTROLS ---
+        groupSettingsBtn.addEventListener('click', () => { groupModal.style.display = 'flex'; });
+        closeModalBtn.addEventListener('click', () => { groupModal.style.display = 'none'; });
+
+        savePasswordBtn.addEventListener('click', async () => {
+            if(activeGroupId) {
+                await updateDoc(doc(db, "groups", activeGroupId), { password: modalPassword.value.trim() });
+                alert("Group password updated!");
+            }
+        });
+
+        clearChatBtn.addEventListener('click', async () => {
+            if(confirm("Are you sure you want to delete all messages in this group?")) {
+                const q = query(collection(db, "groups", activeGroupId, "messages"));
+                const snaps = await getDocs(q);
+                const deletePromises = snaps.docs.map(d => deleteDoc(d.ref));
+                await Promise.all(deletePromises);
+                alert("Chat cleared.");
+            }
+        });
+
+        deleteGroupBtn.addEventListener('click', async () => {
+            if(confirm("Permanently delete this group and all its messages?")) {
+                await deleteDoc(doc(db, "groups", activeGroupId));
+                groupModal.style.display = 'none';
+                messagesContainer.innerHTML = '';
+                currentGroupTitle.textContent = "# Select a Group";
+                groupSettingsBtn.style.display = 'none';
+                messageInput.disabled = true;
+                sendBtn.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
