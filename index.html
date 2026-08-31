@@ -223,7 +223,6 @@
 
     <main class="content-area">
         
-        <!-- === GAMES VIEW === -->
         <div id="games-view" class="view-section active">
             <div class="games-grid">
                 <a href="craft.html" class="game-card">
@@ -241,7 +240,6 @@
             </div>
         </div>
 
-        <!-- === LIVE CHAT VIEW === -->
         <div id="chat-view" class="view-section">
             <div class="chat-container">
                 <div id="auth-overlay">
@@ -274,12 +272,29 @@
             </div>
         </div>
 
-        <!-- === PROFILE VIEW === -->
         <div id="profile-view" class="view-section">
             <div class="page-container">
                 <h2>My Account Profile</h2>
                 <div style="margin-top: 20px; font-size: 1.1rem; display: flex; flex-direction: column; gap: 15px;">
+                    
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <img id="profile-preview-img" src="assets/sitelogo.png" alt="Profile Picture" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); box-shadow: 0 4px 10px var(--shadow);">
+                    </div>
+
                     <div class="setting-item">
+                        <span>Profile Picture Source:</span>
+                        <button id="use-google-pic-btn" class="base-btn" style="background: #2196F3; width: 180px; margin: 0; font-size: 1rem;">Use Google Picture</button>
+                    </div>
+
+                    <div>
+                        <p style="margin-bottom: 8px; font-size: 1rem;"><strong>Or Custom Image URL:</strong></p>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="custom-pic-url-input" class="base-input" placeholder="https://example.com/image.png" style="margin-bottom: 0;">
+                            <button id="save-custom-pic-btn" class="base-btn" style="background: var(--accent-gradient); width: 100px; margin: 0; font-size: 1rem;">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item" style="margin-top: 10px;">
                         <span>Display Name:</span>
                         <span id="page-profile-name" style="color: var(--text-muted);">Not signed in</span>
                     </div>
@@ -287,7 +302,7 @@
                         <span>Email Address:</span>
                         <span id="page-profile-email" style="color: var(--text-muted);">Not signed in</span>
                     </div>
-                    <div style="padding-top: 10px;">
+                    <div style="padding-top: 5px;">
                         <p style="margin-bottom: 8px;"><strong>Your 8-Digit Profile ID:</strong> (Give this to friends for DMs)</p>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <input type="text" id="page-profile-id" class="base-input" style="margin-bottom: 0; font-weight: bold; text-align: center; letter-spacing: 2px; font-size: 1.2rem;" value="------" readonly>
@@ -298,7 +313,6 @@
             </div>
         </div>
 
-        <!-- === SETTINGS VIEW === -->
         <div id="settings-view" class="view-section">
             <div class="page-container">
                 <h2>Customization</h2>
@@ -315,7 +329,6 @@
                     <input type="color" id="color2" class="color-picker" value="#FFCA28">
                 </div>
                 
-                <!-- ADMIN PANEL -->
                 <div id="admin-panel" style="display:none; margin-top: 20px; border-top: 2px solid var(--border-color); padding-top: 20px;">
                     <h2 style="color: #f44336; border-bottom: 2px solid #f44336;">Admin Controls</h2>
                     
@@ -339,7 +352,6 @@
         </div>
     </main>
 
-    <!-- === GROUP OWNER MODAL === -->
     <div id="group-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -357,7 +369,6 @@
         </div>
     </div>
 
-    <!-- === DM CONFIRMATION POPUP MODAL === -->
     <div id="dm-confirm-modal" class="custom-modal">
         <div class="modal-content" style="text-align: center;">
             <button id="close-dm-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -369,9 +380,6 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- FRONTEND JAVASCRIPT (Navigation & Settings)-->
-    <!-- ========================================== -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
@@ -447,9 +455,6 @@
         });
     </script>
 
-    <!-- ========================================== -->
-    <!-- FIREBASE JAVASCRIPT (Backend logic)        -->
-    <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -507,6 +512,10 @@
         const pageProfileEmail = document.getElementById('page-profile-email');
         const pageProfileId = document.getElementById('page-profile-id');
         const pageCopyIdBtn = document.getElementById('page-copy-id-btn');
+        const profilePreviewImg = document.getElementById('profile-preview-img');
+        const useGooglePicBtn = document.getElementById('use-google-pic-btn');
+        const customPicUrlInput = document.getElementById('custom-pic-url-input');
+        const saveCustomPicBtn = document.getElementById('save-custom-pic-btn');
 
         // Admin DOM Elements
         const adminPanel = document.getElementById('admin-panel');
@@ -517,11 +526,11 @@
 
         let currentUser = null;
         let currentUserProfileId = null;
+        let activePhotoURL = "";
         let activeGroupId = null;
         let unsubscribeMessages = null;
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 
-        // Pending DM target state when clicking an avatar
         let pendingDmUid = null;
         let pendingDmName = null;
 
@@ -544,20 +553,24 @@
 
                 currentUser = user;
 
-                // Check or Generate 8-Digit Profile ID
+                // Check or Generate 8-Digit Profile ID & Photo Preference
                 const userRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userRef);
                 
-                if (userSnap.exists() && userSnap.data().profileId) {
-                    currentUserProfileId = userSnap.data().profileId;
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    currentUserProfileId = data.profileId || Math.floor(10000000 + Math.random() * 90000000).toString();
+                    activePhotoURL = data.customPhotoURL || user.photoURL || "";
                 } else {
                     currentUserProfileId = Math.floor(10000000 + Math.random() * 90000000).toString();
+                    activePhotoURL = user.photoURL || "";
                     
                     await setDoc(userRef, {
                         uid: user.uid,
                         email: user.email.toLowerCase(),
                         name: user.displayName,
                         photoURL: user.photoURL || "",
+                        customPhotoURL: "",
                         profileId: currentUserProfileId,
                         lastSeen: serverTimestamp()
                     }, { merge: true });
@@ -566,6 +579,7 @@
                 pageProfileName.textContent = currentUser.displayName;
                 pageProfileEmail.textContent = currentUser.email;
                 pageProfileId.value = currentUserProfileId;
+                profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png';
 
                 authOverlay.style.display = 'none';
                 logoutBtn.style.display = 'block';
@@ -578,10 +592,12 @@
             } else {
                 currentUser = null;
                 currentUserProfileId = null;
+                activePhotoURL = "";
                 activeGroupId = null;
                 pageProfileName.textContent = "Not signed in";
                 pageProfileEmail.textContent = "Not signed in";
                 pageProfileId.value = "------";
+                profilePreviewImg.src = 'assets/sitelogo.png';
                 authOverlay.style.display = 'flex';
                 logoutBtn.style.display = 'none';
                 messagesContainer.innerHTML = '';
@@ -590,6 +606,36 @@
                 adminPanel.style.display = 'none';
                 if(unsubscribeMessages) unsubscribeMessages();
             }
+        });
+
+        // --- PROFILE PICTURE CONTROLS ---
+        useGooglePicBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            activePhotoURL = currentUser.photoURL || "";
+            profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png';
+            customPicUrlInput.value = "";
+
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                customPhotoURL: ""
+            });
+            alert("Switched back to your Google profile picture!");
+        });
+
+        saveCustomPicBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            const newUrl = customPicUrlInput.value.trim();
+            if (!newUrl) {
+                alert("Please enter a valid image URL.");
+                return;
+            }
+
+            activePhotoURL = newUrl;
+            profilePreviewImg.src = activePhotoURL;
+
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                customPhotoURL: newUrl
+            });
+            alert("Custom profile picture saved!");
         });
 
         // --- DM CONFIRMATION POPUP HANDLERS ---
@@ -827,27 +873,23 @@
                     const message = msgDoc.data();
                     const isOwnMessage = message.uid === currentUser.uid;
                     
-                    // Create row element for avatar + message bubble
                     const rowElement = document.createElement('div');
                     rowElement.classList.add('message-row');
                     if (isOwnMessage) rowElement.classList.add('own-row');
 
-                    // Profile picture avatar
                     const avatarImg = document.createElement('img');
                     avatarImg.src = message.photoURL || 'assets/sitelogo.png';
                     avatarImg.classList.add('chat-avatar');
                     avatarImg.alt = message.author || 'User';
 
-                    // Click avatar to trigger DM confirmation popup
                     avatarImg.addEventListener('click', () => {
-                        if (message.uid === currentUser.uid) return; // Can't DM yourself
+                        if (message.uid === currentUser.uid) return;
                         pendingDmUid = message.uid;
                         pendingDmName = message.author;
                         dmConfirmText.textContent = `Do you want to start a dm with ${pendingDmName}?`;
                         dmConfirmModal.style.display = 'flex';
                     });
 
-                    // Message bubble
                     const msgDiv = document.createElement('div');
                     msgDiv.classList.add('message');
                     if (isOwnMessage) msgDiv.classList.add('own-message');
@@ -873,11 +915,16 @@
             messageInput.value = '';
             
             try {
+                // Fetch latest user document to ensure custom photo URL is up-to-date
+                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+                const userData = userSnap.exists() ? userSnap.data() : {};
+                const finalPhoto = userData.customPhotoURL || currentUser.photoURL || "";
+
                 await addDoc(collection(db, "groups", activeGroupId, "messages"), {
                     text: text,
                     uid: currentUser.uid,
                     author: currentUser.displayName,
-                    photoURL: currentUser.photoURL || "",
+                    photoURL: finalPhoto,
                     createdAt: serverTimestamp()
                 });
             } catch (error) {
