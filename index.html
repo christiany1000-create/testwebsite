@@ -180,10 +180,42 @@
         .messages-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         
         /* Message & Avatar Layout */
-        .message-row { display: flex; align-items: flex-start; gap: 10px; }
+        .message-row { display: flex; align-items: flex-start; gap: 10px; position: relative; }
         .message-row.own-row { flex-direction: row-reverse; }
         .chat-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); transition: border-color 0.2s; }
         .chat-avatar:hover { border-color: var(--accent); }
+
+        /* --- Avatar Dropdown Menu --- */
+        .avatar-dropdown {
+            position: absolute;
+            background-color: var(--bg-surface);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--shadow);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            min-width: 160px;
+            overflow: hidden;
+        }
+        .dropdown-item {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .dropdown-item:hover {
+            background-color: var(--thumb-bg-hover);
+            color: var(--accent);
+        }
+        .dropdown-item.danger:hover {
+            color: #f44336;
+        }
 
         .message { background-color: var(--bg-surface); padding: 12px 15px; border-radius: 8px; max-width: 70%; border: 1px solid var(--border-color); word-wrap: break-word;}
         .message.own-message { border-color: var(--accent); background-color: var(--thumb-bg); }
@@ -369,17 +401,6 @@
         </div>
     </div>
 
-    <div id="dm-confirm-modal" class="custom-modal">
-        <div class="modal-content" style="text-align: center;">
-            <button id="close-dm-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-            <h3 id="dm-confirm-text" style="margin-top:0; margin-bottom: 25px; font-size: 1.3rem;">Do you want to start a dm with Name?</h3>
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button id="dm-yes-btn" class="base-btn" style="background: #4CAF50; width: 100px; margin: 0;">Yes</button>
-                <button id="dm-no-btn" class="base-btn" style="background: #f44336; width: 100px; margin: 0;">No</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
@@ -453,6 +474,11 @@
                 }
             } catch (fatalError) {}
         });
+
+        // Close any active avatar dropdowns when clicking anywhere outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
+        });
     </script>
 
     <script type="module">
@@ -500,13 +526,6 @@
         const clearChatBtn = document.getElementById('clear-chat-btn');
         const deleteGroupBtn = document.getElementById('delete-group-btn');
 
-        // DM Popup Confirmation Elements
-        const dmConfirmModal = document.getElementById('dm-confirm-modal');
-        const closeDmModalBtn = document.getElementById('close-dm-modal');
-        const dmConfirmText = document.getElementById('dm-confirm-text');
-        const dmYesBtn = document.getElementById('dm-yes-btn');
-        const dmNoBtn = document.getElementById('dm-no-btn');
-
         // Profile Page DOM Elements
         const pageProfileName = document.getElementById('page-profile-name');
         const pageProfileEmail = document.getElementById('page-profile-email');
@@ -531,9 +550,6 @@
         let unsubscribeMessages = null;
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 
-        let pendingDmUid = null;
-        let pendingDmName = null;
-
         loginBtn.addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
         });
@@ -553,7 +569,6 @@
 
                 currentUser = user;
 
-                // Check or Generate 8-Digit Profile ID & Photo Preference
                 const userRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userRef);
                 
@@ -638,16 +653,12 @@
             alert("Custom profile picture saved!");
         });
 
-        // --- DM CONFIRMATION POPUP HANDLERS ---
-        closeDmModalBtn.addEventListener('click', () => { dmConfirmModal.style.display = 'none'; });
-        dmNoBtn.addEventListener('click', () => { dmConfirmModal.style.display = 'none'; });
-
-        dmYesBtn.addEventListener('click', async () => {
-            if (!pendingDmUid) return;
-            dmConfirmModal.style.display = 'none';
-
-            const targetUid = pendingDmUid;
-            const targetName = pendingDmName;
+        // --- START DM HELPER ---
+        async function startDM(targetUid, targetName) {
+            if (targetUid === currentUser.uid) {
+                alert("You can't message yourself!");
+                return;
+            }
 
             const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
 
@@ -664,7 +675,50 @@
             }, { merge: true });
             
             alert(`Direct message started with ${targetName}!`);
-        });
+        }
+
+        // --- REPORT USER HELPER (Sends DM from LMBot UID: 00000000 to admins) ---
+        async function reportUser(targetUid, targetName) {
+            if (!confirm(`Are you sure you want to report ${targetName}?`)) return;
+
+            try {
+                for (const adminEmail of ADMIN_EMAILS) {
+                    const qAdmin = query(collection(db, "users"), where("email", "==", adminEmail.toLowerCase()));
+                    const adminSnap = await getDocs(qAdmin);
+                    
+                    if (!adminSnap.empty) {
+                        const adminUser = adminSnap.docs[0].data();
+                        const adminUid = adminUser.uid;
+
+                        const dmId = adminUid < "00000000" ? `dm_${adminUid}_00000000` : `dm_00000000_${adminUid}`;
+
+                        await setDoc(doc(db, "groups", dmId), {
+                            name: "Admin Reports",
+                            ownerUid: "00000000",
+                            password: "",
+                            isDM: true,
+                            members: [
+                                { uid: "00000000", name: "LMBot" },
+                                { uid: adminUid, name: adminUser.name }
+                            ],
+                            createdAt: serverTimestamp()
+                        }, { merge: true });
+
+                        await addDoc(collection(db, "groups", dmId, "messages"), {
+                            text: `⚠️ REPORT: User "${targetName}" (UID: ${targetUid}) was reported by "${currentUser.displayName}" (UID: ${currentUser.uid}).`,
+                            uid: "00000000",
+                            author: "LMBot",
+                            photoURL: "assets/sitelogo.png",
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                }
+                alert(`Report submitted successfully to administrators (yates.christian@norwinsd.org & christiany1000@gmail.com).`);
+            } catch (err) {
+                console.error("Error submitting report:", err);
+                alert("Failed to send report.");
+            }
+        }
 
         // --- PROFILE PAGE COPY ID ---
         pageCopyIdBtn.addEventListener('click', () => {
@@ -738,23 +792,7 @@
             }
 
             const targetUser = querySnapshot.docs[0].data();
-            const targetUid = targetUser.uid;
-
-            const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
-
-            await setDoc(doc(db, "groups", dmId), {
-                name: "Direct Message",
-                ownerUid: "system", 
-                password: "",
-                isDM: true,
-                members: [
-                    { uid: currentUser.uid, name: currentUser.displayName },
-                    { uid: targetUid, name: targetUser.name }
-                ],
-                createdAt: serverTimestamp()
-            }, { merge: true });
-            
-            alert(`Direct message started with ${targetUser.name}!`);
+            await startDM(targetUser.uid, targetUser.name);
         });
 
         // --- LOAD GROUPS ---
@@ -839,136 +877,4 @@
             activeGroupId = groupId;
             
             if (groupData.isDM) {
-                const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
-                currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
-            } else {
-                currentGroupTitle.textContent = `# ${groupData.name}`;
-            }
-            
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-
-            if (isOwnerOrAdmin && !groupData.isDM) {
-                groupSettingsBtn.style.display = 'block';
-                modalPassword.value = groupData.password || "";
-                
-                memberList.innerHTML = '';
-                (groupData.members || []).forEach(m => {
-                    const li = document.createElement('li');
-                    li.textContent = m.name;
-                    memberList.appendChild(li);
-                });
-            } else {
-                groupSettingsBtn.style.display = 'none';
-            }
-
-            if (unsubscribeMessages) unsubscribeMessages();
-
-            const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
-            
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = '';
-                
-                snapshot.forEach((msgDoc) => {
-                    const message = msgDoc.data();
-                    const isOwnMessage = message.uid === currentUser.uid;
-                    
-                    const rowElement = document.createElement('div');
-                    rowElement.classList.add('message-row');
-                    if (isOwnMessage) rowElement.classList.add('own-row');
-
-                    const avatarImg = document.createElement('img');
-                    avatarImg.src = message.photoURL || 'assets/sitelogo.png';
-                    avatarImg.classList.add('chat-avatar');
-                    avatarImg.alt = message.author || 'User';
-
-                    avatarImg.addEventListener('click', () => {
-                        if (message.uid === currentUser.uid) return;
-                        pendingDmUid = message.uid;
-                        pendingDmName = message.author;
-                        dmConfirmText.textContent = `Do you want to start a dm with ${pendingDmName}?`;
-                        dmConfirmModal.style.display = 'flex';
-                    });
-
-                    const msgDiv = document.createElement('div');
-                    msgDiv.classList.add('message');
-                    if (isOwnMessage) msgDiv.classList.add('own-message');
-                    
-                    msgDiv.innerHTML = `
-                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
-                        <div>${message.text}</div>
-                    `;
-
-                    rowElement.appendChild(avatarImg);
-                    rowElement.appendChild(msgDiv);
-                    messagesContainer.appendChild(rowElement);
-                });
-                
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            });
-        }
-
-        const sendMessage = async () => {
-            const text = messageInput.value.trim();
-            if (text === "" || !currentUser || !activeGroupId) return;
-            
-            messageInput.value = '';
-            
-            try {
-                // Fetch latest user document to ensure custom photo URL is up-to-date
-                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
-                const userData = userSnap.exists() ? userSnap.data() : {};
-                const finalPhoto = userData.customPhotoURL || currentUser.photoURL || "";
-
-                await addDoc(collection(db, "groups", activeGroupId, "messages"), {
-                    text: text,
-                    uid: currentUser.uid,
-                    author: currentUser.displayName,
-                    photoURL: finalPhoto,
-                    createdAt: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Error writing message: ", error);
-            }
-        };
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // --- MODAL CONTROLS ---
-        groupSettingsBtn.addEventListener('click', () => { groupModal.style.display = 'flex'; });
-        closeModalBtn.addEventListener('click', () => { groupModal.style.display = 'none'; });
-
-        savePasswordBtn.addEventListener('click', async () => {
-            if(activeGroupId) {
-                await updateDoc(doc(db, "groups", activeGroupId), { password: modalPassword.value.trim() });
-                alert("Group password updated!");
-            }
-        });
-
-        clearChatBtn.addEventListener('click', async () => {
-            if(confirm("Are you sure you want to delete all messages in this group?")) {
-                const q = query(collection(db, "groups", activeGroupId, "messages"));
-                const snaps = await getDocs(q);
-                const deletePromises = snaps.docs.map(d => deleteDoc(d.ref));
-                await Promise.all(deletePromises);
-                alert("Chat cleared.");
-            }
-        });
-
-        deleteGroupBtn.addEventListener('click', async () => {
-            if(confirm("Permanently delete this group and all its messages?")) {
-                await deleteDoc(doc(db, "groups", activeGroupId));
-                groupModal.style.display = 'none';
-                messagesContainer.innerHTML = '';
-                currentGroupTitle.textContent = "# Select a Group";
-                groupSettingsBtn.style.display = 'none';
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
-            }
-        });
-    </script>
-</body>
-</html>
+                const otherPerson = groupData.members.find(m
