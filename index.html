@@ -189,7 +189,7 @@
         .chat-input button:active { transform: scale(0.95); }
 
         /* --- Modal & Input Styling --- */
-        #group-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
         .modal-content { max-width: 400px; width: 90%; background-color: var(--bg-surface); padding: 30px; border-radius: 12px; border: 2px solid var(--accent); position: relative; }
         .base-input { width: 100%; padding: 10px; margin-bottom: 15px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; box-sizing: border-box;}
         .base-btn { width: 100%; padding: 10px; border-radius: 6px; border: none; font-family: inherit; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; color: white;}
@@ -244,6 +244,7 @@
                         <h2>Groups</h2>
                         <button id="create-group-btn" class="create-btn">+ New Group</button>
                         <button id="create-dm-btn" class="create-btn" style="background: #4CAF50;">+ Direct Message</button>
+                        <button id="profile-btn" class="create-btn" style="background: #2196F3;">👤 Profile</button>
                     </div>
                     <ul class="group-list" id="sidebar-groups"></ul>
                 </div>
@@ -303,7 +304,7 @@
         </div>
     </main>
 
-    <div id="group-modal">
+    <div id="group-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
             <h2 style="margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">Group Controls</h2>
@@ -320,10 +321,26 @@
         </div>
     </div>
 
+    <div id="profile-modal" class="custom-modal">
+        <div class="modal-content">
+            <button id="close-profile-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">My Profile</h2>
+            
+            <div style="margin-top: 15px; font-size: 1.1rem;">
+                <p><strong>Name:</strong> <span id="profile-display-name" style="color: var(--text-muted);">Loading...</span></p>
+                <p><strong>Email:</strong> <span id="profile-display-email" style="color: var(--text-muted);">Loading...</span></p>
+                <p><strong>Profile ID:</strong></p>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
+                    <input type="text" id="profile-display-id" class="base-input" style="margin-bottom: 0; font-weight: bold; text-align: center; letter-spacing: 2px;" readonly>
+                    <button id="copy-id-btn" class="base-btn" style="background: #2196F3; width: 100px; margin: 0;">Copy ID</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
-                // Navigation Logic
                 const navBtns = document.querySelectorAll('.nav-btn');
                 const viewSections = document.querySelectorAll('.view-section');
 
@@ -341,7 +358,6 @@
                     });
                 });
 
-                // Settings Logic
                 const themeToggle = document.getElementById('theme-toggle');
                 const color1Input = document.getElementById('color1');
                 const color2Input = document.getElementById('color2');
@@ -366,9 +382,7 @@
                         color2Input.value = savedC2; 
                         applyColors(savedC1, savedC2); 
                     }
-                } catch(e) {
-                    console.warn("LocalStorage is blocked by browser settings, defaults loaded.");
-                }
+                } catch(e) {}
 
                 if (themeToggle) {
                     themeToggle.addEventListener('change', (e) => {
@@ -395,9 +409,7 @@
                         try { localStorage.setItem('gradC2', e.target.value); } catch(err){}
                     });
                 }
-            } catch (fatalError) {
-                console.error("Frontend script completely failed: ", fatalError);
-            }
+            } catch (fatalError) {}
         });
     </script>
 
@@ -419,7 +431,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- SUPER ADMIN SETUP ---
         const ADMIN_EMAILS = [
             "christiany1000@gmail.com",
             "yates.christian@norwinsd.org"
@@ -447,6 +458,15 @@
         const clearChatBtn = document.getElementById('clear-chat-btn');
         const deleteGroupBtn = document.getElementById('delete-group-btn');
 
+        // Profile DOM Elements
+        const profileBtn = document.getElementById('profile-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const closeProfileModalBtn = document.getElementById('close-profile-modal');
+        const profileDisplayName = document.getElementById('profile-display-name');
+        const profileDisplayEmail = document.getElementById('profile-display-email');
+        const profileDisplayId = document.getElementById('profile-display-id');
+        const copyIdBtn = document.getElementById('copy-id-btn');
+
         // Admin DOM Elements
         const adminPanel = document.getElementById('admin-panel');
         const banBtn = document.getElementById('ban-btn');
@@ -455,326 +475,7 @@
         const unbanEmailInput = document.getElementById('unban-email');
 
         let currentUser = null;
+        let currentUserProfileId = null;
         let activeGroupId = null;
         let unsubscribeMessages = null;
-        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-
-        // --- AUTHENTICATION & BAN CHECK ---
-        loginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
-        });
-
-        logoutBtn.addEventListener('click', () => signOut(auth));
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const banRef = doc(db, "banned_users", user.email);
-                const banSnap = await getDoc(banRef);
-                
-                if (banSnap.exists()) {
-                    alert("You have been banned from using the chat.");
-                    signOut(auth);
-                    return;
-                }
-
-                currentUser = user;
-                
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    email: user.email.toLowerCase(),
-                    name: user.displayName,
-                    lastSeen: serverTimestamp()
-                }, { merge: true });
-
-                authOverlay.style.display = 'none';
-                logoutBtn.style.display = 'block';
-                
-                if (ADMIN_EMAILS.includes(currentUser.email)) {
-                    adminPanel.style.display = 'block';
-                }
-
-                loadGroups();
-            } else {
-                currentUser = null;
-                activeGroupId = null;
-                authOverlay.style.display = 'flex';
-                logoutBtn.style.display = 'none';
-                messagesContainer.innerHTML = '';
-                sidebarGroups.innerHTML = '';
-                groupSettingsBtn.style.display = 'none';
-                adminPanel.style.display = 'none';
-                if(unsubscribeMessages) unsubscribeMessages();
-            }
-        });
-
-        // --- ADMIN CONTROLS ---
-        banBtn.addEventListener('click', async () => {
-            const emailToBan = banEmailInput.value.trim();
-            if (emailToBan && ADMIN_EMAILS.includes(currentUser.email)) {
-                if (ADMIN_EMAILS.includes(emailToBan)) {
-                    alert("You cannot ban another Admin!");
-                    return;
-                }
-                await setDoc(doc(db, "banned_users", emailToBan), {
-                    bannedAt: serverTimestamp(),
-                    bannedBy: currentUser.email
-                });
-                alert(`${emailToBan} has been permanently banned.`);
-                banEmailInput.value = '';
-            }
-        });
-
-        unbanBtn.addEventListener('click', async () => {
-            const emailToUnban = unbanEmailInput.value.trim();
-            if (emailToUnban && ADMIN_EMAILS.includes(currentUser.email)) {
-                await deleteDoc(doc(db, "banned_users", emailToUnban));
-                alert(`${emailToUnban} has been unbanned.`);
-                unbanEmailInput.value = '';
-            }
-        });
-
-        // --- GROUP & DM CREATION ---
-        createGroupBtn.addEventListener('click', async () => {
-            const groupName = prompt("Enter the name of the new group:");
-            if (groupName && groupName.trim()) {
-                const groupId = groupName.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
-                
-                await setDoc(doc(db, "groups", groupId), {
-                    name: groupName.trim(),
-                    ownerUid: currentUser.uid,
-                    password: "",
-                    isDM: false,
-                    members: [{ uid: currentUser.uid, name: currentUser.displayName }],
-                    createdAt: serverTimestamp()
-                });
-            }
-        });
-
-        createDmBtn.addEventListener('click', async () => {
-            const targetEmail = prompt("Enter the email of the student you want to message:");
-            if (!targetEmail || targetEmail.trim() === "") return;
-            
-            const cleanEmail = targetEmail.trim().toLowerCase();
-            
-            if (cleanEmail === currentUser.email.toLowerCase()) {
-                alert("You can't message yourself!");
-                return;
-            }
-
-            const qUsers = query(collection(db, "users"), where("email", "==", cleanEmail));
-            const querySnapshot = await getDocs(qUsers);
-
-            if (querySnapshot.empty) {
-                alert("User not found! They need to log into the website at least once before you can message them.");
-                return;
-            }
-
-            const targetUser = querySnapshot.docs[0].data();
-            const targetUid = targetUser.uid;
-
-            const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
-
-            await setDoc(doc(db, "groups", dmId), {
-                name: "Direct Message",
-                ownerUid: "system", 
-                password: "",
-                isDM: true,
-                members: [
-                    { uid: currentUser.uid, name: currentUser.displayName, email: currentUser.email },
-                    { uid: targetUid, name: targetUser.name, email: targetUser.email }
-                ],
-                createdAt: serverTimestamp()
-            }, { merge: true });
-            
-            alert(`Direct message started with ${targetUser.name}!`);
-        });
-
-        // --- LOAD GROUPS ---
-        function loadGroups() {
-            const q = query(collection(db, "groups"), orderBy("createdAt", "asc"));
-            
-            onSnapshot(q, async (snapshot) => {
-                sidebarGroups.innerHTML = '';
-                const now = Date.now();
-                
-                if (snapshot.empty) {
-                    await setDoc(doc(db, "groups", "main_hub"), { 
-                        name: "Main Hub", 
-                        ownerUid: "system",
-                        password: "",
-                        isDM: false,
-                        members: [],
-                        createdAt: serverTimestamp() 
-                    });
-                    return;
-                }
-
-                snapshot.forEach((groupDoc) => {
-                    const group = groupDoc.data();
-                    const isOwnerOrAdmin = group.ownerUid === currentUser.uid || ADMIN_EMAILS.includes(currentUser.email);
-                    
-                    if (group.isDM) {
-                        const amIMember = group.members && group.members.some(m => m.uid === currentUser.uid);
-                        if (!amIMember && !ADMIN_EMAILS.includes(currentUser.email)) return; 
-                    }
-
-                    if (group.createdAt && group.ownerUid !== "system" && !group.isDM) {
-                        const age = now - group.createdAt.toMillis();
-                        if (age > TWENTY_FOUR_HOURS) {
-                            if (isOwnerOrAdmin) deleteDoc(doc(db, "groups", groupDoc.id));
-                            return; 
-                        }
-                    }
-
-                    let displayName = `# ${group.name}`;
-                    if (group.isDM) {
-                        const otherPerson = group.members.find(m => m.uid !== currentUser.uid);
-                        displayName = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
-                    }
-
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${displayName}</span> ${group.password && !group.isDM ? '<span class="lock-icon">🔒</span>' : ''}`;
-                    
-                    if (activeGroupId === groupDoc.id) {
-                        li.classList.add('active-group');
-                    }
-
-                    li.addEventListener('click', async () => {
-                        const hasJoined = group.members && group.members.some(m => m.uid === currentUser.uid);
-
-                        if (!isOwnerOrAdmin && !hasJoined && group.password && !group.isDM) {
-                            const attempt = prompt(`Enter the password for #${group.name}:`);
-                            if (attempt !== group.password) {
-                                alert("Incorrect password.");
-                                return;
-                            }
-                        }
-
-                        if (!hasJoined && !group.isDM) {
-                            await updateDoc(doc(db, "groups", groupDoc.id), {
-                                members: arrayUnion({ uid: currentUser.uid, name: currentUser.displayName })
-                            });
-                        }
-
-                        document.querySelectorAll('.group-list li').forEach(el => el.classList.remove('active-group'));
-                        li.classList.add('active-group');
-                        switchGroup(groupDoc.id, group, isOwnerOrAdmin);
-                    });
-
-                    sidebarGroups.appendChild(li);
-                });
-            });
-        }
-
-        // --- SWITCH GROUPS & MESSAGING ---
-        function switchGroup(groupId, groupData, isOwnerOrAdmin) {
-            activeGroupId = groupId;
-            
-            if (groupData.isDM) {
-                const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
-                currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
-            } else {
-                currentGroupTitle.textContent = `# ${groupData.name}`;
-            }
-            
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-
-            if (isOwnerOrAdmin && !groupData.isDM) {
-                groupSettingsBtn.style.display = 'block';
-                modalPassword.value = groupData.password || "";
-                
-                memberList.innerHTML = '';
-                (groupData.members || []).forEach(m => {
-                    const li = document.createElement('li');
-                    li.textContent = m.name;
-                    memberList.appendChild(li);
-                });
-            } else {
-                groupSettingsBtn.style.display = 'none';
-            }
-
-            if (unsubscribeMessages) unsubscribeMessages();
-
-            const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
-            
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                messagesContainer.innerHTML = '';
-                
-                snapshot.forEach((msgDoc) => {
-                    const message = msgDoc.data();
-                    const isOwnMessage = message.uid === currentUser.uid;
-                    
-                    const msgElement = document.createElement('div');
-                    msgElement.classList.add('message');
-                    if (isOwnMessage) msgElement.classList.add('own-message');
-                    
-                    msgElement.innerHTML = `
-                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
-                        <div>${message.text}</div>
-                    `;
-                    messagesContainer.appendChild(msgElement);
-                });
-                
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            });
-        }
-
-        const sendMessage = async () => {
-            const text = messageInput.value.trim();
-            if (text === "" || !currentUser || !activeGroupId) return;
-            
-            messageInput.value = '';
-            
-            try {
-                await addDoc(collection(db, "groups", activeGroupId, "messages"), {
-                    text: text,
-                    uid: currentUser.uid,
-                    author: currentUser.displayName,
-                    createdAt: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Error writing message: ", error);
-            }
-        };
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // --- MODAL CONTROLS ---
-        groupSettingsBtn.addEventListener('click', () => { groupModal.style.display = 'flex'; });
-        closeModalBtn.addEventListener('click', () => { groupModal.style.display = 'none'; });
-
-        savePasswordBtn.addEventListener('click', async () => {
-            if(activeGroupId) {
-                await updateDoc(doc(db, "groups", activeGroupId), { password: modalPassword.value.trim() });
-                alert("Group password updated!");
-            }
-        });
-
-        clearChatBtn.addEventListener('click', async () => {
-            if(confirm("Are you sure you want to delete all messages in this group?")) {
-                const q = query(collection(db, "groups", activeGroupId, "messages"));
-                const snaps = await getDocs(q);
-                const deletePromises = snaps.docs.map(d => deleteDoc(d.ref));
-                await Promise.all(deletePromises);
-                alert("Chat cleared.");
-            }
-        });
-
-        deleteGroupBtn.addEventListener('click', async () => {
-            if(confirm("Permanently delete this group and all its messages?")) {
-                await deleteDoc(doc(db, "groups", activeGroupId));
-                groupModal.style.display = 'none';
-                messagesContainer.innerHTML = '';
-                currentGroupTitle.textContent = "# Select a Group";
-                groupSettingsBtn.style.display = 'none';
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
-            }
-        });
-    </script>
-</body>
-</html>
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 *
