@@ -178,8 +178,15 @@
         #logout-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-family: inherit; }
         
         .messages-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { background-color: var(--bg-surface); padding: 12px 15px; border-radius: 8px; max-width: 70%; align-self: flex-start; border: 1px solid var(--border-color); word-wrap: break-word;}
-        .message.own-message { align-self: flex-end; border-color: var(--accent); background-color: var(--thumb-bg); }
+        
+        /* Message & Avatar Layout */
+        .message-row { display: flex; align-items: flex-start; gap: 10px; }
+        .message-row.own-row { flex-direction: row-reverse; }
+        .chat-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); transition: border-color 0.2s; }
+        .chat-avatar:hover { border-color: var(--accent); }
+
+        .message { background-color: var(--bg-surface); padding: 12px 15px; border-radius: 8px; max-width: 70%; border: 1px solid var(--border-color); word-wrap: break-word;}
+        .message.own-message { border-color: var(--accent); background-color: var(--thumb-bg); }
         .message-author { font-size: 0.9rem; color: var(--accent); margin-bottom: 5px; }
         
         .chat-input { padding: 20px; background-color: var(--bg-surface); border-top: 2px solid var(--border-color); display: flex; gap: 15px; }
@@ -216,6 +223,7 @@
 
     <main class="content-area">
         
+        <!-- === GAMES VIEW === -->
         <div id="games-view" class="view-section active">
             <div class="games-grid">
                 <a href="craft.html" class="game-card">
@@ -233,6 +241,7 @@
             </div>
         </div>
 
+        <!-- === LIVE CHAT VIEW === -->
         <div id="chat-view" class="view-section">
             <div class="chat-container">
                 <div id="auth-overlay">
@@ -265,6 +274,7 @@
             </div>
         </div>
 
+        <!-- === PROFILE VIEW === -->
         <div id="profile-view" class="view-section">
             <div class="page-container">
                 <h2>My Account Profile</h2>
@@ -288,6 +298,7 @@
             </div>
         </div>
 
+        <!-- === SETTINGS VIEW === -->
         <div id="settings-view" class="view-section">
             <div class="page-container">
                 <h2>Customization</h2>
@@ -304,6 +315,7 @@
                     <input type="color" id="color2" class="color-picker" value="#FFCA28">
                 </div>
                 
+                <!-- ADMIN PANEL -->
                 <div id="admin-panel" style="display:none; margin-top: 20px; border-top: 2px solid var(--border-color); padding-top: 20px;">
                     <h2 style="color: #f44336; border-bottom: 2px solid #f44336;">Admin Controls</h2>
                     
@@ -327,6 +339,7 @@
         </div>
     </main>
 
+    <!-- === GROUP OWNER MODAL === -->
     <div id="group-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -344,6 +357,21 @@
         </div>
     </div>
 
+    <!-- === DM CONFIRMATION POPUP MODAL === -->
+    <div id="dm-confirm-modal" class="custom-modal">
+        <div class="modal-content" style="text-align: center;">
+            <button id="close-dm-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h3 id="dm-confirm-text" style="margin-top:0; margin-bottom: 25px; font-size: 1.3rem;">Do you want to start a dm with Name?</h3>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button id="dm-yes-btn" class="base-btn" style="background: #4CAF50; width: 100px; margin: 0;">Yes</button>
+                <button id="dm-no-btn" class="base-btn" style="background: #f44336; width: 100px; margin: 0;">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- FRONTEND JAVASCRIPT (Navigation & Settings)-->
+    <!-- ========================================== -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
@@ -419,6 +447,9 @@
         });
     </script>
 
+    <!-- ========================================== -->
+    <!-- FIREBASE JAVASCRIPT (Backend logic)        -->
+    <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -464,6 +495,13 @@
         const clearChatBtn = document.getElementById('clear-chat-btn');
         const deleteGroupBtn = document.getElementById('delete-group-btn');
 
+        // DM Popup Confirmation Elements
+        const dmConfirmModal = document.getElementById('dm-confirm-modal');
+        const closeDmModalBtn = document.getElementById('close-dm-modal');
+        const dmConfirmText = document.getElementById('dm-confirm-text');
+        const dmYesBtn = document.getElementById('dm-yes-btn');
+        const dmNoBtn = document.getElementById('dm-no-btn');
+
         // Profile Page DOM Elements
         const pageProfileName = document.getElementById('page-profile-name');
         const pageProfileEmail = document.getElementById('page-profile-email');
@@ -482,6 +520,10 @@
         let activeGroupId = null;
         let unsubscribeMessages = null;
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+        // Pending DM target state when clicking an avatar
+        let pendingDmUid = null;
+        let pendingDmName = null;
 
         loginBtn.addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
@@ -515,12 +557,12 @@
                         uid: user.uid,
                         email: user.email.toLowerCase(),
                         name: user.displayName,
+                        photoURL: user.photoURL || "",
                         profileId: currentUserProfileId,
                         lastSeen: serverTimestamp()
                     }, { merge: true });
                 }
 
-                // Populate Profile View Tab
                 pageProfileName.textContent = currentUser.displayName;
                 pageProfileEmail.textContent = currentUser.email;
                 pageProfileId.value = currentUserProfileId;
@@ -548,6 +590,34 @@
                 adminPanel.style.display = 'none';
                 if(unsubscribeMessages) unsubscribeMessages();
             }
+        });
+
+        // --- DM CONFIRMATION POPUP HANDLERS ---
+        closeDmModalBtn.addEventListener('click', () => { dmConfirmModal.style.display = 'none'; });
+        dmNoBtn.addEventListener('click', () => { dmConfirmModal.style.display = 'none'; });
+
+        dmYesBtn.addEventListener('click', async () => {
+            if (!pendingDmUid) return;
+            dmConfirmModal.style.display = 'none';
+
+            const targetUid = pendingDmUid;
+            const targetName = pendingDmName;
+
+            const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
+
+            await setDoc(doc(db, "groups", dmId), {
+                name: "Direct Message",
+                ownerUid: "system", 
+                password: "",
+                isDM: true,
+                members: [
+                    { uid: currentUser.uid, name: currentUser.displayName },
+                    { uid: targetUid, name: targetName }
+                ],
+                createdAt: serverTimestamp()
+            }, { merge: true });
+            
+            alert(`Direct message started with ${targetName}!`);
         });
 
         // --- PROFILE PAGE COPY ID ---
@@ -757,15 +827,39 @@
                     const message = msgDoc.data();
                     const isOwnMessage = message.uid === currentUser.uid;
                     
-                    const msgElement = document.createElement('div');
-                    msgElement.classList.add('message');
-                    if (isOwnMessage) msgElement.classList.add('own-message');
+                    // Create row element for avatar + message bubble
+                    const rowElement = document.createElement('div');
+                    rowElement.classList.add('message-row');
+                    if (isOwnMessage) rowElement.classList.add('own-row');
+
+                    // Profile picture avatar
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = message.photoURL || 'assets/sitelogo.png';
+                    avatarImg.classList.add('chat-avatar');
+                    avatarImg.alt = message.author || 'User';
+
+                    // Click avatar to trigger DM confirmation popup
+                    avatarImg.addEventListener('click', () => {
+                        if (message.uid === currentUser.uid) return; // Can't DM yourself
+                        pendingDmUid = message.uid;
+                        pendingDmName = message.author;
+                        dmConfirmText.textContent = `Do you want to start a dm with ${pendingDmName}?`;
+                        dmConfirmModal.style.display = 'flex';
+                    });
+
+                    // Message bubble
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('message');
+                    if (isOwnMessage) msgDiv.classList.add('own-message');
                     
-                    msgElement.innerHTML = `
+                    msgDiv.innerHTML = `
                         <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
                         <div>${message.text}</div>
                     `;
-                    messagesContainer.appendChild(msgElement);
+
+                    rowElement.appendChild(avatarImg);
+                    rowElement.appendChild(msgDiv);
+                    messagesContainer.appendChild(rowElement);
                 });
                 
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -783,6 +877,7 @@
                     text: text,
                     uid: currentUser.uid,
                     author: currentUser.displayName,
+                    photoURL: currentUser.photoURL || "",
                     createdAt: serverTimestamp()
                 });
             } catch (error) {
