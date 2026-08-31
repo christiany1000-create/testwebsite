@@ -117,8 +117,8 @@
         .view-section { display: none; animation: fadeIn 0.5s ease forwards; }
         .view-section.active { display: block; }
 
-        /* --- Settings View --- */
-        .settings-container {
+        /* --- Profile & Settings Containers --- */
+        .page-container {
             background-color: var(--bg-surface);
             border: 2px solid var(--border-color);
             border-radius: 12px;
@@ -129,7 +129,7 @@
             position: relative;
         }
 
-        .settings-container h2 { margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .page-container h2 { margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); font-size: 1.2rem; }
         .color-picker { border: 2px solid var(--border-color); border-radius: 6px; padding: 2px; height: 35px; width: 60px; cursor: pointer; background: var(--bg-base); }
         
@@ -188,7 +188,7 @@
         .chat-input button { padding: 0 25px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
         .chat-input button:active { transform: scale(0.95); }
 
-        /* --- Modal & Input Styling --- */
+        /* --- Modal Styling --- */
         .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
         .modal-content { max-width: 400px; width: 90%; background-color: var(--bg-surface); padding: 30px; border-radius: 12px; border: 2px solid var(--accent); position: relative; }
         .base-input { width: 100%; padding: 10px; margin-bottom: 15px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; box-sizing: border-box;}
@@ -209,6 +209,7 @@
         <div class="nav-controls">
             <button class="nav-btn active" data-target="games-view">🎮 Games</button>
             <button class="nav-btn" data-target="chat-view">💬 Chat</button>
+            <button class="nav-btn" data-target="profile-view">👤 Profile</button>
             <button class="nav-btn" data-target="settings-view">⚙️ Settings</button>
         </div>
     </header>
@@ -244,7 +245,6 @@
                         <h2>Groups</h2>
                         <button id="create-group-btn" class="create-btn">+ New Group</button>
                         <button id="create-dm-btn" class="create-btn" style="background: #4CAF50;">+ Direct Message</button>
-                        <button id="profile-btn" class="create-btn" style="background: #2196F3;">👤 Profile</button>
                     </div>
                     <ul class="group-list" id="sidebar-groups"></ul>
                 </div>
@@ -265,8 +265,31 @@
             </div>
         </div>
 
+        <div id="profile-view" class="view-section">
+            <div class="page-container">
+                <h2>My Account Profile</h2>
+                <div style="margin-top: 20px; font-size: 1.1rem; display: flex; flex-direction: column; gap: 15px;">
+                    <div class="setting-item">
+                        <span>Display Name:</span>
+                        <span id="page-profile-name" style="color: var(--text-muted);">Not signed in</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>Email Address:</span>
+                        <span id="page-profile-email" style="color: var(--text-muted);">Not signed in</span>
+                    </div>
+                    <div style="padding-top: 10px;">
+                        <p style="margin-bottom: 8px;"><strong>Your 8-Digit Profile ID:</strong> (Give this to friends for DMs)</p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="page-profile-id" class="base-input" style="margin-bottom: 0; font-weight: bold; text-align: center; letter-spacing: 2px; font-size: 1.2rem;" value="------" readonly>
+                            <button id="page-copy-id-btn" class="base-btn" style="background: #2196F3; width: 120px; margin: 0;">Copy ID</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="settings-view" class="view-section">
-            <div class="settings-container">
+            <div class="page-container">
                 <h2>Customization</h2>
                 <div class="setting-item">
                     <span>Dark Mode</span>
@@ -318,23 +341,6 @@
             
             <button id="clear-chat-btn" class="base-btn" style="background:#FF9800; margin-top: 15px;">🧹 Clear Chat</button>
             <button id="delete-group-btn" class="base-btn" style="background:#f44336;">🗑️ Delete Group</button>
-        </div>
-    </div>
-
-    <div id="profile-modal" class="custom-modal">
-        <div class="modal-content">
-            <button id="close-profile-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-            <h2 style="margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">My Profile</h2>
-            
-            <div style="margin-top: 15px; font-size: 1.1rem;">
-                <p><strong>Name:</strong> <span id="profile-display-name" style="color: var(--text-muted);">Loading...</span></p>
-                <p><strong>Email:</strong> <span id="profile-display-email" style="color: var(--text-muted);">Loading...</span></p>
-                <p><strong>Profile ID:</strong></p>
-                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
-                    <input type="text" id="profile-display-id" class="base-input" style="margin-bottom: 0; font-weight: bold; text-align: center; letter-spacing: 2px;" readonly>
-                    <button id="copy-id-btn" class="base-btn" style="background: #2196F3; width: 100px; margin: 0;">Copy ID</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -458,14 +464,11 @@
         const clearChatBtn = document.getElementById('clear-chat-btn');
         const deleteGroupBtn = document.getElementById('delete-group-btn');
 
-        // Profile DOM Elements
-        const profileBtn = document.getElementById('profile-btn');
-        const profileModal = document.getElementById('profile-modal');
-        const closeProfileModalBtn = document.getElementById('close-profile-modal');
-        const profileDisplayName = document.getElementById('profile-display-name');
-        const profileDisplayEmail = document.getElementById('profile-display-email');
-        const profileDisplayId = document.getElementById('profile-display-id');
-        const copyIdBtn = document.getElementById('copy-id-btn');
+        // Profile Page DOM Elements
+        const pageProfileName = document.getElementById('page-profile-name');
+        const pageProfileEmail = document.getElementById('page-profile-email');
+        const pageProfileId = document.getElementById('page-profile-id');
+        const pageCopyIdBtn = document.getElementById('page-copy-id-btn');
 
         // Admin DOM Elements
         const adminPanel = document.getElementById('admin-panel');
@@ -506,7 +509,6 @@
                 if (userSnap.exists() && userSnap.data().profileId) {
                     currentUserProfileId = userSnap.data().profileId;
                 } else {
-                    // Generate random 8-digit number (between 10000000 and 99999999)
                     currentUserProfileId = Math.floor(10000000 + Math.random() * 90000000).toString();
                     
                     await setDoc(userRef, {
@@ -517,6 +519,11 @@
                         lastSeen: serverTimestamp()
                     }, { merge: true });
                 }
+
+                // Populate Profile View Tab
+                pageProfileName.textContent = currentUser.displayName;
+                pageProfileEmail.textContent = currentUser.email;
+                pageProfileId.value = currentUserProfileId;
 
                 authOverlay.style.display = 'none';
                 logoutBtn.style.display = 'block';
@@ -530,6 +537,9 @@
                 currentUser = null;
                 currentUserProfileId = null;
                 activeGroupId = null;
+                pageProfileName.textContent = "Not signed in";
+                pageProfileEmail.textContent = "Not signed in";
+                pageProfileId.value = "------";
                 authOverlay.style.display = 'flex';
                 logoutBtn.style.display = 'none';
                 messagesContainer.innerHTML = '';
@@ -540,22 +550,13 @@
             }
         });
 
-        // --- PROFILE MODAL TRIGGERS ---
-        profileBtn.addEventListener('click', () => {
-            if (currentUser) {
-                profileDisplayName.textContent = currentUser.displayName;
-                profileDisplayEmail.textContent = currentUser.email;
-                profileDisplayId.value = currentUserProfileId;
-                profileModal.style.display = 'flex';
+        // --- PROFILE PAGE COPY ID ---
+        pageCopyIdBtn.addEventListener('click', () => {
+            if (currentUserProfileId) {
+                navigator.clipboard.writeText(currentUserProfileId);
+                pageCopyIdBtn.textContent = "Copied!";
+                setTimeout(() => { pageCopyIdBtn.textContent = "Copy ID"; }, 2000);
             }
-        });
-
-        closeProfileModalBtn.addEventListener('click', () => { profileModal.style.display = 'none'; });
-
-        copyIdBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(profileDisplayId.value);
-            copyIdBtn.textContent = "Copied!";
-            setTimeout(() => { copyIdBtn.textContent = "Copy ID"; }, 2000);
         });
 
         // --- ADMIN CONTROLS ---
@@ -612,7 +613,6 @@
                 return;
             }
 
-            // Look up target user by their 8-digit profile ID
             const qUsers = query(collection(db, "users"), where("profileId", "==", cleanTargetId));
             const querySnapshot = await getDocs(qUsers);
 
