@@ -112,6 +112,14 @@
         .nav-btn:hover { border-color: var(--accent); }
         .nav-btn.active { background: var(--accent-gradient); border-color: transparent; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
+        /* --- Sliders --- */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: var(--accent-gradient); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
         /* --- Layout --- */
         .content-area { width: 95%; max-width: 1200px; margin-top: 30px; margin-bottom: 60px; flex-grow: 1; }
         .view-section { display: none; animation: fadeIn 0.5s ease forwards; }
@@ -132,15 +140,6 @@
         .settings-container h2 { margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); font-size: 1.2rem; }
         .color-picker { border: 2px solid var(--border-color); border-radius: 6px; padding: 2px; height: 35px; width: 60px; cursor: pointer; background: var(--bg-base); }
-        
-        /* Sliders */
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background: var(--accent-gradient); }
-        input:checked + .slider:before { transform: translateX(24px); }
-        
         .admin-input-group { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
 
         /* --- Games View --- */
@@ -150,3 +149,96 @@
         .thumbnail { width: 100%; height: 140px; background: var(--thumb-bg); display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--border-color); transition: background 0.3s; position: relative; z-index: 2; border-radius: 10px 10px 0 0; overflow: hidden; }
         .game-card:hover .thumbnail { background: var(--thumb-bg-hover); }
         .thumbnail-icon { font-size: 3rem; color: var(--text-muted); }
+        .game-title { padding: 15px; text-align: center; font-size: 1.2rem; background-color: var(--bg-surface); position: relative; z-index: 2; border-radius: 0 0 10px 10px; }
+        .play-btn { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent-gradient); color: white; text-align: center; padding: 10px 0; border-radius: 0 0 10px 10px; font-size: 1.1rem; z-index: 1; transform: translateY(0); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .game-card:hover .play-btn { transform: translateY(100%); }
+
+        /* --- Live Chat View --- */
+        #chat-view { height: 75vh; }
+        .chat-container { display: flex; height: 100%; background-color: var(--bg-surface); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px var(--shadow); position: relative; }
+        #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; text-align: center;}
+        #login-btn { padding: 15px 30px; font-size: 1.2rem; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 20px; transition: opacity 0.2s; }
+        #login-btn:hover { opacity: 0.9; }
+
+        .chat-sidebar { width: 250px; background-color: var(--bg-surface); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 2px solid var(--border-color); }
+        .sidebar-header h2 { margin: 0 0 15px 0; font-size: 1.5rem; }
+        .create-btn { width: 100%; padding: 10px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+        .create-btn:hover { opacity: 0.9; }
+        
+        .group-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        .group-list li { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; display: flex; justify-content: space-between; align-items: center;}
+        .group-list li:hover { background-color: var(--thumb-bg); }
+        .group-list li.active-group { border-left: 5px solid var(--accent); background-color: var(--thumb-bg); font-weight: bold; }
+        .lock-icon { font-size: 0.9rem; color: var(--text-muted); }
+
+        .chat-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-base); }
+        .chat-header { padding: 20px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        #logout-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+        
+        .messages-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { background-color: var(--bg-surface); padding: 12px 15px; border-radius: 8px; max-width: 70%; align-self: flex-start; border: 1px solid var(--border-color); word-wrap: break-word;}
+        .message.own-message { align-self: flex-end; border-color: var(--accent); background-color: var(--thumb-bg); }
+        .message-author { font-size: 0.9rem; color: var(--accent); margin-bottom: 5px; }
+        
+        .chat-input { padding: 20px; background-color: var(--bg-surface); border-top: 2px solid var(--border-color); display: flex; gap: 15px; }
+        .chat-input input { flex-grow: 1; padding: 12px 15px; border-radius: 6px; border: 2px solid var(--border-color); background-color: var(--bg-base); color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; }
+        .chat-input input:focus { border-color: var(--accent); }
+        .chat-input button { padding: 0 25px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
+        .chat-input button:active { transform: scale(0.95); }
+
+        /* --- Modal & Input Styling --- */
+        #group-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .modal-content { max-width: 400px; width: 90%; background-color: var(--bg-surface); padding: 30px; border-radius: 12px; border: 2px solid var(--accent); position: relative; }
+        .base-input { width: 100%; padding: 10px; margin-bottom: 15px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; box-sizing: border-box;}
+        .base-btn { width: 100%; padding: 10px; border-radius: 6px; border: none; font-family: inherit; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; color: white;}
+        #member-list { max-height: 120px; overflow-y: auto; padding-left: 20px; margin-bottom: 20px; color: var(--text-muted); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="assets/sitelogo.png" alt="Logo" class="logo-icon">
+            <div class="logo">LearnMultiply</div>
+        </div>
+        
+        <div class="nav-controls">
+            <button class="nav-btn active" data-target="games-view">🎮 Games</button>
+            <button class="nav-btn" data-target="chat-view">💬 Chat</button>
+            <button class="nav-btn" data-target="settings-view">⚙️ Settings</button>
+        </div>
+    </header>
+
+    <main class="content-area">
+        
+        <div id="games-view" class="view-section active">
+            <div class="games-grid">
+                <a href="craft.html" class="game-card">
+                    <div class="thumbnail">
+                        <img src="assets/mclogo.webp" alt="Eaglercraft" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="game-title">Eaglercraft</div>
+                    <div class="play-btn">▶ Play Now</div>
+                </a>
+                <a href="sm64/index.html" class="game-card">
+                    <div class="thumbnail"><span class="thumbnail-icon">🍄</span></div>
+                    <div class="game-title">Super Mario 64</div>
+                    <div class="play-btn">▶ Play Now</div>
+                </a>
+            </div>
+        </div>
+
+        <div id="chat-view" class="view-section">
+            <div class="chat-container">
+                <div id="auth-overlay">
+                    <h2>Classroom Chat</h2>
+                    <p>Please sign in with your Google account to chat.</p>
+                    <button id="login-btn">Sign in with Google</button>
+                </div>
+                <div class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <h2>Groups</h2>
+                        <button
