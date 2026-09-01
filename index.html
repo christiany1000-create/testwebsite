@@ -291,6 +291,7 @@
                     <div class="chat-header">
                         <span id="current-group-title"># Select a Group</span>
                         <div style="display:flex; gap:15px; align-items:center;">
+                            <button id="delete-dm-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Delete Direct Message">🗑️ Delete DM</button>
                             <button id="group-settings-btn" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer;" title="Group Controls">⚙️</button>
                             <button id="logout-btn" style="display:none;">Log Out</button>
                         </div>
@@ -351,6 +352,10 @@
                 <div class="setting-item">
                     <span>Dark Mode</span>
                     <label class="switch"><input type="checkbox" id="theme-toggle" checked><span class="slider"></span></label>
+                </div>
+                <div class="setting-item">
+                    <span>DM Requests Approval</span>
+                    <label class="switch"><input type="checkbox" id="dm-requests-toggle"><span class="slider"></span></label>
                 </div>
                 <div class="setting-item">
                     <span>Gradient Color 1</span>
@@ -475,7 +480,6 @@
             } catch (fatalError) {}
         });
 
-        // Close any active avatar dropdowns when clicking anywhere outside
         document.addEventListener('click', () => {
             document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
         });
@@ -518,6 +522,7 @@
         
         // Modal DOM Elements
         const groupSettingsBtn = document.getElementById('group-settings-btn');
+        const deleteDmBtn = document.getElementById('delete-dm-btn');
         const groupModal = document.getElementById('group-modal');
         const closeModalBtn = document.getElementById('close-modal');
         const modalPassword = document.getElementById('modal-password');
@@ -535,6 +540,7 @@
         const useGooglePicBtn = document.getElementById('use-google-pic-btn');
         const customPicUrlInput = document.getElementById('custom-pic-url-input');
         const saveCustomPicBtn = document.getElementById('save-custom-pic-btn');
+        const dmRequestsToggle = document.getElementById('dm-requests-toggle');
 
         // Admin DOM Elements
         const adminPanel = document.getElementById('admin-panel');
@@ -547,6 +553,7 @@
         let currentUserProfileId = null;
         let activePhotoURL = "";
         let activeGroupId = null;
+        let activeGroupData = null;
         let unsubscribeMessages = null;
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 
@@ -576,9 +583,11 @@
                     const data = userSnap.data();
                     currentUserProfileId = data.profileId || Math.floor(10000000 + Math.random() * 90000000).toString();
                     activePhotoURL = data.customPhotoURL || user.photoURL || "";
+                    if (dmRequestsToggle) dmRequestsToggle.checked = !!data.dmRequestsEnabled;
                 } else {
                     currentUserProfileId = Math.floor(10000000 + Math.random() * 90000000).toString();
                     activePhotoURL = user.photoURL || "";
+                    if (dmRequestsToggle) dmRequestsToggle.checked = false;
                     
                     await setDoc(userRef, {
                         uid: user.uid,
@@ -587,6 +596,7 @@
                         photoURL: user.photoURL || "",
                         customPhotoURL: "",
                         profileId: currentUserProfileId,
+                        dmRequestsEnabled: false,
                         lastSeen: serverTimestamp()
                     }, { merge: true });
                 }
@@ -609,6 +619,7 @@
                 currentUserProfileId = null;
                 activePhotoURL = "";
                 activeGroupId = null;
+                activeGroupData = null;
                 pageProfileName.textContent = "Not signed in";
                 pageProfileEmail.textContent = "Not signed in";
                 pageProfileId.value = "------";
@@ -618,10 +629,25 @@
                 messagesContainer.innerHTML = '';
                 sidebarGroups.innerHTML = '';
                 groupSettingsBtn.style.display = 'none';
+                deleteDmBtn.style.display = 'none';
                 adminPanel.style.display = 'none';
                 if(unsubscribeMessages) unsubscribeMessages();
             }
         });
+
+        // --- DM REQUESTS TOGGLE LISTENER ---
+        if (dmRequestsToggle) {
+            dmRequestsToggle.addEventListener('change', async (e) => {
+                if (!currentUser) return;
+                try {
+                    await updateDoc(doc(db, "users", currentUser.uid), {
+                        dmRequestsEnabled: e.target.checked
+                    });
+                } catch(err) {
+                    console.error("Failed to update DM requests setting:", err);
+                }
+            });
+        }
 
         // --- PROFILE PICTURE CONTROLS ---
         useGooglePicBtn.addEventListener('click', async () => {
@@ -660,6 +686,11 @@
                 return;
             }
 
+            // Check if target user has dmRequestsEnabled
+            const targetSnap = await getDoc(doc(db, "users", targetUid));
+            const targetData = targetSnap.exists() ? targetSnap.data() : {};
+            const requiresApproval = targetData.dmRequestsEnabled === true;
+
             const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
 
             await setDoc(doc(db, "groups", dmId), {
@@ -667,17 +698,31 @@
                 ownerUid: "system", 
                 password: "",
                 isDM: true,
+                pending: requiresApproval,
+                initiatorUid: currentUser.uid,
                 members: [
                     { uid: currentUser.uid, name: currentUser.displayName },
                     { uid: targetUid, name: targetName }
                 ],
                 createdAt: serverTimestamp()
             }, { merge: true });
-            
-            alert(`Direct message started with ${targetName}!`);
+
+            if (requiresApproval) {
+                // LMBot sends prompt message
+                await addDoc(collection(db, "groups", dmId, "messages"), {
+                    text: `Do you wanna start a Direct Message with ${currentUser.displayName}? Respond with Yes or No.`,
+                    uid: "00000000",
+                    author: "LMBot",
+                    photoURL: "assets/sitelogo.png",
+                    createdAt: serverTimestamp()
+                });
+                alert(`DM request sent to ${targetName} (pending approval).`);
+            } else {
+                alert(`Direct message started with ${targetName}!`);
+            }
         }
 
-        // --- REPORT USER HELPER (Sends DM from LMBot UID: 00000000 to admins) ---
+        // --- REPORT USER HELPER ---
         async function reportUser(targetUid, targetName) {
             if (!confirm(`Are you sure you want to report ${targetName}?`)) return;
 
@@ -697,6 +742,8 @@
                             ownerUid: "00000000",
                             password: "",
                             isDM: true,
+                            pending: false,
+                            initiatorUid: "00000000",
                             members: [
                                 { uid: "00000000", name: "LMBot" },
                                 { uid: adminUid, name: adminUser.name }
@@ -713,12 +760,32 @@
                         });
                     }
                 }
-                alert(`Report submitted successfully to administrators (yates.christian@norwinsd.org & christiany1000@gmail.com).`);
+                alert(`Report submitted successfully to administrators.`);
             } catch (err) {
                 console.error("Error submitting report:", err);
                 alert("Failed to send report.");
             }
         }
+
+        // --- DELETE CURRENT DM BUTTON ---
+        deleteDmBtn.addEventListener('click', async () => {
+            if (!activeGroupId || !activeGroupData || !activeGroupData.isDM) return;
+            if (confirm("Are you sure you want to delete this Direct Message?")) {
+                try {
+                    await deleteDoc(doc(db, "groups", activeGroupId));
+                    messagesContainer.innerHTML = '';
+                    currentGroupTitle.textContent = "# Select a Group";
+                    deleteDmBtn.style.display = 'none';
+                    messageInput.disabled = true;
+                    sendBtn.disabled = true;
+                    activeGroupId = null;
+                    activeGroupData = null;
+                } catch (err) {
+                    console.error("Error deleting DM:", err);
+                    alert("Failed to delete DM.");
+                }
+            }
+        });
 
         // --- PROFILE PAGE COPY ID ---
         pageCopyIdBtn.addEventListener('click', () => {
@@ -875,12 +942,15 @@
         // --- SWITCH GROUPS & MESSAGING ---
         function switchGroup(groupId, groupData, isOwnerOrAdmin) {
             activeGroupId = groupId;
+            activeGroupData = groupData;
             
             if (groupData.isDM) {
                 const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
                 currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
+                deleteDmBtn.style.display = 'block';
             } else {
                 currentGroupTitle.textContent = `# ${groupData.name}`;
+                deleteDmBtn.style.display = 'none';
             }
             
             messageInput.disabled = false;
@@ -920,12 +990,11 @@
                     avatarImg.classList.add('chat-avatar');
                     avatarImg.alt = message.author || 'User';
 
-                    // Avatar click shows dropdown menu (DM & Report)
                     avatarImg.addEventListener('click', (e) => {
                         e.stopPropagation();
                         document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
 
-                        if (message.uid === currentUser.uid) return; // Don't show dropdown for own messages
+                        if (message.uid === currentUser.uid || message.uid === "00000000") return;
 
                         const dropdown = document.createElement('div');
                         dropdown.classList.add('avatar-dropdown');
@@ -981,6 +1050,36 @@
             messageInput.value = '';
             
             try {
+                // Check if this is a pending DM and recipient answered Yes or No
+                if (activeGroupData && activeGroupData.isDM && activeGroupData.pending && currentUser.uid !== activeGroupData.initiatorUid) {
+                    const cleanText = text.toLowerCase();
+                    if (cleanText === "yes") {
+                        // Accept DM
+                        await updateDoc(doc(db, "groups", activeGroupId), {
+                            pending: false
+                        });
+                        await addDoc(collection(db, "groups", activeGroupId, "messages"), {
+                            text: `Direct Message accepted! You can now chat.`,
+                            uid: "00000000",
+                            author: "LMBot",
+                            photoURL: "assets/sitelogo.png",
+                            createdAt: serverTimestamp()
+                        });
+                        activeGroupData.pending = false;
+                        return;
+                    } else if (cleanText === "no") {
+                        // Decline & Delete DM
+                        await deleteDoc(doc(db, "groups", activeGroupId));
+                        messagesContainer.innerHTML = '';
+                        currentGroupTitle.textContent = "# Select a Group";
+                        deleteDmBtn.style.display = 'none';
+                        activeGroupId = null;
+                        activeGroupData = null;
+                        alert("DM request declined.");
+                        return;
+                    }
+                }
+
                 const userSnap = await getDoc(doc(db, "users", currentUser.uid));
                 const userData = userSnap.exists() ? userSnap.data() : {};
                 const finalPhoto = userData.customPhotoURL || currentUser.photoURL || "";
