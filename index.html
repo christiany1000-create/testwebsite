@@ -406,6 +406,26 @@
         </div>
     </div>
 
+    <div id="report-modal" class="custom-modal">
+        <div class="modal-content">
+            <button id="close-report-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">Report User</h2>
+            
+            <p style="margin-bottom:5px; margin-top:15px; font-size:0.95rem;">Reason for reporting:</p>
+            <select id="report-reason" class="base-input">
+                <option value="Harassment">Harassment or Bullying</option>
+                <option value="Inappropriate Content">Inappropriate Content / Language</option>
+                <option value="Spam">Spam</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <p style="margin-bottom:5px; font-size:0.95rem;">What happened?</p>
+            <textarea id="report-description" class="base-input" placeholder="Provide details..." rows="4" style="resize:vertical;"></textarea>
+            
+            <button id="submit-report-btn" class="base-btn" style="background:#f44336; margin-top: 10px;">Submit Report</button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
@@ -531,6 +551,13 @@
         const clearChatBtn = document.getElementById('clear-chat-btn');
         const deleteGroupBtn = document.getElementById('delete-group-btn');
 
+        // Report Modal DOM Elements
+        const reportModal = document.getElementById('report-modal');
+        const closeReportModalBtn = document.getElementById('close-report-modal');
+        const reportReasonSelect = document.getElementById('report-reason');
+        const reportDescriptionInput = document.getElementById('report-description');
+        const submitReportBtn = document.getElementById('submit-report-btn');
+
         // Profile Page DOM Elements
         const pageProfileName = document.getElementById('page-profile-name');
         const pageProfileEmail = document.getElementById('page-profile-email');
@@ -556,6 +583,9 @@
         let activeGroupData = null;
         let unsubscribeMessages = null;
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
+        let pendingReportUid = null;
+        let pendingReportName = null;
 
         loginBtn.addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
@@ -686,7 +716,6 @@
                 return;
             }
 
-            // Check if target user has dmRequestsEnabled
             const targetSnap = await getDoc(doc(db, "users", targetUid));
             const targetData = targetSnap.exists() ? targetSnap.data() : {};
             const requiresApproval = targetData.dmRequestsEnabled === true;
@@ -708,7 +737,6 @@
             }, { merge: true });
 
             if (requiresApproval) {
-                // LMBot sends prompt message
                 await addDoc(collection(db, "groups", dmId, "messages"), {
                     text: `Do you wanna start a Direct Message with ${currentUser.displayName}? Respond with Yes or No.`,
                     uid: "00000000",
@@ -722,9 +750,19 @@
             }
         }
 
-        // --- REPORT USER HELPER ---
-        async function reportUser(targetUid, targetName) {
-            if (!confirm(`Are you sure you want to report ${targetName}?`)) return;
+        // --- REPORT MODAL HANDLERS ---
+        closeReportModalBtn.addEventListener('click', () => { reportModal.style.display = 'none'; });
+
+        submitReportBtn.addEventListener('click', async () => {
+            const reason = reportReasonSelect.value;
+            const description = reportDescriptionInput.value.trim();
+
+            if (!description) {
+                alert("Please explain what happened.");
+                return;
+            }
+
+            reportModal.style.display = 'none';
 
             try {
                 for (const adminEmail of ADMIN_EMAILS) {
@@ -752,7 +790,7 @@
                         }, { merge: true });
 
                         await addDoc(collection(db, "groups", dmId, "messages"), {
-                            text: `⚠️ REPORT: User "${targetName}" (UID: ${targetUid}) was reported by "${currentUser.displayName}" (UID: ${currentUser.uid}).`,
+                            text: `⚠️ REPORT:\n• Reported User: "${pendingReportName}" (UID: ${pendingReportUid})\n• Reported By: "${currentUser.displayName}" (UID: ${currentUser.uid})\n• Reason: ${reason}\n• Details: ${description}`,
                             uid: "00000000",
                             author: "LMBot",
                             photoURL: "assets/sitelogo.png",
@@ -760,12 +798,12 @@
                         });
                     }
                 }
-                alert(`Report submitted successfully to administrators.`);
+                alert("Report submitted successfully to administrators.");
             } catch (err) {
                 console.error("Error submitting report:", err);
                 alert("Failed to send report.");
             }
-        }
+        });
 
         // --- DELETE CURRENT DM BUTTON ---
         deleteDmBtn.addEventListener('click', async () => {
@@ -1012,7 +1050,11 @@
                         reportBtn.textContent = '🚨 Report User';
                         reportBtn.addEventListener('click', () => {
                             dropdown.remove();
-                            reportUser(message.uid, message.author);
+                            pendingReportUid = message.uid;
+                            pendingReportName = message.author;
+                            reportDescriptionInput.value = '';
+                            reportReasonSelect.value = 'Harassment';
+                            reportModal.style.display = 'flex';
                         });
 
                         dropdown.appendChild(dmBtn);
@@ -1050,11 +1092,9 @@
             messageInput.value = '';
             
             try {
-                // Check if this is a pending DM and recipient answered Yes or No
                 if (activeGroupData && activeGroupData.isDM && activeGroupData.pending && currentUser.uid !== activeGroupData.initiatorUid) {
                     const cleanText = text.toLowerCase();
                     if (cleanText === "yes") {
-                        // Accept DM
                         await updateDoc(doc(db, "groups", activeGroupId), {
                             pending: false
                         });
@@ -1068,7 +1108,6 @@
                         activeGroupData.pending = false;
                         return;
                     } else if (cleanText === "no") {
-                        // Decline & Delete DM
                         await deleteDoc(doc(db, "groups", activeGroupId));
                         messagesContainer.innerHTML = '';
                         currentGroupTitle.textContent = "# Select a Group";
