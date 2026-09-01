@@ -163,6 +163,13 @@
         #login-btn:hover { opacity: 0.9; }
 
         .chat-sidebar { width: 300px; background-color: var(--bg-surface); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
+        
+        /* Sidebar Tabs */
+        .sidebar-tabs { display: flex; border-bottom: 2px solid var(--border-color); }
+        .sidebar-tab-btn { flex: 1; padding: 15px 0; background: var(--bg-base); color: var(--text-muted); border: none; cursor: pointer; font-family: inherit; font-size: 1.1rem; transition: background 0.2s, color 0.2s; }
+        .sidebar-tab-btn.active-tab { background: var(--bg-surface); color: var(--accent); font-weight: bold; }
+        #nav-contacts-btn { border-left: 2px solid var(--border-color); }
+
         .sidebar-header { padding: 20px; border-bottom: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;}
         .sidebar-header h2 { margin: 0; font-size: 1.5rem; }
         .create-btn { width: 100%; padding: 10px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
@@ -290,14 +297,32 @@
                     <p>Please sign in with your Google account to chat.</p>
                     <button id="login-btn">Sign in with Google</button>
                 </div>
+                
                 <div class="chat-sidebar">
-                    <div class="sidebar-header">
-                        <h2>Groups</h2>
-                        <button id="create-group-btn" class="create-btn">+ New Group</button>
-                        <button id="create-dm-btn" class="create-btn" style="background: #4CAF50;">+ Direct Message</button>
+                    <!-- Sidebar Tabs -->
+                    <div class="sidebar-tabs">
+                        <button id="nav-groups-btn" class="sidebar-tab-btn active-tab">💬 Chats</button>
+                        <button id="nav-contacts-btn" class="sidebar-tab-btn">👥 Contacts</button>
                     </div>
-                    <ul class="group-list" id="sidebar-groups"></ul>
+
+                    <!-- Chats View (Default) -->
+                    <div id="sidebar-chats-view" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+                        <div class="sidebar-header">
+                            <button id="create-group-btn" class="create-btn">+ New Group</button>
+                            <button id="create-dm-btn" class="create-btn" style="background: #4CAF50;">+ DM by ID</button>
+                        </div>
+                        <ul class="group-list" id="sidebar-groups"></ul>
+                    </div>
+
+                    <!-- Contacts View (Hidden by default) -->
+                    <div id="sidebar-contacts-view" style="display: none; flex-direction: column; flex-grow: 1; overflow: hidden;">
+                        <div class="sidebar-header" style="padding: 15px 20px;">
+                            <input type="text" id="contact-search" placeholder="Search contacts..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-family: inherit; box-sizing: border-box; outline: none;">
+                        </div>
+                        <ul class="group-list" id="sidebar-contacts"></ul>
+                    </div>
                 </div>
+
                 <div class="chat-main">
                     <div class="chat-header">
                         <span id="current-group-title"># Select a Group</span>
@@ -449,6 +474,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
+                // Main Top Navigation
                 const navBtns = document.querySelectorAll('.nav-btn');
                 const viewSections = document.querySelectorAll('.view-section');
 
@@ -461,19 +487,36 @@
                         const targetId = btn.getAttribute('data-target');
                         const targetSection = document.getElementById(targetId);
                         
-                        // Prevent page scrolling when Chat (full screen) is active
                         if(targetId === 'chat-view') {
                             document.body.style.overflow = 'hidden';
                         } else {
                             document.body.style.overflow = 'auto';
                         }
-
-                        if (targetSection) {
-                            targetSection.classList.add('active');
-                        }
+                        if (targetSection) { targetSection.classList.add('active'); }
                     });
                 });
 
+                // Sidebar Tabs (Chats vs Contacts)
+                const navGroupsBtn = document.getElementById('nav-groups-btn');
+                const navContactsBtn = document.getElementById('nav-contacts-btn');
+                const sidebarChatsView = document.getElementById('sidebar-chats-view');
+                const sidebarContactsView = document.getElementById('sidebar-contacts-view');
+
+                navGroupsBtn.addEventListener('click', () => {
+                    navGroupsBtn.classList.add('active-tab');
+                    navContactsBtn.classList.remove('active-tab');
+                    sidebarChatsView.style.display = 'flex';
+                    sidebarContactsView.style.display = 'none';
+                });
+
+                navContactsBtn.addEventListener('click', () => {
+                    navContactsBtn.classList.add('active-tab');
+                    navGroupsBtn.classList.remove('active-tab');
+                    sidebarContactsView.style.display = 'flex';
+                    sidebarChatsView.style.display = 'none';
+                });
+
+                // Settings & Themes
                 const themeToggle = document.getElementById('theme-toggle');
                 const color1Input = document.getElementById('color1');
                 const color2Input = document.getElementById('color2');
@@ -487,40 +530,25 @@
 
                 try {
                     if (localStorage.getItem('theme') === 'light' && themeToggle) { 
-                        document.body.classList.add('light-mode'); 
-                        themeToggle.checked = false; 
+                        document.body.classList.add('light-mode'); themeToggle.checked = false; 
                     }
-                    const savedC1 = localStorage.getItem('gradC1'); 
-                    const savedC2 = localStorage.getItem('gradC2');
+                    const savedC1 = localStorage.getItem('gradC1'); const savedC2 = localStorage.getItem('gradC2');
                     if (savedC1 && savedC2 && color1Input && color2Input) { 
-                        color1Input.value = savedC1; 
-                        color2Input.value = savedC2; 
-                        applyColors(savedC1, savedC2); 
+                        color1Input.value = savedC1; color2Input.value = savedC2; applyColors(savedC1, savedC2); 
                     }
                 } catch(e) {}
 
                 if (themeToggle) {
                     themeToggle.addEventListener('change', (e) => {
                         try {
-                            if (e.target.checked) { 
-                                document.body.classList.remove('light-mode'); 
-                                localStorage.setItem('theme', 'dark'); 
-                            } else { 
-                                document.body.classList.add('light-mode'); 
-                                localStorage.setItem('theme', 'light'); 
-                            }
+                            if (e.target.checked) { document.body.classList.remove('light-mode'); localStorage.setItem('theme', 'dark'); } 
+                            else { document.body.classList.add('light-mode'); localStorage.setItem('theme', 'light'); }
                         } catch(err) {}
                     });
                 }
                 if (color1Input && color2Input) {
-                    color1Input.addEventListener('input', (e) => { 
-                        applyColors(e.target.value, color2Input.value); 
-                        try { localStorage.setItem('gradC1', e.target.value); } catch(err){}
-                    });
-                    color2Input.addEventListener('input', (e) => { 
-                        applyColors(color1Input.value, e.target.value); 
-                        try { localStorage.setItem('gradC2', e.target.value); } catch(err){}
-                    });
+                    color1Input.addEventListener('input', (e) => { applyColors(e.target.value, color2Input.value); try { localStorage.setItem('gradC1', e.target.value); } catch(err){} });
+                    color2Input.addEventListener('input', (e) => { applyColors(color1Input.value, e.target.value); try { localStorage.setItem('gradC2', e.target.value); } catch(err){} });
                 }
             } catch (fatalError) {}
         });
@@ -564,10 +592,13 @@
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
         const sidebarGroups = document.getElementById('sidebar-groups');
+        const sidebarContacts = document.getElementById('sidebar-contacts');
+        const contactSearchInput = document.getElementById('contact-search');
         const createGroupBtn = document.getElementById('create-group-btn');
         const createDmBtn = document.getElementById('create-dm-btn');
         const currentGroupTitle = document.getElementById('current-group-title');
         const typingIndicator = document.getElementById('typing-indicator');
+        const navGroupsBtn = document.getElementById('nav-groups-btn');
         
         // Modal DOM Elements
         const groupSettingsBtn = document.getElementById('group-settings-btn');
@@ -614,56 +645,96 @@
         let unsubscribeGroupDoc = null;
         let typingTimeout = null;
         let userOnlineStatuses = {}; 
+        let allContactsList = [];
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
         let pendingReportUid = null;
         let pendingReportName = null;
 
-        // --- ONLINE PRESENCE SYSTEM ---
+        // --- ONLINE PRESENCE & CONTACTS SYSTEM ---
         const setOnlineStatus = async (isOnline) => {
             if (!currentUser) return;
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), { isOnline: isOnline, lastSeen: serverTimestamp() });
-            } catch(e) {}
+            try { await updateDoc(doc(db, "users", currentUser.uid), { isOnline: isOnline, lastSeen: serverTimestamp() }); } catch(e) {}
         };
         window.addEventListener('focus', () => setOnlineStatus(true));
         window.addEventListener('blur', () => setOnlineStatus(false));
         window.addEventListener('beforeunload', () => setOnlineStatus(false));
 
-        // Listen for all users online status
+        // Listen for all users: handles Online status AND populates Contacts tab
         onSnapshot(collection(db, "users"), (snapshot) => {
-            snapshot.forEach(doc => { userOnlineStatuses[doc.id] = doc.data().isOnline; });
+            allContactsList = [];
+            sidebarContacts.innerHTML = '';
+            
+            snapshot.forEach(doc => { 
+                const userData = doc.data();
+                userOnlineStatuses[doc.id] = userData.isOnline; 
+                
+                // Do not show current user or system bot in contact list
+                if (currentUser && userData.uid !== currentUser.uid && userData.uid !== "00000000") {
+                    allContactsList.push(userData);
+                }
+            });
+            
+            // Sort alphabetically by name
+            allContactsList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+            
+            // Re-render contacts considering active search filter
+            const term = contactSearchInput.value.toLowerCase();
+            allContactsList.forEach(user => {
+                if ((user.name || "").toLowerCase().includes(term)) { renderContact(user); }
+            });
+
+            // Update green dots on the group/chats list
             document.querySelectorAll('.dm-status-dot').forEach(dot => {
                 const uid = dot.getAttribute('data-uid');
-                if (userOnlineStatuses[uid]) {
-                    dot.classList.add('status-online');
-                } else {
-                    dot.classList.remove('status-online');
-                }
+                if (userOnlineStatuses[uid]) { dot.classList.add('status-online'); } 
+                else { dot.classList.remove('status-online'); }
             });
         });
 
-        loginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
+        // Contacts Search Filter
+        contactSearchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            sidebarContacts.innerHTML = '';
+            allContactsList.forEach(user => {
+                if ((user.name || "").toLowerCase().includes(term)) { renderContact(user); }
+            });
         });
 
-        logoutBtn.addEventListener('click', () => {
-            setOnlineStatus(false);
-            signOut(auth);
-        });
+        function renderContact(user) {
+            const li = document.createElement('li');
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.gap = '12px';
+            
+            const isOnline = user.isOnline ? 'status-online' : '';
+            const finalPhoto = user.customPhotoURL || user.photoURL || 'assets/sitelogo.png';
+            
+            li.innerHTML = `
+                <div style="position:relative;">
+                    <img src="${finalPhoto}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                    <span class="status-dot ${isOnline}" style="position:absolute; bottom:-2px; right:-2px; margin:0; border: 2px solid var(--bg-surface);"></span>
+                </div>
+                <span style="font-weight: 500;">${user.name}</span>
+            `;
+            
+            li.addEventListener('click', () => {
+                startDM(user.uid, user.name);
+                navGroupsBtn.click(); // Auto-switch back to the chats view
+            });
+            
+            sidebarContacts.appendChild(li);
+        }
+
+        loginBtn.addEventListener('click', () => { signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err)); });
+        logoutBtn.addEventListener('click', () => { setOnlineStatus(false); signOut(auth); });
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const banRef = doc(db, "banned_users", user.email);
                 const banSnap = await getDoc(banRef);
-                
-                if (banSnap.exists()) {
-                    alert("You have been banned from using the chat.");
-                    signOut(auth);
-                    return;
-                }
+                if (banSnap.exists()) { alert("You have been banned from using the chat."); signOut(auth); return; }
 
                 currentUser = user;
-
                 const userRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userRef);
                 
@@ -678,48 +749,25 @@
                     if (dmRequestsToggle) dmRequestsToggle.checked = false;
                     
                     await setDoc(userRef, {
-                        uid: user.uid,
-                        email: user.email.toLowerCase(),
-                        name: user.displayName,
-                        photoURL: user.photoURL || "",
-                        customPhotoURL: "",
-                        profileId: currentUserProfileId,
-                        dmRequestsEnabled: false,
-                        isOnline: true,
-                        lastSeen: serverTimestamp()
+                        uid: user.uid, email: user.email.toLowerCase(), name: user.displayName, photoURL: user.photoURL || "", customPhotoURL: "",
+                        profileId: currentUserProfileId, dmRequestsEnabled: false, isOnline: true, lastSeen: serverTimestamp()
                     }, { merge: true });
                 }
 
                 setOnlineStatus(true);
-                pageProfileName.textContent = currentUser.displayName;
-                pageProfileEmail.textContent = currentUser.email;
-                pageProfileId.value = currentUserProfileId;
+                pageProfileName.textContent = currentUser.displayName; pageProfileEmail.textContent = currentUser.email; pageProfileId.value = currentUserProfileId;
                 profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png';
-
-                authOverlay.style.display = 'none';
-                logoutBtn.style.display = 'block';
-                
+                authOverlay.style.display = 'none'; logoutBtn.style.display = 'block';
                 if (ADMIN_EMAILS.includes(currentUser.email)) { adminPanel.style.display = 'block'; }
                 loadGroups();
             } else {
-                currentUser = null;
-                currentUserProfileId = null;
-                activePhotoURL = "";
-                activeGroupId = null;
-                activeGroupData = null;
-                pageProfileName.textContent = "Not signed in";
-                pageProfileEmail.textContent = "Not signed in";
-                pageProfileId.value = "------";
+                currentUser = null; currentUserProfileId = null; activePhotoURL = ""; activeGroupId = null; activeGroupData = null;
+                pageProfileName.textContent = "Not signed in"; pageProfileEmail.textContent = "Not signed in"; pageProfileId.value = "------";
                 profilePreviewImg.src = 'assets/sitelogo.png';
-                authOverlay.style.display = 'flex';
-                logoutBtn.style.display = 'none';
-                messagesContainer.innerHTML = '';
-                sidebarGroups.innerHTML = '';
-                groupSettingsBtn.style.display = 'none';
-                deleteDmBtn.style.display = 'none';
-                adminPanel.style.display = 'none';
-                if(unsubscribeMessages) unsubscribeMessages();
-                if(unsubscribeGroupDoc) unsubscribeGroupDoc();
+                authOverlay.style.display = 'flex'; logoutBtn.style.display = 'none';
+                messagesContainer.innerHTML = ''; sidebarGroups.innerHTML = ''; sidebarContacts.innerHTML = '';
+                groupSettingsBtn.style.display = 'none'; deleteDmBtn.style.display = 'none'; adminPanel.style.display = 'none';
+                if(unsubscribeMessages) unsubscribeMessages(); if(unsubscribeGroupDoc) unsubscribeGroupDoc();
             }
         });
 
@@ -727,30 +775,23 @@
         if (dmRequestsToggle) {
             dmRequestsToggle.addEventListener('change', async (e) => {
                 if (!currentUser) return;
-                try {
-                    await updateDoc(doc(db, "users", currentUser.uid), { dmRequestsEnabled: e.target.checked });
-                } catch(err) {}
+                try { await updateDoc(doc(db, "users", currentUser.uid), { dmRequestsEnabled: e.target.checked }); } catch(err) {}
             });
         }
 
         // --- PROFILE PICTURE CONTROLS ---
         useGooglePicBtn.addEventListener('click', async () => {
             if (!currentUser) return;
-            activePhotoURL = currentUser.photoURL || "";
-            profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png';
-            customPicUrlInput.value = "";
-            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: "" });
-            alert("Switched back to your Google profile picture!");
+            activePhotoURL = currentUser.photoURL || ""; profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png'; customPicUrlInput.value = "";
+            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: "" }); alert("Switched back to your Google profile picture!");
         });
 
         saveCustomPicBtn.addEventListener('click', async () => {
             if (!currentUser) return;
             const newUrl = customPicUrlInput.value.trim();
             if (!newUrl) { alert("Please enter a valid image URL."); return; }
-            activePhotoURL = newUrl;
-            profilePreviewImg.src = activePhotoURL;
-            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: newUrl });
-            alert("Custom profile picture saved!");
+            activePhotoURL = newUrl; profilePreviewImg.src = activePhotoURL;
+            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: newUrl }); alert("Custom profile picture saved!");
         });
 
         // --- START DM HELPER ---
@@ -763,30 +804,19 @@
             const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
 
             await setDoc(doc(db, "groups", dmId), {
-                name: "Direct Message",
-                ownerUid: "system", 
-                password: "",
-                isDM: true,
-                pending: requiresApproval,
-                initiatorUid: currentUser.uid,
-                members: [
-                    { uid: currentUser.uid, name: currentUser.displayName },
-                    { uid: targetUid, name: targetName }
-                ],
-                createdAt: serverTimestamp()
+                name: "Direct Message", ownerUid: "system", password: "", isDM: true, pending: requiresApproval, initiatorUid: currentUser.uid,
+                members: [ { uid: currentUser.uid, name: currentUser.displayName }, { uid: targetUid, name: targetName } ], createdAt: serverTimestamp()
             }, { merge: true });
 
             if (requiresApproval) {
-                await addDoc(collection(db, "groups", dmId, "messages"), {
-                    text: `Do you wanna start a Direct Message with ${currentUser.displayName}? Respond with Yes or No.`,
-                    uid: "00000000",
-                    author: "LMBot",
-                    photoURL: "assets/sitelogo.png",
-                    createdAt: serverTimestamp()
-                });
+                // To avoid spamming, only send the prompt if it doesn't already exist (simple check: let it merge)
+                const msgs = await getDocs(query(collection(db, "groups", dmId, "messages"), limit(1)));
+                if(msgs.empty) {
+                    await addDoc(collection(db, "groups", dmId, "messages"), {
+                        text: `Do you wanna start a Direct Message with ${currentUser.displayName}? Respond with Yes or No.`, uid: "00000000", author: "LMBot", photoURL: "assets/sitelogo.png", createdAt: serverTimestamp()
+                    });
+                }
                 alert(`DM request sent to ${targetName} (pending approval).`);
-            } else {
-                alert(`Direct message started with ${targetName}!`);
             }
         }
 
@@ -807,8 +837,7 @@
                         const dmId = adminUid < "00000000" ? `dm_${adminUid}_00000000` : `dm_00000000_${adminUid}`;
                         await setDoc(doc(db, "groups", dmId), {
                             name: "Admin Reports", ownerUid: "00000000", password: "", isDM: true, pending: false, initiatorUid: "00000000",
-                            members: [{ uid: "00000000", name: "LMBot" }, { uid: adminUid, name: adminSnap.docs[0].data().name }],
-                            createdAt: serverTimestamp()
+                            members: [{ uid: "00000000", name: "LMBot" }, { uid: adminUid, name: adminSnap.docs[0].data().name }], createdAt: serverTimestamp()
                         }, { merge: true });
                         await addDoc(collection(db, "groups", dmId, "messages"), {
                             text: `⚠️ REPORT:\n• Reported User: "${pendingReportName}" (UID: ${pendingReportUid})\n• Reported By: "${currentUser.displayName}" (UID: ${currentUser.uid})\n• Reason: ${reason}\n• Details: ${description}`,
@@ -826,13 +855,9 @@
             if (confirm("Are you sure you want to delete this Direct Message?")) {
                 try {
                     await deleteDoc(doc(db, "groups", activeGroupId));
-                    messagesContainer.innerHTML = '';
-                    currentGroupTitle.textContent = "# Select a Group";
-                    deleteDmBtn.style.display = 'none';
-                    messageInput.disabled = true;
-                    sendBtn.disabled = true;
-                    activeGroupId = null;
-                    activeGroupData = null;
+                    messagesContainer.innerHTML = ''; currentGroupTitle.textContent = "# Select a Group";
+                    deleteDmBtn.style.display = 'none'; messageInput.disabled = true; sendBtn.disabled = true;
+                    activeGroupId = null; activeGroupData = null;
                     if(unsubscribeGroupDoc) unsubscribeGroupDoc();
                 } catch (err) { alert("Failed to delete DM."); }
             }
@@ -863,6 +888,7 @@
                     let displayName = `# ${group.name}`;
                     if (group.isDM) {
                         const otherPerson = group.members.find(m => m.uid !== currentUser.uid);
+                        if (!otherPerson) return;
                         const isOnline = userOnlineStatuses[otherPerson.uid] ? 'status-online' : '';
                         const dotHtml = `<span class="status-dot dm-status-dot ${isOnline}" data-uid="${otherPerson.uid}"></span>`;
                         displayName = `${dotHtml} @ ${otherPerson.name}`;
@@ -904,17 +930,15 @@
                 deleteDmBtn.style.display = 'none';
             }
             
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
+            messageInput.disabled = false; sendBtn.disabled = false;
 
             if (isOwnerOrAdmin && !groupData.isDM) {
-                groupSettingsBtn.style.display = 'block';
-                modalPassword.value = groupData.password || "";
+                groupSettingsBtn.style.display = 'block'; modalPassword.value = groupData.password || "";
                 memberList.innerHTML = '';
                 (groupData.members || []).forEach(m => { const li = document.createElement('li'); li.textContent = m.name; memberList.appendChild(li); });
             } else { groupSettingsBtn.style.display = 'none'; }
 
-            // Listen for typing events on current group
+            // Listen for typing events
             if(unsubscribeGroupDoc) unsubscribeGroupDoc();
             unsubscribeGroupDoc = onSnapshot(doc(db, "groups", groupId), (docSnap) => {
                 const data = docSnap.data();
@@ -942,26 +966,21 @@
                     const timeStr = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                     if (dateStr !== lastRenderedDate) {
-                        const divider = document.createElement('div');
-                        divider.classList.add('date-divider');
-                        divider.innerHTML = `<span>${dateStr}</span>`;
-                        messagesContainer.appendChild(divider);
-                        lastRenderedDate = dateStr;
+                        const divider = document.createElement('div'); divider.classList.add('date-divider'); divider.innerHTML = `<span>${dateStr}</span>`;
+                        messagesContainer.appendChild(divider); lastRenderedDate = dateStr;
                     }
 
                     const isOwnMessage = message.uid === currentUser.uid;
-                    const rowElement = document.createElement('div');
-                    rowElement.classList.add('message-row');
+                    const rowElement = document.createElement('div'); rowElement.classList.add('message-row');
                     if (isOwnMessage) rowElement.classList.add('own-row');
 
-                    const avatarImg = document.createElement('img');
-                    avatarImg.src = message.photoURL || 'assets/sitelogo.png';
-                    avatarImg.classList.add('chat-avatar');
+                    const avatarImg = document.createElement('img'); avatarImg.src = message.photoURL || 'assets/sitelogo.png'; avatarImg.classList.add('chat-avatar');
 
                     avatarImg.addEventListener('click', (e) => {
                         e.stopPropagation();
                         document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
                         if (message.uid === currentUser.uid || message.uid === "00000000") return;
+                        
                         const dropdown = document.createElement('div'); dropdown.classList.add('avatar-dropdown');
                         
                         const dmBtn = document.createElement('button'); dmBtn.classList.add('dropdown-item'); dmBtn.textContent = '💬 Direct Message';
@@ -971,24 +990,19 @@
                         reportBtn.addEventListener('click', () => {
                             dropdown.remove();
                             pendingReportUid = message.uid; pendingReportName = message.author;
-                            reportDescriptionInput.value = ''; reportReasonSelect.value = 'Harassment';
-                            reportModal.style.display = 'flex';
+                            reportDescriptionInput.value = ''; reportReasonSelect.value = 'Harassment'; reportModal.style.display = 'flex';
                         });
 
                         dropdown.appendChild(dmBtn); dropdown.appendChild(reportBtn);
                         document.body.appendChild(dropdown);
                         const rect = avatarImg.getBoundingClientRect();
-                        dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-                        dropdown.style.left = `${rect.left + window.scrollX}px`;
-                        dropdown.style.display = 'flex';
+                        dropdown.style.top = `${rect.bottom + window.scrollY}px`; dropdown.style.left = `${rect.left + window.scrollX}px`; dropdown.style.display = 'flex';
                     });
 
-                    const msgDiv = document.createElement('div');
-                    msgDiv.classList.add('message');
+                    const msgDiv = document.createElement('div'); msgDiv.classList.add('message');
                     if (isOwnMessage) msgDiv.classList.add('own-message');
                     msgDiv.innerHTML = `<div class="message-author">${isOwnMessage ? 'You' : message.author} <span class="msg-time">${timeStr}</span></div><div>${message.text}</div>`;
-                    rowElement.appendChild(avatarImg); rowElement.appendChild(msgDiv);
-                    messagesContainer.appendChild(rowElement);
+                    rowElement.appendChild(avatarImg); rowElement.appendChild(msgDiv); messagesContainer.appendChild(rowElement);
                 });
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
@@ -1000,16 +1014,14 @@
             updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: currentUser.displayName }, { merge: true });
             
             clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() });
-            }, 2000);
+            typingTimeout = setTimeout(() => { updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() }); }, 2000);
         });
 
         const sendMessage = async () => {
             const text = messageInput.value.trim();
             if (text === "" || !currentUser || !activeGroupId) return;
             messageInput.value = '';
-            updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() }); // Clear typing immediately
+            updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() }); 
             
             try {
                 if (activeGroupData && activeGroupData.isDM && activeGroupData.pending && currentUser.uid !== activeGroupData.initiatorUid) {
@@ -1021,8 +1033,7 @@
                     } else if (cleanText === "no") {
                         await deleteDoc(doc(db, "groups", activeGroupId));
                         messagesContainer.innerHTML = ''; currentGroupTitle.textContent = "# Select a Group"; deleteDmBtn.style.display = 'none';
-                        activeGroupId = null; activeGroupData = null;
-                        alert("DM request declined."); return;
+                        activeGroupId = null; activeGroupData = null; alert("DM request declined."); return;
                     }
                 }
                 const userSnap = await getDoc(doc(db, "users", currentUser.uid));
