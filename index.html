@@ -154,14 +154,15 @@
         .play-btn { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent-gradient); color: white; text-align: center; padding: 10px 0; border-radius: 0 0 10px 10px; font-size: 1.1rem; z-index: 1; transform: translateY(0); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .game-card:hover .play-btn { transform: translateY(100%); }
 
-        /* --- Live Chat View --- */
-        #chat-view { height: 75vh; }
-        .chat-container { display: flex; height: 100%; background-color: var(--bg-surface); border: 2px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px var(--shadow); position: relative; }
+        /* --- Full-Screen Live Chat View --- */
+        #chat-view.active { display: flex; position: fixed; top: 73px; left: 0; width: 100vw; height: calc(100vh - 73px); z-index: 50; padding: 0; margin: 0; max-width: none; background: var(--bg-base); }
+        .chat-container { display: flex; width: 100%; height: 100%; border: none; border-top: 2px solid var(--accent); border-radius: 0; box-shadow: none; position: relative; overflow: hidden;}
+        
         #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; text-align: center;}
         #login-btn { padding: 15px 30px; font-size: 1.2rem; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 20px; transition: opacity 0.2s; }
         #login-btn:hover { opacity: 0.9; }
 
-        .chat-sidebar { width: 250px; background-color: var(--bg-surface); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
+        .chat-sidebar { width: 300px; background-color: var(--bg-surface); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
         .sidebar-header { padding: 20px; border-bottom: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;}
         .sidebar-header h2 { margin: 0; font-size: 1.5rem; }
         .create-btn { width: 100%; padding: 10px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
@@ -171,18 +172,28 @@
         .group-list li { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; display: flex; justify-content: space-between; align-items: center;}
         .group-list li:hover { background-color: var(--thumb-bg); }
         .group-list li.active-group { border-left: 5px solid var(--accent); background-color: var(--thumb-bg); font-weight: bold; }
+        
+        /* Online Status Dots */
+        .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #666; margin-right: 8px; transition: background-color 0.3s; }
+        .status-online { background-color: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
         .lock-icon { font-size: 0.9rem; color: var(--text-muted); }
 
         .chat-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-base); }
-        .chat-header { padding: 20px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .chat-header { padding: 20px 30px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-family: inherit; }
         
-        .messages-area { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .messages-area { flex-grow: 1; padding: 20px 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         
+        /* Date Divider & Timestamps */
+        .date-divider { text-align: center; margin: 20px 0; font-size: 0.9rem; color: var(--text-muted); position: relative; }
+        .date-divider::before { content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border-color); z-index: 1; }
+        .date-divider span { background: var(--bg-base); padding: 0 15px; position: relative; z-index: 2; font-weight: bold; }
+        .msg-time { font-size: 0.75rem; color: var(--text-muted); margin-left: 10px; font-weight: normal; }
+
         /* Message & Avatar Layout */
         .message-row { display: flex; align-items: flex-start; gap: 10px; position: relative; }
         .message-row.own-row { flex-direction: row-reverse; }
-        .chat-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); transition: border-color 0.2s; }
+        .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); transition: border-color 0.2s; }
         .chat-avatar:hover { border-color: var(--accent); }
 
         /* --- Avatar Dropdown Menu --- */
@@ -209,22 +220,20 @@
             font-size: 0.95rem;
             transition: background 0.2s;
         }
-        .dropdown-item:hover {
-            background-color: var(--thumb-bg-hover);
-            color: var(--accent);
-        }
-        .dropdown-item.danger:hover {
-            color: #f44336;
-        }
+        .dropdown-item:hover { background-color: var(--thumb-bg-hover); color: var(--accent); }
+        .dropdown-item.danger:hover { color: #f44336; }
 
-        .message { background-color: var(--bg-surface); padding: 12px 15px; border-radius: 8px; max-width: 70%; border: 1px solid var(--border-color); word-wrap: break-word;}
+        .message { background-color: var(--bg-surface); padding: 12px 18px; border-radius: 8px; max-width: 60%; border: 1px solid var(--border-color); word-wrap: break-word; font-size: 1.05rem; }
         .message.own-message { border-color: var(--accent); background-color: var(--thumb-bg); }
-        .message-author { font-size: 0.9rem; color: var(--accent); margin-bottom: 5px; }
+        .message-author { font-size: 0.95rem; color: var(--accent); margin-bottom: 5px; font-weight: bold; }
         
-        .chat-input { padding: 20px; background-color: var(--bg-surface); border-top: 2px solid var(--border-color); display: flex; gap: 15px; }
-        .chat-input input { flex-grow: 1; padding: 12px 15px; border-radius: 6px; border: 2px solid var(--border-color); background-color: var(--bg-base); color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; }
+        /* Typing Indicator */
+        .typing-indicator-container { padding: 5px 30px; background-color: var(--bg-base); font-style: italic; color: var(--text-muted); font-size: 0.9rem; min-height: 25px; display: flex; align-items: center; }
+
+        .chat-input { padding: 20px 30px; background-color: var(--bg-surface); border-top: 2px solid var(--border-color); display: flex; gap: 15px; }
+        .chat-input input { flex-grow: 1; padding: 15px 20px; border-radius: 8px; border: 2px solid var(--border-color); background-color: var(--bg-base); color: var(--text-main); font-family: inherit; font-size: 1.1rem; outline: none; }
         .chat-input input:focus { border-color: var(--accent); }
-        .chat-input button { padding: 0 25px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
+        .chat-input button { padding: 0 35px; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
         .chat-input button:active { transform: scale(0.95); }
 
         /* --- Modal Styling --- */
@@ -255,6 +264,7 @@
 
     <main class="content-area">
         
+        <!-- === GAMES VIEW === -->
         <div id="games-view" class="view-section active">
             <div class="games-grid">
                 <a href="craft.html" class="game-card">
@@ -272,6 +282,7 @@
             </div>
         </div>
 
+        <!-- === FULL-SCREEN LIVE CHAT VIEW === -->
         <div id="chat-view" class="view-section">
             <div class="chat-container">
                 <div id="auth-overlay">
@@ -297,6 +308,7 @@
                         </div>
                     </div>
                     <div class="messages-area" id="messages-container"></div>
+                    <div class="typing-indicator-container" id="typing-indicator"></div>
                     <div class="chat-input">
                         <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" disabled>
                         <button id="send-btn" disabled>Send</button>
@@ -305,6 +317,7 @@
             </div>
         </div>
 
+        <!-- === PROFILE VIEW === -->
         <div id="profile-view" class="view-section">
             <div class="page-container">
                 <h2>My Account Profile</h2>
@@ -346,6 +359,7 @@
             </div>
         </div>
 
+        <!-- === SETTINGS VIEW === -->
         <div id="settings-view" class="view-section">
             <div class="page-container">
                 <h2>Customization</h2>
@@ -366,6 +380,7 @@
                     <input type="color" id="color2" class="color-picker" value="#FFCA28">
                 </div>
                 
+                <!-- ADMIN PANEL -->
                 <div id="admin-panel" style="display:none; margin-top: 20px; border-top: 2px solid var(--border-color); padding-top: 20px;">
                     <h2 style="color: #f44336; border-bottom: 2px solid #f44336;">Admin Controls</h2>
                     
@@ -389,6 +404,7 @@
         </div>
     </main>
 
+    <!-- === GROUP OWNER MODAL === -->
     <div id="group-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -406,6 +422,7 @@
         </div>
     </div>
 
+    <!-- === REPORT MODAL === -->
     <div id="report-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-report-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -426,6 +443,9 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- FRONTEND JAVASCRIPT (Navigation & Settings)-->
+    <!-- ========================================== -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
@@ -440,6 +460,14 @@
                         btn.classList.add('active');
                         const targetId = btn.getAttribute('data-target');
                         const targetSection = document.getElementById(targetId);
+                        
+                        // Prevent page scrolling when Chat (full screen) is active
+                        if(targetId === 'chat-view') {
+                            document.body.style.overflow = 'hidden';
+                        } else {
+                            document.body.style.overflow = 'auto';
+                        }
+
                         if (targetSection) {
                             targetSection.classList.add('active');
                         }
@@ -462,7 +490,6 @@
                         document.body.classList.add('light-mode'); 
                         themeToggle.checked = false; 
                     }
-                    
                     const savedC1 = localStorage.getItem('gradC1'); 
                     const savedC2 = localStorage.getItem('gradC2');
                     if (savedC1 && savedC2 && color1Input && color2Input) { 
@@ -485,13 +512,11 @@
                         } catch(err) {}
                     });
                 }
-
                 if (color1Input && color2Input) {
                     color1Input.addEventListener('input', (e) => { 
                         applyColors(e.target.value, color2Input.value); 
                         try { localStorage.setItem('gradC1', e.target.value); } catch(err){}
                     });
-                    
                     color2Input.addEventListener('input', (e) => { 
                         applyColors(color1Input.value, e.target.value); 
                         try { localStorage.setItem('gradC2', e.target.value); } catch(err){}
@@ -505,10 +530,13 @@
         });
     </script>
 
+    <!-- ========================================== -->
+    <!-- FIREBASE JAVASCRIPT (Backend logic)        -->
+    <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, setDoc, doc, getDoc, serverTimestamp, query, orderBy, limit, onSnapshot, updateDoc, arrayUnion, deleteDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, setDoc, doc, getDoc, serverTimestamp, query, orderBy, limit, onSnapshot, updateDoc, arrayUnion, deleteDoc, getDocs, where, deleteField } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyATd0AhKa4v8rS4viCXETkjZ16V6e1VjsY",
@@ -539,6 +567,7 @@
         const createGroupBtn = document.getElementById('create-group-btn');
         const createDmBtn = document.getElementById('create-dm-btn');
         const currentGroupTitle = document.getElementById('current-group-title');
+        const typingIndicator = document.getElementById('typing-indicator');
         
         // Modal DOM Elements
         const groupSettingsBtn = document.getElementById('group-settings-btn');
@@ -582,16 +611,45 @@
         let activeGroupId = null;
         let activeGroupData = null;
         let unsubscribeMessages = null;
+        let unsubscribeGroupDoc = null;
+        let typingTimeout = null;
+        let userOnlineStatuses = {}; 
         const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-
         let pendingReportUid = null;
         let pendingReportName = null;
+
+        // --- ONLINE PRESENCE SYSTEM ---
+        const setOnlineStatus = async (isOnline) => {
+            if (!currentUser) return;
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), { isOnline: isOnline, lastSeen: serverTimestamp() });
+            } catch(e) {}
+        };
+        window.addEventListener('focus', () => setOnlineStatus(true));
+        window.addEventListener('blur', () => setOnlineStatus(false));
+        window.addEventListener('beforeunload', () => setOnlineStatus(false));
+
+        // Listen for all users online status
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            snapshot.forEach(doc => { userOnlineStatuses[doc.id] = doc.data().isOnline; });
+            document.querySelectorAll('.dm-status-dot').forEach(dot => {
+                const uid = dot.getAttribute('data-uid');
+                if (userOnlineStatuses[uid]) {
+                    dot.classList.add('status-online');
+                } else {
+                    dot.classList.remove('status-online');
+                }
+            });
+        });
 
         loginBtn.addEventListener('click', () => {
             signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err));
         });
 
-        logoutBtn.addEventListener('click', () => signOut(auth));
+        logoutBtn.addEventListener('click', () => {
+            setOnlineStatus(false);
+            signOut(auth);
+        });
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -627,10 +685,12 @@
                         customPhotoURL: "",
                         profileId: currentUserProfileId,
                         dmRequestsEnabled: false,
+                        isOnline: true,
                         lastSeen: serverTimestamp()
                     }, { merge: true });
                 }
 
+                setOnlineStatus(true);
                 pageProfileName.textContent = currentUser.displayName;
                 pageProfileEmail.textContent = currentUser.email;
                 pageProfileId.value = currentUserProfileId;
@@ -639,10 +699,7 @@
                 authOverlay.style.display = 'none';
                 logoutBtn.style.display = 'block';
                 
-                if (ADMIN_EMAILS.includes(currentUser.email)) {
-                    adminPanel.style.display = 'block';
-                }
-
+                if (ADMIN_EMAILS.includes(currentUser.email)) { adminPanel.style.display = 'block'; }
                 loadGroups();
             } else {
                 currentUser = null;
@@ -662,20 +719,17 @@
                 deleteDmBtn.style.display = 'none';
                 adminPanel.style.display = 'none';
                 if(unsubscribeMessages) unsubscribeMessages();
+                if(unsubscribeGroupDoc) unsubscribeGroupDoc();
             }
         });
 
-        // --- DM REQUESTS TOGGLE LISTENER ---
+        // --- DM REQUESTS TOGGLE ---
         if (dmRequestsToggle) {
             dmRequestsToggle.addEventListener('change', async (e) => {
                 if (!currentUser) return;
                 try {
-                    await updateDoc(doc(db, "users", currentUser.uid), {
-                        dmRequestsEnabled: e.target.checked
-                    });
-                } catch(err) {
-                    console.error("Failed to update DM requests setting:", err);
-                }
+                    await updateDoc(doc(db, "users", currentUser.uid), { dmRequestsEnabled: e.target.checked });
+                } catch(err) {}
             });
         }
 
@@ -685,37 +739,23 @@
             activePhotoURL = currentUser.photoURL || "";
             profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png';
             customPicUrlInput.value = "";
-
-            await updateDoc(doc(db, "users", currentUser.uid), {
-                customPhotoURL: ""
-            });
+            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: "" });
             alert("Switched back to your Google profile picture!");
         });
 
         saveCustomPicBtn.addEventListener('click', async () => {
             if (!currentUser) return;
             const newUrl = customPicUrlInput.value.trim();
-            if (!newUrl) {
-                alert("Please enter a valid image URL.");
-                return;
-            }
-
+            if (!newUrl) { alert("Please enter a valid image URL."); return; }
             activePhotoURL = newUrl;
             profilePreviewImg.src = activePhotoURL;
-
-            await updateDoc(doc(db, "users", currentUser.uid), {
-                customPhotoURL: newUrl
-            });
+            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: newUrl });
             alert("Custom profile picture saved!");
         });
 
         // --- START DM HELPER ---
         async function startDM(targetUid, targetName) {
-            if (targetUid === currentUser.uid) {
-                alert("You can't message yourself!");
-                return;
-            }
-
+            if (targetUid === currentUser.uid) { alert("You can't message yourself!"); return; }
             const targetSnap = await getDoc(doc(db, "users", targetUid));
             const targetData = targetSnap.exists() ? targetSnap.data() : {};
             const requiresApproval = targetData.dmRequestsEnabled === true;
@@ -752,57 +792,32 @@
 
         // --- REPORT MODAL HANDLERS ---
         closeReportModalBtn.addEventListener('click', () => { reportModal.style.display = 'none'; });
-
         submitReportBtn.addEventListener('click', async () => {
             const reason = reportReasonSelect.value;
             const description = reportDescriptionInput.value.trim();
-
-            if (!description) {
-                alert("Please explain what happened.");
-                return;
-            }
-
+            if (!description) { alert("Please explain what happened."); return; }
             reportModal.style.display = 'none';
 
             try {
                 for (const adminEmail of ADMIN_EMAILS) {
                     const qAdmin = query(collection(db, "users"), where("email", "==", adminEmail.toLowerCase()));
                     const adminSnap = await getDocs(qAdmin);
-                    
                     if (!adminSnap.empty) {
-                        const adminUser = adminSnap.docs[0].data();
-                        const adminUid = adminUser.uid;
-
+                        const adminUid = adminSnap.docs[0].data().uid;
                         const dmId = adminUid < "00000000" ? `dm_${adminUid}_00000000` : `dm_00000000_${adminUid}`;
-
                         await setDoc(doc(db, "groups", dmId), {
-                            name: "Admin Reports",
-                            ownerUid: "00000000",
-                            password: "",
-                            isDM: true,
-                            pending: false,
-                            initiatorUid: "00000000",
-                            members: [
-                                { uid: "00000000", name: "LMBot" },
-                                { uid: adminUid, name: adminUser.name }
-                            ],
+                            name: "Admin Reports", ownerUid: "00000000", password: "", isDM: true, pending: false, initiatorUid: "00000000",
+                            members: [{ uid: "00000000", name: "LMBot" }, { uid: adminUid, name: adminSnap.docs[0].data().name }],
                             createdAt: serverTimestamp()
                         }, { merge: true });
-
                         await addDoc(collection(db, "groups", dmId, "messages"), {
                             text: `⚠️ REPORT:\n• Reported User: "${pendingReportName}" (UID: ${pendingReportUid})\n• Reported By: "${currentUser.displayName}" (UID: ${currentUser.uid})\n• Reason: ${reason}\n• Details: ${description}`,
-                            uid: "00000000",
-                            author: "LMBot",
-                            photoURL: "assets/sitelogo.png",
-                            createdAt: serverTimestamp()
+                            uid: "00000000", author: "LMBot", photoURL: "assets/sitelogo.png", createdAt: serverTimestamp()
                         });
                     }
                 }
                 alert("Report submitted successfully to administrators.");
-            } catch (err) {
-                console.error("Error submitting report:", err);
-                alert("Failed to send report.");
-            }
+            } catch (err) { alert("Failed to send report."); }
         });
 
         // --- DELETE CURRENT DM BUTTON ---
@@ -818,160 +833,58 @@
                     sendBtn.disabled = true;
                     activeGroupId = null;
                     activeGroupData = null;
-                } catch (err) {
-                    console.error("Error deleting DM:", err);
-                    alert("Failed to delete DM.");
-                }
+                    if(unsubscribeGroupDoc) unsubscribeGroupDoc();
+                } catch (err) { alert("Failed to delete DM."); }
             }
-        });
-
-        // --- PROFILE PAGE COPY ID ---
-        pageCopyIdBtn.addEventListener('click', () => {
-            if (currentUserProfileId) {
-                navigator.clipboard.writeText(currentUserProfileId);
-                pageCopyIdBtn.textContent = "Copied!";
-                setTimeout(() => { pageCopyIdBtn.textContent = "Copy ID"; }, 2000);
-            }
-        });
-
-        // --- ADMIN CONTROLS ---
-        banBtn.addEventListener('click', async () => {
-            const emailToBan = banEmailInput.value.trim();
-            if (emailToBan && ADMIN_EMAILS.includes(currentUser.email)) {
-                if (ADMIN_EMAILS.includes(emailToBan)) {
-                    alert("You cannot ban another Admin!");
-                    return;
-                }
-                await setDoc(doc(db, "banned_users", emailToBan), {
-                    bannedAt: serverTimestamp(),
-                    bannedBy: currentUser.email
-                });
-                alert(`${emailToBan} has been permanently banned.`);
-                banEmailInput.value = '';
-            }
-        });
-
-        unbanBtn.addEventListener('click', async () => {
-            const emailToUnban = unbanEmailInput.value.trim();
-            if (emailToUnban && ADMIN_EMAILS.includes(currentUser.email)) {
-                await deleteDoc(doc(db, "banned_users", emailToUnban));
-                alert(`${emailToUnban} has been unbanned.`);
-                unbanEmailInput.value = '';
-            }
-        });
-
-        // --- GROUP & ID-BASED DM CREATION ---
-        createGroupBtn.addEventListener('click', async () => {
-            const groupName = prompt("Enter the name of the new group:");
-            if (groupName && groupName.trim()) {
-                const groupId = groupName.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
-                
-                await setDoc(doc(db, "groups", groupId), {
-                    name: groupName.trim(),
-                    ownerUid: currentUser.uid,
-                    password: "",
-                    isDM: false,
-                    members: [{ uid: currentUser.uid, name: currentUser.displayName }],
-                    createdAt: serverTimestamp()
-                });
-            }
-        });
-
-        createDmBtn.addEventListener('click', async () => {
-            const targetId = prompt("Enter your friend's 8-digit Profile ID:");
-            if (!targetId || targetId.trim() === "") return;
-            
-            const cleanTargetId = targetId.trim();
-            
-            if (cleanTargetId === currentUserProfileId) {
-                alert("You can't message yourself!");
-                return;
-            }
-
-            const qUsers = query(collection(db, "users"), where("profileId", "==", cleanTargetId));
-            const querySnapshot = await getDocs(qUsers);
-
-            if (querySnapshot.empty) {
-                alert("Profile ID not found! Make sure they gave you the correct 8-digit number.");
-                return;
-            }
-
-            const targetUser = querySnapshot.docs[0].data();
-            await startDM(targetUser.uid, targetUser.name);
         });
 
         // --- LOAD GROUPS ---
         function loadGroups() {
             const q = query(collection(db, "groups"), orderBy("createdAt", "asc"));
-            
             onSnapshot(q, async (snapshot) => {
                 sidebarGroups.innerHTML = '';
                 const now = Date.now();
-                
                 if (snapshot.empty) {
-                    await setDoc(doc(db, "groups", "main_hub"), { 
-                        name: "Main Hub", 
-                        ownerUid: "system",
-                        password: "",
-                        isDM: false,
-                        members: [],
-                        createdAt: serverTimestamp() 
-                    });
+                    await setDoc(doc(db, "groups", "main_hub"), { name: "Main Hub", ownerUid: "system", password: "", isDM: false, members: [], createdAt: serverTimestamp() });
                     return;
                 }
 
                 snapshot.forEach((groupDoc) => {
                     const group = groupDoc.data();
                     const isOwnerOrAdmin = group.ownerUid === currentUser.uid || ADMIN_EMAILS.includes(currentUser.email);
-                    
                     if (group.isDM) {
                         const amIMember = group.members && group.members.some(m => m.uid === currentUser.uid);
                         if (!amIMember && !ADMIN_EMAILS.includes(currentUser.email)) return; 
                     }
-
                     if (group.createdAt && group.ownerUid !== "system" && !group.isDM) {
-                        const age = now - group.createdAt.toMillis();
-                        if (age > TWENTY_FOUR_HOURS) {
-                            if (isOwnerOrAdmin) deleteDoc(doc(db, "groups", groupDoc.id));
-                            return; 
-                        }
+                        if ((now - group.createdAt.toMillis()) > TWENTY_FOUR_HOURS) { if (isOwnerOrAdmin) deleteDoc(doc(db, "groups", groupDoc.id)); return; }
                     }
 
                     let displayName = `# ${group.name}`;
                     if (group.isDM) {
                         const otherPerson = group.members.find(m => m.uid !== currentUser.uid);
-                        displayName = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
+                        const isOnline = userOnlineStatuses[otherPerson.uid] ? 'status-online' : '';
+                        const dotHtml = `<span class="status-dot dm-status-dot ${isOnline}" data-uid="${otherPerson.uid}"></span>`;
+                        displayName = `${dotHtml} @ ${otherPerson.name}`;
                     }
 
                     const li = document.createElement('li');
                     li.innerHTML = `<span>${displayName}</span> ${group.password && !group.isDM ? '<span class="lock-icon">🔒</span>' : ''}`;
-                    
-                    if (activeGroupId === groupDoc.id) {
-                        li.classList.add('active-group');
-                    }
+                    if (activeGroupId === groupDoc.id) li.classList.add('active-group');
 
                     li.addEventListener('click', async () => {
                         const hasJoined = group.members && group.members.some(m => m.uid === currentUser.uid);
-
                         if (!isOwnerOrAdmin && !hasJoined && group.password && !group.isDM) {
                             const attempt = prompt(`Enter the password for #${group.name}:`);
-                            if (attempt !== group.password) {
-                                alert("Incorrect password.");
-                                return;
-                            }
+                            if (attempt !== group.password) { alert("Incorrect password."); return; }
                         }
-
                         if (!hasJoined && !group.isDM) {
-                            await updateDoc(doc(db, "groups", groupDoc.id), {
-                                members: arrayUnion({ uid: currentUser.uid, name: currentUser.displayName })
-                            });
+                            await updateDoc(doc(db, "groups", groupDoc.id), { members: arrayUnion({ uid: currentUser.uid, name: currentUser.displayName }) });
                         }
-
                         document.querySelectorAll('.group-list li').forEach(el => el.classList.remove('active-group'));
                         li.classList.add('active-group');
                         switchGroup(groupDoc.id, group, isOwnerOrAdmin);
                     });
-
                     sidebarGroups.appendChild(li);
                 });
             });
@@ -997,28 +910,46 @@
             if (isOwnerOrAdmin && !groupData.isDM) {
                 groupSettingsBtn.style.display = 'block';
                 modalPassword.value = groupData.password || "";
-                
                 memberList.innerHTML = '';
-                (groupData.members || []).forEach(m => {
-                    const li = document.createElement('li');
-                    li.textContent = m.name;
-                    memberList.appendChild(li);
-                });
-            } else {
-                groupSettingsBtn.style.display = 'none';
-            }
+                (groupData.members || []).forEach(m => { const li = document.createElement('li'); li.textContent = m.name; memberList.appendChild(li); });
+            } else { groupSettingsBtn.style.display = 'none'; }
+
+            // Listen for typing events on current group
+            if(unsubscribeGroupDoc) unsubscribeGroupDoc();
+            unsubscribeGroupDoc = onSnapshot(doc(db, "groups", groupId), (docSnap) => {
+                const data = docSnap.data();
+                if (data && data.typing) {
+                    const typers = Object.entries(data.typing).filter(([uid, name]) => uid !== currentUser.uid && name);
+                    typingIndicator.textContent = typers.length > 0 ? `${typers.map(t => t[1]).join(", ")} is typing...` : "";
+                } else { typingIndicator.textContent = ""; }
+            });
 
             if (unsubscribeMessages) unsubscribeMessages();
-
             const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
             
+            let lastRenderedDate = "";
+
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
                 messagesContainer.innerHTML = '';
+                lastRenderedDate = ""; 
                 
                 snapshot.forEach((msgDoc) => {
                     const message = msgDoc.data();
+                    if(!message.createdAt) return;
+
+                    const msgDate = new Date(message.createdAt.toMillis());
+                    const dateStr = msgDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+                    const timeStr = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    if (dateStr !== lastRenderedDate) {
+                        const divider = document.createElement('div');
+                        divider.classList.add('date-divider');
+                        divider.innerHTML = `<span>${dateStr}</span>`;
+                        messagesContainer.appendChild(divider);
+                        lastRenderedDate = dateStr;
+                    }
+
                     const isOwnMessage = message.uid === currentUser.uid;
-                    
                     const rowElement = document.createElement('div');
                     rowElement.classList.add('message-row');
                     if (isOwnMessage) rowElement.classList.add('own-row');
@@ -1026,40 +957,25 @@
                     const avatarImg = document.createElement('img');
                     avatarImg.src = message.photoURL || 'assets/sitelogo.png';
                     avatarImg.classList.add('chat-avatar');
-                    avatarImg.alt = message.author || 'User';
 
                     avatarImg.addEventListener('click', (e) => {
                         e.stopPropagation();
                         document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
-
                         if (message.uid === currentUser.uid || message.uid === "00000000") return;
-
-                        const dropdown = document.createElement('div');
-                        dropdown.classList.add('avatar-dropdown');
-
-                        const dmBtn = document.createElement('button');
-                        dmBtn.classList.add('dropdown-item');
-                        dmBtn.textContent = '💬 Direct Message';
-                        dmBtn.addEventListener('click', () => {
-                            dropdown.remove();
-                            startDM(message.uid, message.author);
-                        });
-
-                        const reportBtn = document.createElement('button');
-                        reportBtn.classList.add('dropdown-item', 'danger');
-                        reportBtn.textContent = '🚨 Report User';
+                        const dropdown = document.createElement('div'); dropdown.classList.add('avatar-dropdown');
+                        
+                        const dmBtn = document.createElement('button'); dmBtn.classList.add('dropdown-item'); dmBtn.textContent = '💬 Direct Message';
+                        dmBtn.addEventListener('click', () => { dropdown.remove(); startDM(message.uid, message.author); });
+                        
+                        const reportBtn = document.createElement('button'); reportBtn.classList.add('dropdown-item', 'danger'); reportBtn.textContent = '🚨 Report User';
                         reportBtn.addEventListener('click', () => {
                             dropdown.remove();
-                            pendingReportUid = message.uid;
-                            pendingReportName = message.author;
-                            reportDescriptionInput.value = '';
-                            reportReasonSelect.value = 'Harassment';
+                            pendingReportUid = message.uid; pendingReportName = message.author;
+                            reportDescriptionInput.value = ''; reportReasonSelect.value = 'Harassment';
                             reportModal.style.display = 'flex';
                         });
 
-                        dropdown.appendChild(dmBtn);
-                        dropdown.appendChild(reportBtn);
-
+                        dropdown.appendChild(dmBtn); dropdown.appendChild(reportBtn);
                         document.body.appendChild(dropdown);
                         const rect = avatarImg.getBoundingClientRect();
                         dropdown.style.top = `${rect.bottom + window.scrollY}px`;
@@ -1070,108 +986,54 @@
                     const msgDiv = document.createElement('div');
                     msgDiv.classList.add('message');
                     if (isOwnMessage) msgDiv.classList.add('own-message');
-                    
-                    msgDiv.innerHTML = `
-                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
-                        <div>${message.text}</div>
-                    `;
-
-                    rowElement.appendChild(avatarImg);
-                    rowElement.appendChild(msgDiv);
+                    msgDiv.innerHTML = `<div class="message-author">${isOwnMessage ? 'You' : message.author} <span class="msg-time">${timeStr}</span></div><div>${message.text}</div>`;
+                    rowElement.appendChild(avatarImg); rowElement.appendChild(msgDiv);
                     messagesContainer.appendChild(rowElement);
                 });
-                
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
         }
 
+        // --- TYPING INDICATOR INPUT LISTENER ---
+        messageInput.addEventListener('input', () => {
+            if (!activeGroupId || !currentUser) return;
+            updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: currentUser.displayName }, { merge: true });
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() });
+            }, 2000);
+        });
+
         const sendMessage = async () => {
             const text = messageInput.value.trim();
             if (text === "" || !currentUser || !activeGroupId) return;
-            
             messageInput.value = '';
+            updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() }); // Clear typing immediately
             
             try {
                 if (activeGroupData && activeGroupData.isDM && activeGroupData.pending && currentUser.uid !== activeGroupData.initiatorUid) {
                     const cleanText = text.toLowerCase();
                     if (cleanText === "yes") {
-                        await updateDoc(doc(db, "groups", activeGroupId), {
-                            pending: false
-                        });
-                        await addDoc(collection(db, "groups", activeGroupId, "messages"), {
-                            text: `Direct Message accepted! You can now chat.`,
-                            uid: "00000000",
-                            author: "LMBot",
-                            photoURL: "assets/sitelogo.png",
-                            createdAt: serverTimestamp()
-                        });
-                        activeGroupData.pending = false;
-                        return;
+                        await updateDoc(doc(db, "groups", activeGroupId), { pending: false });
+                        await addDoc(collection(db, "groups", activeGroupId, "messages"), { text: `Direct Message accepted! You can now chat.`, uid: "00000000", author: "LMBot", photoURL: "assets/sitelogo.png", createdAt: serverTimestamp() });
+                        activeGroupData.pending = false; return;
                     } else if (cleanText === "no") {
                         await deleteDoc(doc(db, "groups", activeGroupId));
-                        messagesContainer.innerHTML = '';
-                        currentGroupTitle.textContent = "# Select a Group";
-                        deleteDmBtn.style.display = 'none';
-                        activeGroupId = null;
-                        activeGroupData = null;
-                        alert("DM request declined.");
-                        return;
+                        messagesContainer.innerHTML = ''; currentGroupTitle.textContent = "# Select a Group"; deleteDmBtn.style.display = 'none';
+                        activeGroupId = null; activeGroupData = null;
+                        alert("DM request declined."); return;
                     }
                 }
-
                 const userSnap = await getDoc(doc(db, "users", currentUser.uid));
                 const userData = userSnap.exists() ? userSnap.data() : {};
                 const finalPhoto = userData.customPhotoURL || currentUser.photoURL || "";
-
-                await addDoc(collection(db, "groups", activeGroupId, "messages"), {
-                    text: text,
-                    uid: currentUser.uid,
-                    author: currentUser.displayName,
-                    photoURL: finalPhoto,
-                    createdAt: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Error writing message: ", error);
-            }
+                await addDoc(collection(db, "groups", activeGroupId, "messages"), { text: text, uid: currentUser.uid, author: currentUser.displayName, photoURL: finalPhoto, createdAt: serverTimestamp() });
+            } catch (error) {}
         };
 
         sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // --- MODAL CONTROLS ---
-        groupSettingsBtn.addEventListener('click', () => { groupModal.style.display = 'flex'; });
-        closeModalBtn.addEventListener('click', () => { groupModal.style.display = 'none'; });
-
-        savePasswordBtn.addEventListener('click', async () => {
-            if(activeGroupId) {
-                await updateDoc(doc(db, "groups", activeGroupId), { password: modalPassword.value.trim() });
-                alert("Group password updated!");
-            }
-        });
-
-        clearChatBtn.addEventListener('click', async () => {
-            if(confirm("Are you sure you want to delete all messages in this group?")) {
-                const q = query(collection(db, "groups", activeGroupId, "messages"));
-                const snaps = await getDocs(q);
-                const deletePromises = snaps.docs.map(d => deleteDoc(d.ref));
-                await Promise.all(deletePromises);
-                alert("Chat cleared.");
-            }
-        });
-
-        deleteGroupBtn.addEventListener('click', async () => {
-            if(confirm("Permanently delete this group and all its messages?")) {
-                await deleteDoc(doc(db, "groups", activeGroupId));
-                groupModal.style.display = 'none';
-                messagesContainer.innerHTML = '';
-                currentGroupTitle.textContent = "# Select a Group";
-                groupSettingsBtn.style.display = 'none';
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
-            }
-        });
+        messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
     </script>
 </body>
 </html>
