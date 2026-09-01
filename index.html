@@ -877,4 +877,163 @@
             activeGroupId = groupId;
             
             if (groupData.isDM) {
-                const otherPerson = groupData.members.find(m
+                const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
+                currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
+            } else {
+                currentGroupTitle.textContent = `# ${groupData.name}`;
+            }
+            
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+
+            if (isOwnerOrAdmin && !groupData.isDM) {
+                groupSettingsBtn.style.display = 'block';
+                modalPassword.value = groupData.password || "";
+                
+                memberList.innerHTML = '';
+                (groupData.members || []).forEach(m => {
+                    const li = document.createElement('li');
+                    li.textContent = m.name;
+                    memberList.appendChild(li);
+                });
+            } else {
+                groupSettingsBtn.style.display = 'none';
+            }
+
+            if (unsubscribeMessages) unsubscribeMessages();
+
+            const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
+            
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = '';
+                
+                snapshot.forEach((msgDoc) => {
+                    const message = msgDoc.data();
+                    const isOwnMessage = message.uid === currentUser.uid;
+                    
+                    const rowElement = document.createElement('div');
+                    rowElement.classList.add('message-row');
+                    if (isOwnMessage) rowElement.classList.add('own-row');
+
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = message.photoURL || 'assets/sitelogo.png';
+                    avatarImg.classList.add('chat-avatar');
+                    avatarImg.alt = message.author || 'User';
+
+                    // Avatar click shows dropdown menu (DM & Report)
+                    avatarImg.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
+
+                        if (message.uid === currentUser.uid) return; // Don't show dropdown for own messages
+
+                        const dropdown = document.createElement('div');
+                        dropdown.classList.add('avatar-dropdown');
+
+                        const dmBtn = document.createElement('button');
+                        dmBtn.classList.add('dropdown-item');
+                        dmBtn.textContent = '💬 Direct Message';
+                        dmBtn.addEventListener('click', () => {
+                            dropdown.remove();
+                            startDM(message.uid, message.author);
+                        });
+
+                        const reportBtn = document.createElement('button');
+                        reportBtn.classList.add('dropdown-item', 'danger');
+                        reportBtn.textContent = '🚨 Report User';
+                        reportBtn.addEventListener('click', () => {
+                            dropdown.remove();
+                            reportUser(message.uid, message.author);
+                        });
+
+                        dropdown.appendChild(dmBtn);
+                        dropdown.appendChild(reportBtn);
+
+                        document.body.appendChild(dropdown);
+                        const rect = avatarImg.getBoundingClientRect();
+                        dropdown.style.top = `${rect.bottom + window.scrollY}px`;
+                        dropdown.style.left = `${rect.left + window.scrollX}px`;
+                        dropdown.style.display = 'flex';
+                    });
+
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('message');
+                    if (isOwnMessage) msgDiv.classList.add('own-message');
+                    
+                    msgDiv.innerHTML = `
+                        <div class="message-author">${isOwnMessage ? 'You' : message.author}</div>
+                        <div>${message.text}</div>
+                    `;
+
+                    rowElement.appendChild(avatarImg);
+                    rowElement.appendChild(msgDiv);
+                    messagesContainer.appendChild(rowElement);
+                });
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        const sendMessage = async () => {
+            const text = messageInput.value.trim();
+            if (text === "" || !currentUser || !activeGroupId) return;
+            
+            messageInput.value = '';
+            
+            try {
+                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+                const userData = userSnap.exists() ? userSnap.data() : {};
+                const finalPhoto = userData.customPhotoURL || currentUser.photoURL || "";
+
+                await addDoc(collection(db, "groups", activeGroupId, "messages"), {
+                    text: text,
+                    uid: currentUser.uid,
+                    author: currentUser.displayName,
+                    photoURL: finalPhoto,
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error writing message: ", error);
+            }
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // --- MODAL CONTROLS ---
+        groupSettingsBtn.addEventListener('click', () => { groupModal.style.display = 'flex'; });
+        closeModalBtn.addEventListener('click', () => { groupModal.style.display = 'none'; });
+
+        savePasswordBtn.addEventListener('click', async () => {
+            if(activeGroupId) {
+                await updateDoc(doc(db, "groups", activeGroupId), { password: modalPassword.value.trim() });
+                alert("Group password updated!");
+            }
+        });
+
+        clearChatBtn.addEventListener('click', async () => {
+            if(confirm("Are you sure you want to delete all messages in this group?")) {
+                const q = query(collection(db, "groups", activeGroupId, "messages"));
+                const snaps = await getDocs(q);
+                const deletePromises = snaps.docs.map(d => deleteDoc(d.ref));
+                await Promise.all(deletePromises);
+                alert("Chat cleared.");
+            }
+        });
+
+        deleteGroupBtn.addEventListener('click', async () => {
+            if(confirm("Permanently delete this group and all its messages?")) {
+                await deleteDoc(doc(db, "groups", activeGroupId));
+                groupModal.style.display = 'none';
+                messagesContainer.innerHTML = '';
+                currentGroupTitle.textContent = "# Select a Group";
+                groupSettingsBtn.style.display = 'none';
+                messageInput.disabled = true;
+                sendBtn.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
