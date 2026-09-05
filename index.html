@@ -487,12 +487,16 @@
                         const targetId = btn.getAttribute('data-target');
                         const targetSection = document.getElementById(targetId);
                         
+                        // Prevent page scrolling when Chat (full screen) is active
                         if(targetId === 'chat-view') {
                             document.body.style.overflow = 'hidden';
                         } else {
                             document.body.style.overflow = 'auto';
                         }
-                        if (targetSection) { targetSection.classList.add('active'); }
+
+                        if (targetSection) {
+                            targetSection.classList.add('active');
+                        }
                     });
                 });
 
@@ -532,7 +536,8 @@
                     if (localStorage.getItem('theme') === 'light' && themeToggle) { 
                         document.body.classList.add('light-mode'); themeToggle.checked = false; 
                     }
-                    const savedC1 = localStorage.getItem('gradC1'); const savedC2 = localStorage.getItem('gradC2');
+                    const savedC1 = localStorage.getItem('gradC1'); 
+                    const savedC2 = localStorage.getItem('gradC2');
                     if (savedC1 && savedC2 && color1Input && color2Input) { 
                         color1Input.value = savedC1; color2Input.value = savedC2; applyColors(savedC1, savedC2); 
                     }
@@ -809,7 +814,7 @@
             }, { merge: true });
 
             if (requiresApproval) {
-                // To avoid spamming, only send the prompt if it doesn't already exist (simple check: let it merge)
+                // To avoid spamming, only send the prompt if it doesn't already exist
                 const msgs = await getDocs(query(collection(db, "groups", dmId, "messages"), limit(1)));
                 if(msgs.empty) {
                     await addDoc(collection(db, "groups", dmId, "messages"), {
@@ -877,10 +882,13 @@
                 snapshot.forEach((groupDoc) => {
                     const group = groupDoc.data();
                     const isOwnerOrAdmin = group.ownerUid === currentUser.uid || ADMIN_EMAILS.includes(currentUser.email);
+                    
                     if (group.isDM) {
                         const amIMember = group.members && group.members.some(m => m.uid === currentUser.uid);
-                        if (!amIMember && !ADMIN_EMAILS.includes(currentUser.email)) return; 
+                        // FIX: Admins are no longer granted global bypass. Only actual participants see their DMs.
+                        if (!amIMember) return; 
                     }
+                    
                     if (group.createdAt && group.ownerUid !== "system" && !group.isDM) {
                         if ((now - group.createdAt.toMillis()) > TWENTY_FOUR_HOURS) { if (isOwnerOrAdmin) deleteDoc(doc(db, "groups", groupDoc.id)); return; }
                     }
@@ -952,10 +960,28 @@
             const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
             
             let lastRenderedDate = "";
+            let isInitialMsgLoad = true; // FIX: Track initial load to prevent playing sounds on historically fetched messages
 
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
                 messagesContainer.innerHTML = '';
                 lastRenderedDate = ""; 
+                
+                // Determine if a sound needs to be played
+                let playSound = false;
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added" && !isInitialMsgLoad) {
+                        const msgData = change.doc.data();
+                        // Only play sound if the message isn't from the active user
+                        if (msgData.uid !== currentUser.uid) {
+                            playSound = true;
+                        }
+                    }
+                });
+
+                if (playSound) {
+                    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                    audio.play().catch(e => console.log("Audio autoplay blocked by browser rules", e));
+                }
                 
                 snapshot.forEach((msgDoc) => {
                     const message = msgDoc.data();
@@ -1004,6 +1030,8 @@
                     msgDiv.innerHTML = `<div class="message-author">${isOwnMessage ? 'You' : message.author} <span class="msg-time">${timeStr}</span></div><div>${message.text}</div>`;
                     rowElement.appendChild(avatarImg); rowElement.appendChild(msgDiv); messagesContainer.appendChild(rowElement);
                 });
+                
+                isInitialMsgLoad = false;
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
         }
