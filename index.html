@@ -406,7 +406,7 @@
                             <audio id="remote-audio" autoplay style="display:none;"></audio>
 
                             <button id="delete-dm-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Delete Direct Message">🗑️ Delete DM</button>
-                            <button id="group-settings-btn" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer;" title="Group Controls">⚙️</button>
+                            <button id="group-settings-btn" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer;" title="Settings">⚙️</button>
                             <button id="logout-btn" style="display:none;">Log Out</button>
                         </div>
                     </div>
@@ -949,7 +949,62 @@
             }
         });
 
-        // --- ROBUST VOICE CALL SYSTEM (WITH ICE CANDIDATE QUEUEING) ---
+        // --- GROUP & DM SETTINGS MODAL LISTENERS ---
+        groupSettingsBtn.addEventListener('click', async () => {
+            if (!activeGroupId || !activeGroupData) return;
+            
+            // If it's a DM, ask to clear all messages instead of showing the group modal
+            if (activeGroupData.isDM) {
+                if (confirm("Are you sure you want to clear all messages in this chat?")) {
+                    try {
+                        const msgsQuery = query(collection(db, "groups", activeGroupId, "messages"));
+                        const msgsSnapshot = await getDocs(msgsQuery);
+                        msgsSnapshot.forEach((docSnap) => {
+                            deleteDoc(doc(db, "groups", activeGroupId, "messages", docSnap.id)).catch(()=>{});
+                        });
+                        alert("Chat history cleared.");
+                    } catch(e) {
+                        console.log("Error clearing messages:", e);
+                    }
+                }
+            } else {
+                // Open normal Group Modal
+                groupModal.style.display = 'flex';
+                modalPassword.value = activeGroupData.password || "";
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => { groupModal.style.display = 'none'; });
+        
+        savePasswordBtn.addEventListener('click', async () => {
+            if(!activeGroupId) return;
+            await updateDoc(doc(db, "groups", activeGroupId), { password: modalPassword.value });
+            alert("Password updated.");
+        });
+
+        clearChatBtn.addEventListener('click', async () => {
+            if(confirm("Clear all messages in this group?")) {
+                const msgs = await getDocs(collection(db, "groups", activeGroupId, "messages"));
+                msgs.forEach(d => deleteDoc(doc(db, "groups", activeGroupId, "messages", d.id)));
+                groupModal.style.display = 'none';
+            }
+        });
+
+        deleteGroupBtn.addEventListener('click', async () => {
+            if(confirm("Delete this entire group?")) {
+                await deleteDoc(doc(db, "groups", activeGroupId));
+                groupModal.style.display = 'none';
+                messagesContainer.innerHTML = ''; 
+                currentGroupTitle.textContent = "# Select a Group";
+                groupSettingsBtn.style.display = 'none'; 
+                messageInput.disabled = true; 
+                sendBtn.disabled = true;
+                activeGroupId = null; 
+                activeGroupData = null;
+            }
+        });
+
+        // --- ROBUST VOICE CALL SYSTEM ---
         async function setupAudio() {
             if (!localStream) {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -1176,6 +1231,10 @@
                 currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
                 deleteDmBtn.style.display = 'block';
                 startCallBtn.style.display = 'block';
+                
+                // Show settings gear for DMs to clear chat
+                groupSettingsBtn.style.display = 'block';
+                groupSettingsBtn.title = "Clear DM Messages";
 
                 if(callDocUnsubscribe) callDocUnsubscribe();
                 callDocUnsubscribe = onSnapshot(doc(db, "groups", groupId, "calls", "current_call"), (snapshot) => {
@@ -1213,10 +1272,14 @@
             messageInput.disabled = false; sendBtn.disabled = false;
 
             if (isOwnerOrAdmin && !groupData.isDM) {
-                groupSettingsBtn.style.display = 'block'; modalPassword.value = groupData.password || "";
+                groupSettingsBtn.style.display = 'block'; 
+                groupSettingsBtn.title = "Group Controls";
+                modalPassword.value = groupData.password || "";
                 memberList.innerHTML = '';
                 (groupData.members || []).forEach(m => { const li = document.createElement('li'); li.textContent = m.name; memberList.appendChild(li); });
-            } else { groupSettingsBtn.style.display = 'none'; }
+            } else if (!groupData.isDM) { 
+                groupSettingsBtn.style.display = 'none'; 
+            }
 
             if(unsubscribeGroupDoc) unsubscribeGroupDoc();
             unsubscribeGroupDoc = onSnapshot(doc(db, "groups", groupId), (docSnap) => {
@@ -1260,10 +1323,9 @@
 
                     const msgDate = new Date(message.createdAt.toMillis());
                     
-                    // --- 40-HOUR AUTO-DELETE LOGIC ---
                     if (now - msgDate.getTime() > FORTY_HOURS) {
                         deleteDoc(doc(db, "groups", groupId, "messages", msgDoc.id)).catch(() => {});
-                        return; // Skip rendering this message
+                        return;
                     }
 
                     const dateStr = msgDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
@@ -1309,7 +1371,6 @@
                         msgDiv.style.cursor = 'pointer';
                         msgDiv.title = 'Click to delete message';
                         
-                        // --- CLICK TO DELETE MESSAGE ---
                         msgDiv.addEventListener('click', (e) => {
                             e.stopPropagation();
                             document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
@@ -1355,7 +1416,6 @@
             let text = messageInput.value.trim();
             if (text === "" || !currentUser || !activeGroupId) return;
             
-            // Enforce character limit defensively in JavaScript
             if (text.length > 400) {
                 text = text.substring(0, 400);
             }
