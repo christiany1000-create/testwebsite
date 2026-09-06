@@ -150,4 +150,1241 @@
         .thumbnail { width: 100%; height: 140px; background: var(--thumb-bg); display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--border-color); transition: background 0.3s; position: relative; z-index: 2; border-radius: 10px 10px 0 0; overflow: hidden; }
         .game-card:hover .thumbnail { background: var(--thumb-bg-hover); }
         .thumbnail-icon { font-size: 3rem; color: var(--text-muted); }
-        .game-title { padding: 15px; text-align: center; font-size: 1.2rem; background-color: var(--bg-surface); position: relative; z-index: 2; border-radius
+        .game-title { padding: 15px; text-align: center; font-size: 1.2rem; background-color: var(--bg-surface); position: relative; z-index: 2; border-radius: 0 0 10px 10px; }
+        .play-btn { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent-gradient); color: white; text-align: center; padding: 10px 0; border-radius: 0 0 10px 10px; font-size: 1.1rem; z-index: 1; transform: translateY(0); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .game-card:hover .play-btn { transform: translateY(100%); }
+
+        /* --- Full-Screen Live Chat View --- */
+        #chat-view.active { display: flex; position: fixed; top: 73px; left: 0; width: 100vw; height: calc(100vh - 73px); z-index: 50; padding: 0; margin: 0; max-width: none; background: var(--bg-base); }
+        .chat-container { display: flex; width: 100%; height: 100%; border: none; border-top: 2px solid var(--accent); border-radius: 0; box-shadow: none; position: relative; overflow: hidden;}
+        
+        #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; text-align: center;}
+        #login-btn { padding: 15px 30px; font-size: 1.2rem; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 20px; transition: opacity 0.2s; }
+        #login-btn:hover { opacity: 0.9; }
+
+        .chat-sidebar { width: 300px; background-color: var(--bg-surface); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
+        
+        /* Sidebar Tabs */
+        .sidebar-tabs { display: flex; border-bottom: 2px solid var(--border-color); }
+        .sidebar-tab-btn { flex: 1; padding: 15px 0; background: var(--bg-base); color: var(--text-muted); border: none; cursor: pointer; font-family: inherit; font-size: 1.1rem; transition: background 0.2s, color 0.2s; }
+        .sidebar-tab-btn.active-tab { background: var(--bg-surface); color: var(--accent); font-weight: bold; }
+        #nav-contacts-btn { border-left: 2px solid var(--border-color); }
+
+        .sidebar-header { padding: 20px; border-bottom: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;}
+        .sidebar-header h2 { margin: 0; font-size: 1.5rem; }
+        .create-btn { width: 100%; padding: 10px; background: var(--accent-gradient); color: white; border: none; border-radius: 6px; font-family: inherit; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+        .create-btn:hover { opacity: 0.9; }
+        
+        .group-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        .group-list li { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; display: flex; justify-content: space-between; align-items: center;}
+        .group-list li:hover { background-color: var(--thumb-bg); }
+        .group-list li.active-group { border-left: 5px solid var(--accent); background-color: var(--thumb-bg); font-weight: bold; }
+        
+        /* Online Status Dots */
+        .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #666; margin-right: 8px; transition: background-color 0.3s; }
+        .status-online { background-color: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+        .lock-icon { font-size: 0.9rem; color: var(--text-muted); }
+
+        .chat-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-base); }
+        .chat-header { padding: 20px 30px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        #logout-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+        #mobile-back-btn { display: none; }
+        
+        .messages-area { flex-grow: 1; padding: 20px 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* Date Divider & Timestamps */
+        .date-divider { text-align: center; margin: 20px 0; font-size: 0.9rem; color: var(--text-muted); position: relative; }
+        .date-divider::before { content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border-color); z-index: 1; }
+        .date-divider span { background: var(--bg-base); padding: 0 15px; position: relative; z-index: 2; font-weight: bold; }
+        .msg-time { font-size: 0.75rem; color: var(--text-muted); margin-left: 10px; font-weight: normal; }
+
+        /* Message & Avatar Layout */
+        .message-row { display: flex; align-items: flex-start; gap: 10px; position: relative; }
+        .message-row.own-row { flex-direction: row-reverse; }
+        .chat-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); transition: border-color 0.2s; }
+        .chat-avatar:hover { border-color: var(--accent); }
+
+        /* --- Avatar Dropdown Menu --- */
+        .avatar-dropdown {
+            position: absolute;
+            background-color: var(--bg-surface);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--shadow);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            min-width: 160px;
+            overflow: hidden;
+        }
+        .dropdown-item {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        .dropdown-item:hover { background-color: var(--thumb-bg-hover); color: var(--accent); }
+        .dropdown-item.danger:hover { color: #f44336; }
+
+        .message { background-color: var(--bg-surface); padding: 12px 18px; border-radius: 8px; max-width: 60%; border: 1px solid var(--border-color); word-wrap: break-word; font-size: 1.05rem; }
+        .message.own-message { border-color: var(--accent); background-color: var(--thumb-bg); transition: opacity 0.2s; }
+        .message.own-message:hover { opacity: 0.8; }
+        .message-author { font-size: 0.95rem; color: var(--accent); margin-bottom: 5px; font-weight: bold; }
+        
+        /* Typing Indicator */
+        .typing-indicator-container { padding: 5px 30px; background-color: var(--bg-base); font-style: italic; color: var(--text-muted); font-size: 0.9rem; min-height: 25px; display: flex; align-items: center; }
+
+        .chat-input { padding: 20px 30px; background-color: var(--bg-surface); border-top: 2px solid var(--border-color); display: flex; gap: 15px; }
+        .chat-input input { flex-grow: 1; padding: 15px 20px; border-radius: 8px; border: 2px solid var(--border-color); background-color: var(--bg-base); color: var(--text-main); font-family: inherit; font-size: 1.1rem; outline: none; }
+        .chat-input input:focus { border-color: var(--accent); }
+        .chat-input button { padding: 0 35px; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
+        .chat-input button:active { transform: scale(0.95); }
+
+        /* --- In-App Call Banner Styling --- */
+        #call-banner {
+            display: none;
+            position: absolute;
+            top: 73px;
+            left: 0;
+            width: 100%;
+            background: rgba(76, 175, 80, 0.95);
+            color: white;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            z-index: 150;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* --- Modal Styling --- */
+        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .modal-content { max-width: 400px; width: 90%; background-color: var(--bg-surface); padding: 30px; border-radius: 12px; border: 2px solid var(--accent); position: relative; }
+        .base-input { width: 100%; padding: 10px; margin-bottom: 15px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; box-sizing: border-box;}
+        .base-btn { width: 100%; padding: 10px; border-radius: 6px; border: none; font-family: inherit; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; color: white;}
+        #member-list { max-height: 120px; overflow-y: auto; padding-left: 20px; margin-bottom: 20px; color: var(--text-muted); }
+
+        /* ========================================== */
+        /* MOBILE RESPONSIVE MEDIA QUERIES            */
+        /* ========================================== */
+        @media (max-width: 768px) {
+            header { padding: 10px 15px; flex-direction: column; gap: 8px; }
+            .logo { font-size: 1.5rem; }
+            .logo-icon { height: 30px; }
+            .nav-controls { width: 100%; justify-content: space-between; gap: 5px; }
+            .nav-btn { padding: 8px 6px; font-size: 0.85rem; flex: 1; text-align: center; }
+
+            #chat-view.active {
+                top: 115px; 
+                height: calc(100dvh - 115px); 
+            }
+
+            .chat-sidebar { width: 100%; }
+            .chat-main { display: none; width: 100%; }
+
+            .chat-container.mobile-chat-open .chat-sidebar { display: none; }
+            .chat-container.mobile-chat-open .chat-main { display: flex; }
+
+            #mobile-back-btn {
+                display: block; background: none; border: 1px solid var(--accent);
+                color: var(--accent); padding: 5px 10px; border-radius: 4px;
+                cursor: pointer; font-family: inherit; font-size: 0.9rem;
+            }
+
+            .chat-header {
+                padding: 12px 15px;
+                font-size: 1.1rem;
+                flex-shrink: 0; 
+            }
+            .messages-area { padding: 15px; }
+            .message { max-width: 85%; font-size: 0.95rem; }
+            
+            .chat-input {
+                padding: 12px 15px;
+                gap: 10px;
+                flex-shrink: 0; 
+                padding-bottom: max(12px, env(safe-area-inset-bottom)); 
+            }
+            .chat-input input { padding: 10px 12px; font-size: 0.95rem; }
+            .chat-input button { padding: 0 18px; font-size: 1rem; }
+            
+            .page-container { padding: 20px 15px; width: 90%; }
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="assets/sitelogo.png" alt="Logo" class="logo-icon">
+            <div class="logo">LearnMultiply</div>
+        </div>
+        
+        <div class="nav-controls">
+            <button class="nav-btn active" data-target="games-view">🎮 Games</button>
+            <button class="nav-btn" data-target="chat-view">💬 Chat</button>
+            <button class="nav-btn" data-target="profile-view">👤 Profile</button>
+            <button class="nav-btn" data-target="settings-view">⚙️ Settings</button>
+        </div>
+    </header>
+
+    <main class="content-area">
+        
+        <div id="games-view" class="view-section active">
+            <div class="games-grid">
+                <a href="craft.html" class="game-card">
+                    <div class="thumbnail">
+                        <img src="assets/mclogo.webp" alt="Eaglercraft" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="game-title">Eaglercraft</div>
+                    <div class="play-btn">▶ Play Now</div>
+                </a>
+                <a href="sm64/index.html" class="game-card">
+                    <div class="thumbnail"><span class="thumbnail-icon">🍄</span></div>
+                    <div class="game-title">Super Mario 64</div>
+                    <div class="play-btn">▶ Play Now</div>
+                </a>
+            </div>
+        </div>
+
+        <div id="chat-view" class="view-section">
+            <div class="chat-container">
+                <div id="call-banner">
+                    <span id="call-banner-text">Incoming voice call...</span>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="accept-call-btn" style="background: #2196F3; border: none; color: white; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: inherit;">Accept</button>
+                        <button id="decline-call-btn" style="background: #f44336; border: none; color: white; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: inherit;">Decline</button>
+                    </div>
+                </div>
+
+                <div id="auth-overlay">
+                    <h2>Classroom Chat</h2>
+                    <p>Please sign in with your Google account to chat.</p>
+                    <button id="login-btn">Sign in with Google</button>
+                </div>
+                
+                <div class="chat-sidebar">
+                    <div class="sidebar-tabs">
+                        <button id="nav-groups-btn" class="sidebar-tab-btn active-tab">💬 Chats</button>
+                        <button id="nav-contacts-btn" class="sidebar-tab-btn">👥 Contacts</button>
+                    </div>
+
+                    <div id="sidebar-chats-view" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
+                        <div class="sidebar-header">
+                            <button id="create-group-btn" class="create-btn">+ New Group</button>
+                            <button id="create-dm-btn" class="create-btn" style="background: #4CAF50;">+ DM by ID</button>
+                        </div>
+                        <ul class="group-list" id="sidebar-groups"></ul>
+                    </div>
+
+                    <div id="sidebar-contacts-view" style="display: none; flex-direction: column; flex-grow: 1; overflow: hidden;">
+                        <div class="sidebar-header" style="padding: 15px 20px;">
+                            <input type="text" id="contact-search" placeholder="Search contacts..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-family: inherit; box-sizing: border-box; outline: none;">
+                        </div>
+                        <ul class="group-list" id="sidebar-contacts"></ul>
+                    </div>
+                </div>
+
+                <div class="chat-main">
+                    <div class="chat-header">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <button id="mobile-back-btn">← Back</button>
+                            <span id="current-group-title"># Select a Group</span>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <button id="start-call-btn" style="display:none; background:#4CAF50; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Start Voice Call">📞 Call</button>
+                            <button id="end-call-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="End Call">📵 End</button>
+                            <audio id="local-audio" autoplay muted style="display:none;"></audio>
+                            <audio id="remote-audio" autoplay style="display:none;"></audio>
+
+                            <button id="delete-dm-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Delete Direct Message">🗑️ Delete DM</button>
+                            <button id="group-settings-btn" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer;" title="Group Controls">⚙️</button>
+                            <button id="logout-btn" style="display:none;">Log Out</button>
+                        </div>
+                    </div>
+                    <div class="messages-area" id="messages-container"></div>
+                    <div class="typing-indicator-container" id="typing-indicator"></div>
+                    <div class="chat-input">
+                        <input type="text" id="message-input" placeholder="Type a message..." maxlength="400" autocomplete="off" disabled>
+                        <button id="send-btn" disabled>Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile-view" class="view-section">
+            <div class="page-container">
+                <h2>My Account Profile</h2>
+                <div style="margin-top: 20px; font-size: 1.1rem; display: flex; flex-direction: column; gap: 15px;">
+                    
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <img id="profile-preview-img" src="assets/sitelogo.png" alt="Profile Picture" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); box-shadow: 0 4px 10px var(--shadow);">
+                    </div>
+
+                    <div class="setting-item">
+                        <span>Profile Picture Source:</span>
+                        <button id="use-google-pic-btn" class="base-btn" style="background: #2196F3; width: 180px; margin: 0; font-size: 1rem;">Use Google Picture</button>
+                    </div>
+
+                    <div>
+                        <p style="margin-bottom: 8px; font-size: 1rem;"><strong>Or Custom Image URL:</strong></p>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="custom-pic-url-input" class="base-input" placeholder="https://example.com/image.png" style="margin-bottom: 0;">
+                            <button id="save-custom-pic-btn" class="base-btn" style="background: var(--accent-gradient); width: 100px; margin: 0; font-size: 1rem;">Save</button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item" style="margin-top: 10px;">
+                        <span>Display Name:</span>
+                        <span id="page-profile-name" style="color: var(--text-muted);">Not signed in</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>Email Address:</span>
+                        <span id="page-profile-email" style="color: var(--text-muted);">Not signed in</span>
+                    </div>
+                    <div style="padding-top: 5px;">
+                        <p style="margin-bottom: 8px;"><strong>Your 8-Digit Profile ID:</strong> (Give this to friends for DMs)</p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="page-profile-id" class="base-input" style="margin-bottom: 0; font-weight: bold; text-align: center; letter-spacing: 2px; font-size: 1.2rem;" value="------" readonly>
+                            <button id="page-copy-id-btn" class="base-btn" style="background: #2196F3; width: 120px; margin: 0;">Copy ID</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-view" class="view-section">
+            <div class="page-container">
+                <h2>Customization</h2>
+                <div class="setting-item">
+                    <span>Dark Mode</span>
+                    <label class="switch"><input type="checkbox" id="theme-toggle" checked><span class="slider"></span></label>
+                </div>
+                <div class="setting-item">
+                    <span>DM Requests Approval</span>
+                    <label class="switch"><input type="checkbox" id="dm-requests-toggle"><span class="slider"></span></label>
+                </div>
+                <div class="setting-item">
+                    <span>Gradient Color 1</span>
+                    <input type="color" id="color1" class="color-picker" value="#FF3D00">
+                </div>
+                <div class="setting-item" style="border-bottom: none;">
+                    <span>Gradient Color 2</span>
+                    <input type="color" id="color2" class="color-picker" value="#FFCA28">
+                </div>
+                
+                <div id="admin-panel" style="display:none; margin-top: 20px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+                    <h2 style="color: #f44336; border-bottom: 2px solid #f44336;">Admin Controls</h2>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <p style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Ban a user from the chat (Email):</p>
+                        <div class="admin-input-group">
+                            <input type="text" id="ban-email" class="base-input" placeholder="student@example.com" style="margin-bottom:0;">
+                            <button id="ban-btn" class="base-btn" style="background:#f44336; width:100px; margin:0;">Ban</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-muted);">Unban a user (Email):</p>
+                        <div class="admin-input-group">
+                            <input type="text" id="unban-email" class="base-input" placeholder="student@example.com" style="margin-bottom:0;">
+                            <button id="unban-btn" class="base-btn" style="background:#4CAF50; width:100px; margin:0;">Unban</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="group-modal" class="custom-modal">
+        <div class="modal-content">
+            <button id="close-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">Group Controls</h2>
+            
+            <p style="margin-bottom:5px; margin-top:20px; font-size:0.9rem;">Set Password (leave blank for none):</p>
+            <input type="text" id="modal-password" class="base-input" placeholder="Enter password...">
+            <button id="save-password-btn" class="base-btn" style="background:var(--accent-gradient);">Save Password</button>
+            
+            <h3 style="margin-bottom:10px;">Members:</h3>
+            <ul id="member-list"></ul>
+            
+            <button id="clear-chat-btn" class="base-btn" style="background:#FF9800; margin-top: 15px;">🧹 Clear Chat</button>
+            <button id="delete-group-btn" class="base-btn" style="background:#f44336;">🗑️ Delete Group</button>
+        </div>
+    </div>
+
+    <div id="report-modal" class="custom-modal">
+        <div class="modal-content">
+            <button id="close-report-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h2 style="margin-top:0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">Report User</h2>
+            
+            <p style="margin-bottom:5px; margin-top:15px; font-size:0.95rem;">Reason for reporting:</p>
+            <select id="report-reason" class="base-input">
+                <option value="Harassment">Harassment or Bullying</option>
+                <option value="Inappropriate Content">Inappropriate Content / Language</option>
+                <option value="Spam">Spam</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <p style="margin-bottom:5px; font-size:0.95rem;">What happened?</p>
+            <textarea id="report-description" class="base-input" placeholder="Provide details..." rows="4" style="resize:vertical;"></textarea>
+            
+            <button id="submit-report-btn" class="base-btn" style="background:#f44336; margin-top: 10px;">Submit Report</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            try {
+                const navBtns = document.querySelectorAll('.nav-btn');
+                const viewSections = document.querySelectorAll('.view-section');
+
+                navBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        navBtns.forEach(b => b.classList.remove('active'));
+                        viewSections.forEach(v => v.classList.remove('active'));
+                        
+                        btn.classList.add('active');
+                        const targetId = btn.getAttribute('data-target');
+                        const targetSection = document.getElementById(targetId);
+                        
+                        if(targetId === 'chat-view') {
+                            document.body.style.overflow = 'hidden';
+                        } else {
+                            document.body.style.overflow = 'auto';
+                        }
+
+                        if (targetSection) { targetSection.classList.add('active'); }
+                    });
+                });
+
+                const navGroupsBtn = document.getElementById('nav-groups-btn');
+                const navContactsBtn = document.getElementById('nav-contacts-btn');
+                const sidebarChatsView = document.getElementById('sidebar-chats-view');
+                const sidebarContactsView = document.getElementById('sidebar-contacts-view');
+
+                navGroupsBtn.addEventListener('click', () => {
+                    navGroupsBtn.classList.add('active-tab');
+                    navContactsBtn.classList.remove('active-tab');
+                    sidebarChatsView.style.display = 'flex';
+                    sidebarContactsView.style.display = 'none';
+                });
+
+                navContactsBtn.addEventListener('click', () => {
+                    navContactsBtn.classList.add('active-tab');
+                    navGroupsBtn.classList.remove('active-tab');
+                    sidebarContactsView.style.display = 'flex';
+                    sidebarChatsView.style.display = 'none';
+                });
+
+                const mobileBackBtn = document.getElementById('mobile-back-btn');
+                const chatContainer = document.querySelector('.chat-container');
+                if (mobileBackBtn && chatContainer) {
+                    mobileBackBtn.addEventListener('click', () => {
+                        chatContainer.classList.remove('mobile-chat-open');
+                    });
+                }
+
+                const themeToggle = document.getElementById('theme-toggle');
+                const color1Input = document.getElementById('color1');
+                const color2Input = document.getElementById('color2');
+                const root = document.documentElement;
+
+                function applyColors(c1, c2) {
+                    root.style.setProperty('--accent', c1);
+                    root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${c1}, ${c2})`);
+                    root.style.setProperty('--accent-hover', `linear-gradient(135deg, ${c1}, ${c1})`);
+                }
+
+                try {
+                    if (localStorage.getItem('theme') === 'light' && themeToggle) { 
+                        document.body.classList.add('light-mode'); themeToggle.checked = false; 
+                    }
+                    const savedC1 = localStorage.getItem('gradC1'); 
+                    const savedC2 = localStorage.getItem('gradC2');
+                    if (savedC1 && savedC2 && color1Input && color2Input) { 
+                        color1Input.value = savedC1; color2Input.value = savedC2; applyColors(savedC1, savedC2); 
+                    }
+                } catch(e) {}
+
+                if (themeToggle) {
+                    themeToggle.addEventListener('change', (e) => {
+                        try {
+                            if (e.target.checked) { document.body.classList.remove('light-mode'); localStorage.setItem('theme', 'dark'); } 
+                            else { document.body.classList.add('light-mode'); localStorage.setItem('theme', 'light'); }
+                        } catch(err) {}
+                    });
+                }
+                if (color1Input && color2Input) {
+                    color1Input.addEventListener('input', (e) => { applyColors(e.target.value, color2Input.value); try { localStorage.setItem('gradC1', e.target.value); } catch(err){} });
+                    color2Input.addEventListener('input', (e) => { applyColors(color1Input.value, e.target.value); try { localStorage.setItem('gradC2', e.target.value); } catch(err){} });
+                }
+            } catch (fatalError) {}
+        });
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
+        });
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, setDoc, doc, getDoc, serverTimestamp, query, orderBy, limit, onSnapshot, updateDoc, arrayUnion, deleteDoc, getDocs, where, deleteField } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyATd0AhKa4v8rS4viCXETkjZ16V6e1VjsY",
+            authDomain: "learnmultiply.firebaseapp.com",
+            projectId: "learnmultiply",
+            storageBucket: "learnmultiply.firebasestorage.app",
+            messagingSenderId: "328977544347",
+            appId: "1:328977544347:web:1330f41590b4805854423e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const ADMIN_EMAILS = [
+            "christiany1000@gmail.com",
+            "yates.christian@norwinsd.org"
+        ];
+
+        // DOM Elements
+        const authOverlay = document.getElementById('auth-overlay');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const messagesContainer = document.getElementById('messages-container');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const sidebarGroups = document.getElementById('sidebar-groups');
+        const sidebarContacts = document.getElementById('sidebar-contacts');
+        const contactSearchInput = document.getElementById('contact-search');
+        const createGroupBtn = document.getElementById('create-group-btn');
+        const createDmBtn = document.getElementById('create-dm-btn');
+        const currentGroupTitle = document.getElementById('current-group-title');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const navGroupsBtn = document.getElementById('nav-groups-btn');
+        const chatContainer = document.querySelector('.chat-container');
+        const callBanner = document.getElementById('call-banner');
+        const callBannerText = document.getElementById('call-banner-text');
+        const acceptCallBtn = document.getElementById('accept-call-btn');
+        const declineCallBtn = document.getElementById('decline-call-btn');
+        
+        // Modal DOM Elements
+        const groupSettingsBtn = document.getElementById('group-settings-btn');
+        const deleteDmBtn = document.getElementById('delete-dm-btn');
+        const groupModal = document.getElementById('group-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const modalPassword = document.getElementById('modal-password');
+        const savePasswordBtn = document.getElementById('save-password-btn');
+        const memberList = document.getElementById('member-list');
+        const clearChatBtn = document.getElementById('clear-chat-btn');
+        const deleteGroupBtn = document.getElementById('delete-group-btn');
+
+        // Report Modal DOM Elements
+        const reportModal = document.getElementById('report-modal');
+        const closeReportModalBtn = document.getElementById('close-report-modal');
+        const reportReasonSelect = document.getElementById('report-reason');
+        const reportDescriptionInput = document.getElementById('report-description');
+        const submitReportBtn = document.getElementById('submit-report-btn');
+
+        // Profile Page DOM Elements
+        const pageProfileName = document.getElementById('page-profile-name');
+        const pageProfileEmail = document.getElementById('page-profile-email');
+        const pageProfileId = document.getElementById('page-profile-id');
+        const pageCopyIdBtn = document.getElementById('page-copy-id-btn');
+        const profilePreviewImg = document.getElementById('profile-preview-img');
+        const useGooglePicBtn = document.getElementById('use-google-pic-btn');
+        const customPicUrlInput = document.getElementById('custom-pic-url-input');
+        const saveCustomPicBtn = document.getElementById('save-custom-pic-btn');
+        const dmRequestsToggle = document.getElementById('dm-requests-toggle');
+
+        // Admin DOM Elements
+        const adminPanel = document.getElementById('admin-panel');
+        const banBtn = document.getElementById('ban-btn');
+        const banEmailInput = document.getElementById('ban-email');
+        const unbanBtn = document.getElementById('unban-btn');
+        const unbanEmailInput = document.getElementById('unban-email');
+
+        let currentUser = null;
+        let currentUserProfileId = null;
+        let activePhotoURL = "";
+        let activeGroupId = null;
+        let activeGroupData = null;
+        let unsubscribeMessages = null;
+        let unsubscribeGroupDoc = null;
+        let typingTimeout = null;
+        let userOnlineStatuses = {}; 
+        let allContactsList = [];
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+        let pendingReportUid = null;
+        let pendingReportName = null;
+
+        // WebRTC Call Variables
+        let peerConnection = null;
+        let localStream = null;
+        let remoteStream = null;
+        let callDocUnsubscribe = null;
+        let pendingIncomingCallData = null;
+        let iceCandidateQueue = [];
+        const servers = {
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+            ],
+            iceCandidatePoolSize: 10,
+        };
+        const startCallBtn = document.getElementById('start-call-btn');
+        const endCallBtn = document.getElementById('end-call-btn');
+        const localAudio = document.getElementById('local-audio');
+        const remoteAudio = document.getElementById('remote-audio');
+
+        // --- ONLINE PRESENCE & CONTACTS SYSTEM ---
+        const setOnlineStatus = async (isOnline) => {
+            if (!currentUser) return;
+            try { await updateDoc(doc(db, "users", currentUser.uid), { isOnline: isOnline, lastSeen: serverTimestamp() }); } catch(e) {}
+        };
+        window.addEventListener('focus', () => setOnlineStatus(true));
+        window.addEventListener('blur', () => setOnlineStatus(false));
+        window.addEventListener('beforeunload', () => setOnlineStatus(false));
+
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            allContactsList = [];
+            sidebarContacts.innerHTML = '';
+            
+            snapshot.forEach(doc => { 
+                const userData = doc.data();
+                userOnlineStatuses[doc.id] = userData.isOnline; 
+                
+                if (currentUser && userData.uid !== currentUser.uid && userData.uid !== "00000000") {
+                    allContactsList.push(userData);
+                }
+            });
+            
+            allContactsList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+            
+            const term = contactSearchInput.value.toLowerCase();
+            allContactsList.forEach(user => {
+                if ((user.name || "").toLowerCase().includes(term)) { renderContact(user); }
+            });
+
+            document.querySelectorAll('.dm-status-dot').forEach(dot => {
+                const uid = dot.getAttribute('data-uid');
+                if (userOnlineStatuses[uid]) { dot.classList.add('status-online'); } 
+                else { dot.classList.remove('status-online'); }
+            });
+        });
+
+        contactSearchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            sidebarContacts.innerHTML = '';
+            allContactsList.forEach(user => {
+                if ((user.name || "").toLowerCase().includes(term)) { renderContact(user); }
+            });
+        });
+
+        function renderContact(user) {
+            const li = document.createElement('li');
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.gap = '12px';
+            
+            const isOnline = user.isOnline ? 'status-online' : '';
+            const finalPhoto = user.customPhotoURL || user.photoURL || 'assets/sitelogo.png';
+            
+            li.innerHTML = `
+                <div style="position:relative;">
+                    <img src="${finalPhoto}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                    <span class="status-dot ${isOnline}" style="position:absolute; bottom:-2px; right:-2px; margin:0; border: 2px solid var(--bg-surface);"></span>
+                </div>
+                <span style="font-weight: 500;">${user.name}</span>
+            `;
+            
+            li.addEventListener('click', () => {
+                startDM(user.uid, user.name);
+                navGroupsBtn.click();
+            });
+            
+            sidebarContacts.appendChild(li);
+        }
+
+        loginBtn.addEventListener('click', () => { signInWithPopup(auth, new GoogleAuthProvider()).catch(err => console.error(err)); });
+        logoutBtn.addEventListener('click', () => { setOnlineStatus(false); signOut(auth); });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const banRef = doc(db, "banned_users", user.email);
+                const banSnap = await getDoc(banRef);
+                if (banSnap.exists()) { alert("You have been banned from using the chat."); signOut(auth); return; }
+
+                currentUser = user;
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    currentUserProfileId = data.profileId || Math.floor(10000000 + Math.random() * 90000000).toString();
+                    activePhotoURL = data.customPhotoURL || user.photoURL || "";
+                    if (dmRequestsToggle) dmRequestsToggle.checked = !!data.dmRequestsEnabled;
+                } else {
+                    currentUserProfileId = Math.floor(10000000 + Math.random() * 90000000).toString();
+                    activePhotoURL = user.photoURL || "";
+                    if (dmRequestsToggle) dmRequestsToggle.checked = false;
+                    
+                    await setDoc(userRef, {
+                        uid: user.uid, email: user.email.toLowerCase(), name: user.displayName, photoURL: user.photoURL || "", customPhotoURL: "",
+                        profileId: currentUserProfileId, dmRequestsEnabled: false, isOnline: true, lastSeen: serverTimestamp()
+                    }, { merge: true });
+                }
+
+                setOnlineStatus(true);
+                pageProfileName.textContent = currentUser.displayName; pageProfileEmail.textContent = currentUser.email; pageProfileId.value = currentUserProfileId;
+                profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png';
+                authOverlay.style.display = 'none'; logoutBtn.style.display = 'block';
+                if (ADMIN_EMAILS.includes(currentUser.email)) { adminPanel.style.display = 'block'; }
+                loadGroups();
+            } else {
+                currentUser = null; currentUserProfileId = null; activePhotoURL = ""; activeGroupId = null; activeGroupData = null;
+                pageProfileName.textContent = "Not signed in"; pageProfileEmail.textContent = "Not signed in"; pageProfileId.value = "------";
+                profilePreviewImg.src = 'assets/sitelogo.png';
+                authOverlay.style.display = 'flex'; logoutBtn.style.display = 'none';
+                messagesContainer.innerHTML = ''; sidebarGroups.innerHTML = ''; sidebarContacts.innerHTML = '';
+                groupSettingsBtn.style.display = 'none'; deleteDmBtn.style.display = 'none'; adminPanel.style.display = 'none';
+                if(unsubscribeMessages) unsubscribeMessages(); if(unsubscribeGroupDoc) unsubscribeGroupDoc();
+            }
+        });
+
+        if (dmRequestsToggle) {
+            dmRequestsToggle.addEventListener('change', async (e) => {
+                if (!currentUser) return;
+                try { await updateDoc(doc(db, "users", currentUser.uid), { dmRequestsEnabled: e.target.checked }); } catch(err) {}
+            });
+        }
+
+        useGooglePicBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            activePhotoURL = currentUser.photoURL || ""; profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png'; customPicUrlInput.value = "";
+            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: "" }); alert("Switched back to your Google profile picture!");
+        });
+
+        saveCustomPicBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            const newUrl = customPicUrlInput.value.trim();
+            if (!newUrl) { alert("Please enter a valid image URL."); return; }
+            activePhotoURL = newUrl; profilePreviewImg.src = activePhotoURL;
+            await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: newUrl }); alert("Custom profile picture saved!");
+        });
+
+        async function startDM(targetUid, targetName) {
+            if (targetUid === currentUser.uid) { alert("You can't message yourself!"); return; }
+            const targetSnap = await getDoc(doc(db, "users", targetUid));
+            const targetData = targetSnap.exists() ? targetSnap.data() : {};
+            const requiresApproval = targetData.dmRequestsEnabled === true;
+
+            const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
+
+            await setDoc(doc(db, "groups", dmId), {
+                name: "Direct Message", ownerUid: "system", password: "", isDM: true, pending: requiresApproval, initiatorUid: currentUser.uid,
+                members: [ { uid: currentUser.uid, name: currentUser.displayName }, { uid: targetUid, name: targetName } ], createdAt: serverTimestamp()
+            }, { merge: true });
+
+            if (requiresApproval) {
+                const msgs = await getDocs(query(collection(db, "groups", dmId, "messages"), limit(1)));
+                if(msgs.empty) {
+                    await addDoc(collection(db, "groups", dmId, "messages"), {
+                        text: `Do you wanna start a Direct Message with ${currentUser.displayName}? Respond with Yes or No.`, uid: "00000000", author: "LMBot", photoURL: "assets/sitelogo.png", createdAt: serverTimestamp()
+                    });
+                }
+                alert(`DM request sent to ${targetName} (pending approval).`);
+            }
+        }
+
+        closeReportModalBtn.addEventListener('click', () => { reportModal.style.display = 'none'; });
+        submitReportBtn.addEventListener('click', async () => {
+            const reason = reportReasonSelect.value;
+            const description = reportDescriptionInput.value.trim();
+            if (!description) { alert("Please explain what happened."); return; }
+            reportModal.style.display = 'none';
+
+            try {
+                for (const adminEmail of ADMIN_EMAILS) {
+                    const qAdmin = query(collection(db, "users"), where("email", "==", adminEmail.toLowerCase()));
+                    const adminSnap = await getDocs(qAdmin);
+                    if (!adminSnap.empty) {
+                        const adminUid = adminSnap.docs[0].data().uid;
+                        const dmId = adminUid < "00000000" ? `dm_${adminUid}_00000000` : `dm_00000000_${adminUid}`;
+                        await setDoc(doc(db, "groups", dmId), {
+                            name: "Admin Reports", ownerUid: "00000000", password: "", isDM: true, pending: false, initiatorUid: "00000000",
+                            members: [{ uid: "00000000", name: "LMBot" }, { uid: adminUid, name: adminSnap.docs[0].data().name }], createdAt: serverTimestamp()
+                        }, { merge: true });
+                        await addDoc(collection(db, "groups", dmId, "messages"), {
+                            text: `⚠️ REPORT:\n• Reported User: "${pendingReportName}" (UID: ${pendingReportUid})\n• Reported By: "${currentUser.displayName}" (UID: ${currentUser.uid})\n• Reason: ${reason}\n• Details: ${description}`,
+                            uid: "00000000", author: "LMBot", photoURL: "assets/sitelogo.png", createdAt: serverTimestamp()
+                        });
+                    }
+                }
+                alert("Report submitted successfully to administrators.");
+            } catch (err) { alert("Failed to send report."); }
+        });
+
+        deleteDmBtn.addEventListener('click', async () => {
+            if (!activeGroupId || !activeGroupData || !activeGroupData.isDM) return;
+            if (confirm("Are you sure you want to delete this Direct Message?")) {
+                try {
+                    await deleteDoc(doc(db, "groups", activeGroupId));
+                    messagesContainer.innerHTML = ''; currentGroupTitle.textContent = "# Select a Group";
+                    deleteDmBtn.style.display = 'none'; messageInput.disabled = true; sendBtn.disabled = true;
+                    activeGroupId = null; activeGroupData = null;
+                    if (chatContainer) chatContainer.classList.remove('mobile-chat-open');
+                    if(unsubscribeGroupDoc) unsubscribeGroupDoc();
+                } catch (err) { alert("Failed to delete DM."); }
+            }
+        });
+
+        // --- ROBUST VOICE CALL SYSTEM (WITH ICE CANDIDATE QUEUEING) ---
+        async function setupAudio() {
+            if (!localStream) {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                localAudio.srcObject = localStream;
+            }
+            if (!remoteStream) {
+                remoteStream = new MediaStream();
+                remoteAudio.srcObject = remoteStream;
+            }
+        }
+
+        async function handleAddIceCandidate(candidateData) {
+            const candidate = new RTCIceCandidate(candidateData);
+            if (peerConnection && peerConnection.signalingState !== 'closed') {
+                if (!peerConnection.remoteDescription) {
+                    iceCandidateQueue.push(candidate);
+                } else {
+                    try {
+                        await peerConnection.addIceCandidate(candidate);
+                    } catch (e) { console.log("ICE add error:", e); }
+                }
+            }
+        }
+
+        async function flushIceQueue() {
+            while (iceCandidateQueue.length > 0 && peerConnection && peerConnection.remoteDescription) {
+                const candidate = iceCandidateQueue.shift();
+                try {
+                    await peerConnection.addIceCandidate(candidate);
+                } catch (e) { console.log("Queued ICE add error:", e); }
+            }
+        }
+
+        startCallBtn.addEventListener('click', async () => {
+            if (!activeGroupId || !activeGroupData.isDM) return;
+            startCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'block';
+            iceCandidateQueue = [];
+            
+            await setupAudio();
+            peerConnection = new RTCPeerConnection(servers);
+            
+            localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
+            peerConnection.ontrack = (event) => {
+                event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
+                remoteAudio.play().catch(err => console.log("Audio play error:", err));
+            };
+
+            const callDoc = doc(collection(db, "groups", activeGroupId, "calls"), "current_call");
+            const offerCandidates = collection(callDoc, "offerCandidates");
+            const answerCandidates = collection(callDoc, "answerCandidates");
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) addDoc(offerCandidates, event.candidate.toJSON());
+            };
+
+            const offerDescription = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offerDescription);
+
+            await setDoc(callDoc, { offer: { type: offerDescription.type, sdp: offerDescription.sdp }, status: "ringing" });
+
+            onSnapshot(callDoc, async (snapshot) => {
+                const data = snapshot.data();
+                if (peerConnection && peerConnection.signalingState !== 'closed' && !peerConnection.currentRemoteDescription && data?.answer) {
+                    const answerDescription = new RTCSessionDescription(data.answer);
+                    await peerConnection.setRemoteDescription(answerDescription);
+                    await flushIceQueue();
+                }
+            });
+
+            onSnapshot(answerCandidates, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        handleAddIceCandidate(change.doc.data());
+                    }
+                });
+            });
+        });
+
+        async function answerCall(callData) {
+            callBanner.style.display = 'none';
+            startCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'block';
+            iceCandidateQueue = [];
+            
+            await setupAudio();
+            peerConnection = new RTCPeerConnection(servers);
+            
+            localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
+            peerConnection.ontrack = (event) => {
+                event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
+                remoteAudio.play().catch(err => console.log("Audio play error:", err));
+            };
+
+            const callDoc = doc(collection(db, "groups", activeGroupId, "calls"), "current_call");
+            const offerCandidates = collection(callDoc, "offerCandidates");
+            const answerCandidates = collection(callDoc, "answerCandidates");
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
+            };
+
+            const offerDescription = callData.offer;
+            if (peerConnection && peerConnection.signalingState !== 'closed') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
+                await flushIceQueue();
+            }
+
+            const answerDescription = await peerConnection.createAnswer();
+            if (peerConnection && peerConnection.signalingState !== 'closed') {
+                await peerConnection.setLocalDescription(answerDescription);
+            }
+
+            await updateDoc(callDoc, { answer: { type: answerDescription.type, sdp: answerDescription.sdp }, status: "connected" });
+
+            onSnapshot(offerCandidates, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        handleAddIceCandidate(change.doc.data());
+                    }
+                });
+            });
+        }
+
+        endCallBtn.addEventListener('click', async () => {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            iceCandidateQueue = [];
+            
+            if (activeGroupId) {
+                const callDoc = doc(db, "groups", activeGroupId, "calls", "current_call");
+                await deleteDoc(callDoc).catch(() => {});
+            }
+            
+            endCallBtn.style.display = 'none';
+            startCallBtn.style.display = 'block';
+            callBanner.style.display = 'none';
+        });
+
+        acceptCallBtn.addEventListener('click', () => {
+            if (pendingIncomingCallData) {
+                answerCall(pendingIncomingCallData);
+                pendingIncomingCallData = null;
+            }
+        });
+
+        declineCallBtn.addEventListener('click', async () => {
+            callBanner.style.display = 'none';
+            pendingIncomingCallData = null;
+            if (activeGroupId) {
+                await deleteDoc(doc(db, "groups", activeGroupId, "calls", "current_call")).catch(() => {});
+            }
+        });
+
+        function loadGroups() {
+            const q = query(collection(db, "groups"), orderBy("createdAt", "asc"));
+            onSnapshot(q, async (snapshot) => {
+                sidebarGroups.innerHTML = '';
+                const now = Date.now();
+                if (snapshot.empty) {
+                    await setDoc(doc(db, "groups", "main_hub"), { name: "Main Hub", ownerUid: "system", password: "", isDM: false, members: [], createdAt: serverTimestamp() });
+                    return;
+                }
+
+                snapshot.forEach((groupDoc) => {
+                    const group = groupDoc.data();
+                    const isOwnerOrAdmin = group.ownerUid === currentUser.uid || ADMIN_EMAILS.includes(currentUser.email);
+                    
+                    if (group.isDM) {
+                        const amIMember = group.members && group.members.some(m => m.uid === currentUser.uid);
+                        if (!amIMember) return; 
+                    }
+                    
+                    if (group.createdAt && group.ownerUid !== "system" && !group.isDM) {
+                        if ((now - group.createdAt.toMillis()) > TWENTY_FOUR_HOURS) { if (isOwnerOrAdmin) deleteDoc(doc(db, "groups", groupDoc.id)); return; }
+                    }
+
+                    let displayName = `# ${group.name}`;
+                    if (group.isDM) {
+                        const otherPerson = group.members.find(m => m.uid !== currentUser.uid);
+                        if (!otherPerson) return;
+                        const isOnline = userOnlineStatuses[otherPerson.uid] ? 'status-online' : '';
+                        const dotHtml = `<span class="status-dot dm-status-dot ${isOnline}" data-uid="${otherPerson.uid}"></span>`;
+                        displayName = `${dotHtml} @ ${otherPerson.name}`;
+                    }
+
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${displayName}</span> ${group.password && !group.isDM ? '<span class="lock-icon">🔒</span>' : ''}`;
+                    if (activeGroupId === groupDoc.id) li.classList.add('active-group');
+
+                    li.addEventListener('click', async () => {
+                        const hasJoined = group.members && group.members.some(m => m.uid === currentUser.uid);
+                        if (!isOwnerOrAdmin && !hasJoined && group.password && !group.isDM) {
+                            const attempt = prompt(`Enter the password for #${group.name}:`);
+                            if (attempt !== group.password) { alert("Incorrect password."); return; }
+                        }
+                        if (!hasJoined && !group.isDM) {
+                            await updateDoc(doc(db, "groups", groupDoc.id), { members: arrayUnion({ uid: currentUser.uid, name: currentUser.displayName }) });
+                        }
+                        document.querySelectorAll('.group-list li').forEach(el => el.classList.remove('active-group'));
+                        li.classList.add('active-group');
+                        switchGroup(groupDoc.id, group, isOwnerOrAdmin);
+                    });
+                    sidebarGroups.appendChild(li);
+                });
+            });
+        }
+
+        function switchGroup(groupId, groupData, isOwnerOrAdmin) {
+            activeGroupId = groupId;
+            activeGroupData = groupData;
+            
+            if (chatContainer) chatContainer.classList.add('mobile-chat-open');
+            callBanner.style.display = 'none';
+
+            if (groupData.isDM) {
+                const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
+                currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
+                deleteDmBtn.style.display = 'block';
+                startCallBtn.style.display = 'block';
+
+                if(callDocUnsubscribe) callDocUnsubscribe();
+                callDocUnsubscribe = onSnapshot(doc(db, "groups", groupId, "calls", "current_call"), (snapshot) => {
+                    const data = snapshot.data();
+                    if (data && data.offer && !data.answer) {
+                        if (!peerConnection && data.offer) {
+                            pendingIncomingCallData = data;
+                            callBannerText.textContent = `Incoming call from ${otherPerson ? otherPerson.name : 'User'}...`;
+                            callBanner.style.display = 'flex';
+                        }
+                    }
+                    if (!snapshot.exists()) {
+                        callBanner.style.display = 'none';
+                        if (peerConnection) {
+                            peerConnection.close();
+                            peerConnection = null;
+                        }
+                        if (localStream) {
+                            localStream.getTracks().forEach(t => t.stop());
+                            localStream = null;
+                        }
+                        iceCandidateQueue = [];
+                        startCallBtn.style.display = 'block';
+                        endCallBtn.style.display = 'none';
+                    }
+                });
+            } else {
+                currentGroupTitle.textContent = `# ${groupData.name}`;
+                deleteDmBtn.style.display = 'none';
+                startCallBtn.style.display = 'none';
+                endCallBtn.style.display = 'none';
+                if(callDocUnsubscribe) callDocUnsubscribe();
+            }
+            
+            messageInput.disabled = false; sendBtn.disabled = false;
+
+            if (isOwnerOrAdmin && !groupData.isDM) {
+                groupSettingsBtn.style.display = 'block'; modalPassword.value = groupData.password || "";
+                memberList.innerHTML = '';
+                (groupData.members || []).forEach(m => { const li = document.createElement('li'); li.textContent = m.name; memberList.appendChild(li); });
+            } else { groupSettingsBtn.style.display = 'none'; }
+
+            if(unsubscribeGroupDoc) unsubscribeGroupDoc();
+            unsubscribeGroupDoc = onSnapshot(doc(db, "groups", groupId), (docSnap) => {
+                const data = docSnap.data();
+                if (data && data.typing) {
+                    const typers = Object.entries(data.typing).filter(([uid, name]) => uid !== currentUser.uid && name);
+                    typingIndicator.textContent = typers.length > 0 ? `${typers.map(t => t[1]).join(", ")} is typing...` : "";
+                } else { typingIndicator.textContent = ""; }
+            });
+
+            if (unsubscribeMessages) unsubscribeMessages();
+            const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
+            
+            let lastRenderedDate = "";
+            let isInitialMsgLoad = true;
+            const FORTY_HOURS = 40 * 60 * 60 * 1000;
+
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                messagesContainer.innerHTML = '';
+                lastRenderedDate = ""; 
+                const now = Date.now();
+                let playSound = false;
+                
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added" && !isInitialMsgLoad) {
+                        const msgData = change.doc.data();
+                        if (msgData.uid !== currentUser.uid) {
+                            playSound = true;
+                        }
+                    }
+                });
+
+                if (playSound) {
+                    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                    audio.play().catch(e => console.log("Audio autoplay blocked by browser rules", e));
+                }
+                
+                snapshot.forEach((msgDoc) => {
+                    const message = msgDoc.data();
+                    if(!message.createdAt) return;
+
+                    const msgDate = new Date(message.createdAt.toMillis());
+                    
+                    // --- 40-HOUR AUTO-DELETE LOGIC ---
+                    if (now - msgDate.getTime() > FORTY_HOURS) {
+                        deleteDoc(doc(db, "groups", groupId, "messages", msgDoc.id)).catch(() => {});
+                        return; // Skip rendering this message
+                    }
+
+                    const dateStr = msgDate.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+                    const timeStr = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    if (dateStr !== lastRenderedDate) {
+                        const divider = document.createElement('div'); divider.classList.add('date-divider'); divider.innerHTML = `<span>${dateStr}</span>`;
+                        messagesContainer.appendChild(divider); lastRenderedDate = dateStr;
+                    }
+
+                    const isOwnMessage = message.uid === currentUser.uid;
+                    const rowElement = document.createElement('div'); rowElement.classList.add('message-row');
+                    if (isOwnMessage) rowElement.classList.add('own-row');
+
+                    const avatarImg = document.createElement('img'); avatarImg.src = message.photoURL || 'assets/sitelogo.png'; avatarImg.classList.add('chat-avatar');
+
+                    avatarImg.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
+                        if (message.uid === currentUser.uid || message.uid === "00000000") return;
+                        
+                        const dropdown = document.createElement('div'); dropdown.classList.add('avatar-dropdown');
+                        
+                        const dmBtn = document.createElement('button'); dmBtn.classList.add('dropdown-item'); dmBtn.textContent = '💬 Direct Message';
+                        dmBtn.addEventListener('click', () => { dropdown.remove(); startDM(message.uid, message.author); });
+                        
+                        const reportBtn = document.createElement('button'); reportBtn.classList.add('dropdown-item', 'danger'); reportBtn.textContent = '🚨 Report User';
+                        reportBtn.addEventListener('click', () => {
+                            dropdown.remove();
+                            pendingReportUid = message.uid; pendingReportName = message.author;
+                            reportDescriptionInput.value = ''; reportReasonSelect.value = 'Harassment'; reportModal.style.display = 'flex';
+                        });
+
+                        dropdown.appendChild(dmBtn); dropdown.appendChild(reportBtn);
+                        document.body.appendChild(dropdown);
+                        const rect = avatarImg.getBoundingClientRect();
+                        dropdown.style.top = `${rect.bottom + window.scrollY}px`; dropdown.style.left = `${rect.left + window.scrollX}px`; dropdown.style.display = 'flex';
+                    });
+
+                    const msgDiv = document.createElement('div'); msgDiv.classList.add('message');
+                    if (isOwnMessage) {
+                        msgDiv.classList.add('own-message');
+                        msgDiv.style.cursor = 'pointer';
+                        msgDiv.title = 'Click to delete message';
+                        
+                        // --- CLICK TO DELETE MESSAGE ---
+                        msgDiv.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            document.querySelectorAll('.avatar-dropdown').forEach(d => d.remove());
+
+                            const dropdown = document.createElement('div'); dropdown.classList.add('avatar-dropdown');
+                            
+                            const delBtn = document.createElement('button'); 
+                            delBtn.classList.add('dropdown-item', 'danger'); 
+                            delBtn.textContent = '🗑️ Delete Message';
+                            
+                            delBtn.addEventListener('click', async () => {
+                                dropdown.remove();
+                                if (confirm('Are you sure you want to delete this message?')) {
+                                    await deleteDoc(doc(db, "groups", groupId, "messages", msgDoc.id));
+                                }
+                            });
+
+                            dropdown.appendChild(delBtn);
+                            document.body.appendChild(dropdown);
+                            const rect = msgDiv.getBoundingClientRect();
+                            dropdown.style.top = `${rect.bottom + window.scrollY}px`; dropdown.style.left = `${rect.left + window.scrollX}px`; dropdown.style.display = 'flex';
+                        });
+                    }
+                    
+                    msgDiv.innerHTML = `<div class="message-author">${isOwnMessage ? 'You' : message.author} <span class="msg-time">${timeStr}</span></div><div>${message.text}</div>`;
+                    rowElement.appendChild(avatarImg); rowElement.appendChild(msgDiv); messagesContainer.appendChild(rowElement);
+                });
+                
+                isInitialMsgLoad = false;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        messageInput.addEventListener('input', () => {
+            if (!activeGroupId || !currentUser) return;
+            updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: currentUser.displayName }, { merge: true });
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => { updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() }); }, 2000);
+        });
+
+        const sendMessage = async () => {
+            let text = messageInput.value.trim();
+            if (text === "" || !currentUser || !activeGroupId) return;
+            
+            // Enforce character limit defensively in JavaScript
+            if (text.length > 400) {
+                text = text.substring(0, 400);
+            }
+            
+            messageInput.value = '';
+            updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: deleteField() }); 
+            
+            try {
+                if (activeGroupData && activeGroupData.isDM && activeGroupData.pending && currentUser.uid !== activeGroupData.initiatorUid) {
+                    const cleanText = text.toLowerCase();
+                    if (cleanText === "yes") {
+                        await updateDoc(doc(db, "groups", activeGroupId), { pending: false });
+                        await addDoc(collection(db, "groups", activeGroupId, "messages"), { text: `Direct Message accepted! You can now chat.`, uid: "00000000", author: "LMBot", photoURL: "assets/sitelogo.png", createdAt: serverTimestamp() });
+                        activeGroupData.pending = false; return;
+                    } else if (cleanText === "no") {
+                        await deleteDoc(doc(db, "groups", activeGroupId));
+                        messagesContainer.innerHTML = ''; currentGroupTitle.textContent = "# Select a Group"; deleteDmBtn.style.display = 'none';
+                        activeGroupId = null; activeGroupData = null; alert("DM request declined."); return;
+                    }
+                }
+                const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+                const userData = userSnap.exists() ? userSnap.data() : {};
+                const finalPhoto = userData.customPhotoURL || currentUser.photoURL || "";
+                await addDoc(collection(db, "groups", activeGroupId, "messages"), { text: text, uid: currentUser.uid, author: currentUser.displayName, photoURL: finalPhoto, createdAt: serverTimestamp() });
+            } catch (error) {}
+        };
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    </script>
+</body>
+</html>
