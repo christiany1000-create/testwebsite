@@ -728,12 +728,13 @@
         let pendingReportUid = null;
         let pendingReportName = null;
 
-        // WebRTC Call Variables
+        // WebRTC Call Variables (with ICE candidate queueing)
         let peerConnection = null;
         let localStream = null;
         let remoteStream = null;
         let callDocUnsubscribe = null;
         let pendingIncomingCallData = null;
+        let iceCandidateQueue = [];
         const servers = {
             iceServers: [
                 { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
@@ -947,7 +948,7 @@
             }
         });
 
-        // --- VOICE CALL SYSTEM (WITH STATE GUARDS & IN-APP BANNER) ---
+        // --- ROBUST VOICE CALL SYSTEM (WITH ICE CANDIDATE QUEUEING) ---
         async function setupAudio() {
             if (!localStream) {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -959,10 +960,33 @@
             }
         }
 
+        async function handleAddIceCandidate(candidateData) {
+            const candidate = new RTCIceCandidate(candidateData);
+            if (peerConnection && peerConnection.signalingState !== 'closed') {
+                if (!peerConnection.remoteDescription) {
+                    iceCandidateQueue.push(candidate);
+                } else {
+                    try {
+                        await peerConnection.addIceCandidate(candidate);
+                    } catch (e) { console.log("ICE add error:", e); }
+                }
+            }
+        }
+
+        async function flushIceQueue() {
+            while (iceCandidateQueue.length > 0 && peerConnection && peerConnection.remoteDescription) {
+                const candidate = iceCandidateQueue.shift();
+                try {
+                    await peerConnection.addIceCandidate(candidate);
+                } catch (e) { console.log("Queued ICE add error:", e); }
+            }
+        }
+
         startCallBtn.addEventListener('click', async () => {
             if (!activeGroupId || !activeGroupData.isDM) return;
             startCallBtn.style.display = 'none';
             endCallBtn.style.display = 'block';
+            iceCandidateQueue = [];
             
             await setupAudio();
             peerConnection = new RTCPeerConnection(servers);
@@ -986,21 +1010,19 @@
 
             await setDoc(callDoc, { offer: { type: offerDescription.type, sdp: offerDescription.sdp }, status: "ringing" });
 
-            onSnapshot(callDoc, (snapshot) => {
+            onSnapshot(callDoc, async (snapshot) => {
                 const data = snapshot.data();
                 if (peerConnection && peerConnection.signalingState !== 'closed' && !peerConnection.currentRemoteDescription && data?.answer) {
                     const answerDescription = new RTCSessionDescription(data.answer);
-                    peerConnection.setRemoteDescription(answerDescription).catch(e => console.log("Remote desc error:", e));
+                    await peerConnection.setRemoteDescription(answerDescription);
+                    await flushIceQueue();
                 }
             });
 
             onSnapshot(answerCandidates, (snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
-                        const candidate = new RTCIceCandidate(change.doc.data());
-                        if (peerConnection && peerConnection.signalingState !== 'closed') {
-                            peerConnection.addIceCandidate(candidate).catch(err => console.log("ICE candidate error:", err));
-                        }
+                        handleAddIceCandidate(change.doc.data());
                     }
                 });
             });
@@ -1010,6 +1032,7 @@
             callBanner.style.display = 'none';
             startCallBtn.style.display = 'none';
             endCallBtn.style.display = 'block';
+            iceCandidateQueue = [];
             
             await setupAudio();
             peerConnection = new RTCPeerConnection(servers);
@@ -1031,6 +1054,7 @@
             const offerDescription = callData.offer;
             if (peerConnection && peerConnection.signalingState !== 'closed') {
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
+                await flushIceQueue();
             }
 
             const answerDescription = await peerConnection.createAnswer();
@@ -1043,10 +1067,7 @@
             onSnapshot(offerCandidates, (snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
-                        const candidate = new RTCIceCandidate(change.doc.data());
-                        if (peerConnection && peerConnection.signalingState !== 'closed') {
-                            peerConnection.addIceCandidate(candidate).catch(err => console.log("ICE candidate error:", err));
-                        }
+                        handleAddIceCandidate(change.doc.data());
                     }
                 });
             });
@@ -1061,6 +1082,7 @@
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
+            iceCandidateQueue = [];
             
             if (activeGroupId) {
                 const callDoc = doc(db, "groups", activeGroupId, "calls", "current_call");
@@ -1158,7 +1180,6 @@
                 callDocUnsubscribe = onSnapshot(doc(db, "groups", groupId, "calls", "current_call"), (snapshot) => {
                     const data = snapshot.data();
                     if (data && data.offer && !data.answer) {
-                        // Check if the current user is the one receiving the call
                         if (!peerConnection && data.offer) {
                             pendingIncomingCallData = data;
                             callBannerText.textContent = `Incoming call from ${otherPerson ? otherPerson.name : 'User'}...`;
@@ -1175,6 +1196,7 @@
                             localStream.getTracks().forEach(t => t.stop());
                             localStream = null;
                         }
+                        iceCandidateQueue = [];
                         startCallBtn.style.display = 'block';
                         endCallBtn.style.display = 'none';
                     }
