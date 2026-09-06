@@ -188,6 +188,7 @@
         .chat-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-base); }
         .chat-header { padding: 20px 30px; background-color: var(--bg-surface); border-bottom: 2px solid var(--border-color); font-size: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         #logout-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-family: inherit; }
+        #mobile-back-btn { display: none; }
         
         .messages-area { flex-grow: 1; padding: 20px 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         
@@ -249,6 +250,95 @@
         .base-input { width: 100%; padding: 10px; margin-bottom: 15px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; box-sizing: border-box;}
         .base-btn { width: 100%; padding: 10px; border-radius: 6px; border: none; font-family: inherit; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px; color: white;}
         #member-list { max-height: 120px; overflow-y: auto; padding-left: 20px; margin-bottom: 20px; color: var(--text-muted); }
+
+        /* ========================================== */
+        /* MOBILE RESPONSIVE MEDIA QUERIES            */
+        /* ========================================== */
+        @media (max-width: 768px) {
+            header {
+                padding: 10px 15px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .logo {
+                font-size: 1.5rem;
+            }
+            .logo-icon {
+                height: 30px;
+            }
+            .nav-controls {
+                width: 100%;
+                justify-content: space-between;
+                gap: 5px;
+            }
+            .nav-btn {
+                padding: 8px 6px;
+                font-size: 0.85rem;
+                flex: 1;
+                text-align: center;
+            }
+
+            #chat-view.active {
+                top: 92px;
+                height: calc(100vh - 92px);
+            }
+
+            .chat-sidebar {
+                width: 100%;
+            }
+            .chat-main {
+                display: none;
+                width: 100%;
+            }
+
+            /* Toggle view on mobile when opening a message thread */
+            .chat-container.mobile-chat-open .chat-sidebar {
+                display: none;
+            }
+            .chat-container.mobile-chat-open .chat-main {
+                display: flex;
+            }
+
+            #mobile-back-btn {
+                display: block;
+                background: none;
+                border: 1px solid var(--accent);
+                color: var(--accent);
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-family: inherit;
+                font-size: 0.9rem;
+            }
+
+            .chat-header {
+                padding: 12px 15px;
+                font-size: 1.1rem;
+            }
+            .messages-area {
+                padding: 15px;
+            }
+            .message {
+                max-width: 85%;
+                font-size: 0.95rem;
+            }
+            .chat-input {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+            .chat-input input {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+            .chat-input button {
+                padding: 0 18px;
+                font-size: 1rem;
+            }
+            .page-container {
+                padding: 20px 15px;
+                width: 90%;
+            }
+        }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -325,8 +415,11 @@
 
                 <div class="chat-main">
                     <div class="chat-header">
-                        <span id="current-group-title"># Select a Group</span>
-                        <div style="display:flex; gap:15px; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <button id="mobile-back-btn">← Back</button>
+                            <span id="current-group-title"># Select a Group</span>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
                             <button id="delete-dm-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Delete Direct Message">🗑️ Delete DM</button>
                             <button id="group-settings-btn" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer;" title="Group Controls">⚙️</button>
                             <button id="logout-btn" style="display:none;">Log Out</button>
@@ -487,16 +580,13 @@
                         const targetId = btn.getAttribute('data-target');
                         const targetSection = document.getElementById(targetId);
                         
-                        // Prevent page scrolling when Chat (full screen) is active
                         if(targetId === 'chat-view') {
                             document.body.style.overflow = 'hidden';
                         } else {
                             document.body.style.overflow = 'auto';
                         }
 
-                        if (targetSection) {
-                            targetSection.classList.add('active');
-                        }
+                        if (targetSection) { targetSection.classList.add('active'); }
                     });
                 });
 
@@ -519,6 +609,15 @@
                     sidebarContactsView.style.display = 'flex';
                     sidebarChatsView.style.display = 'none';
                 });
+
+                // Mobile Back Button
+                const mobileBackBtn = document.getElementById('mobile-back-btn');
+                const chatContainer = document.querySelector('.chat-container');
+                if (mobileBackBtn && chatContainer) {
+                    mobileBackBtn.addEventListener('click', () => {
+                        chatContainer.classList.remove('mobile-chat-open');
+                    });
+                }
 
                 // Settings & Themes
                 const themeToggle = document.getElementById('theme-toggle');
@@ -604,6 +703,7 @@
         const currentGroupTitle = document.getElementById('current-group-title');
         const typingIndicator = document.getElementById('typing-indicator');
         const navGroupsBtn = document.getElementById('nav-groups-btn');
+        const chatContainer = document.querySelector('.chat-container');
         
         // Modal DOM Elements
         const groupSettingsBtn = document.getElementById('group-settings-btn');
@@ -673,22 +773,18 @@
                 const userData = doc.data();
                 userOnlineStatuses[doc.id] = userData.isOnline; 
                 
-                // Do not show current user or system bot in contact list
                 if (currentUser && userData.uid !== currentUser.uid && userData.uid !== "00000000") {
                     allContactsList.push(userData);
                 }
             });
             
-            // Sort alphabetically by name
             allContactsList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
             
-            // Re-render contacts considering active search filter
             const term = contactSearchInput.value.toLowerCase();
             allContactsList.forEach(user => {
                 if ((user.name || "").toLowerCase().includes(term)) { renderContact(user); }
             });
 
-            // Update green dots on the group/chats list
             document.querySelectorAll('.dm-status-dot').forEach(dot => {
                 const uid = dot.getAttribute('data-uid');
                 if (userOnlineStatuses[uid]) { dot.classList.add('status-online'); } 
@@ -724,7 +820,7 @@
             
             li.addEventListener('click', () => {
                 startDM(user.uid, user.name);
-                navGroupsBtn.click(); // Auto-switch back to the chats view
+                navGroupsBtn.click();
             });
             
             sidebarContacts.appendChild(li);
@@ -814,7 +910,6 @@
             }, { merge: true });
 
             if (requiresApproval) {
-                // To avoid spamming, only send the prompt if it doesn't already exist
                 const msgs = await getDocs(query(collection(db, "groups", dmId, "messages"), limit(1)));
                 if(msgs.empty) {
                     await addDoc(collection(db, "groups", dmId, "messages"), {
@@ -863,6 +958,7 @@
                     messagesContainer.innerHTML = ''; currentGroupTitle.textContent = "# Select a Group";
                     deleteDmBtn.style.display = 'none'; messageInput.disabled = true; sendBtn.disabled = true;
                     activeGroupId = null; activeGroupData = null;
+                    if (chatContainer) chatContainer.classList.remove('mobile-chat-open');
                     if(unsubscribeGroupDoc) unsubscribeGroupDoc();
                 } catch (err) { alert("Failed to delete DM."); }
             }
@@ -885,7 +981,6 @@
                     
                     if (group.isDM) {
                         const amIMember = group.members && group.members.some(m => m.uid === currentUser.uid);
-                        // FIX: Admins are no longer granted global bypass. Only actual participants see their DMs.
                         if (!amIMember) return; 
                     }
                     
@@ -929,6 +1024,9 @@
             activeGroupId = groupId;
             activeGroupData = groupData;
             
+            // Trigger mobile chat view shift on small viewports
+            if (chatContainer) chatContainer.classList.add('mobile-chat-open');
+
             if (groupData.isDM) {
                 const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
                 currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
@@ -960,18 +1058,16 @@
             const q = query(collection(db, "groups", groupId, "messages"), orderBy("createdAt", "asc"), limit(50));
             
             let lastRenderedDate = "";
-            let isInitialMsgLoad = true; // FIX: Track initial load to prevent playing sounds on historically fetched messages
+            let isInitialMsgLoad = true;
 
             unsubscribeMessages = onSnapshot(q, (snapshot) => {
                 messagesContainer.innerHTML = '';
                 lastRenderedDate = ""; 
                 
-                // Determine if a sound needs to be played
                 let playSound = false;
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added" && !isInitialMsgLoad) {
                         const msgData = change.doc.data();
-                        // Only play sound if the message isn't from the active user
                         if (msgData.uid !== currentUser.uid) {
                             playSound = true;
                         }
