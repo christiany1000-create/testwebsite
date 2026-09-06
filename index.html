@@ -244,6 +244,24 @@
         .chat-input button { padding: 0 35px; background: var(--accent-gradient); color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
         .chat-input button:active { transform: scale(0.95); }
 
+        /* --- In-App Call Banner Styling --- */
+        #call-banner {
+            display: none;
+            position: absolute;
+            top: 73px;
+            left: 0;
+            width: 100%;
+            background: rgba(76, 175, 80, 0.95);
+            color: white;
+            padding: 12px 20px;
+            box-sizing: border-box;
+            z-index: 150;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            animation: fadeIn 0.3s ease;
+        }
+
         /* --- Modal Styling --- */
         .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
         .modal-content { max-width: 400px; width: 90%; background-color: var(--bg-surface); padding: 30px; border-radius: 12px; border: 2px solid var(--accent); position: relative; }
@@ -319,7 +337,6 @@
 
     <main class="content-area">
         
-        <!-- === GAMES VIEW === -->
         <div id="games-view" class="view-section active">
             <div class="games-grid">
                 <a href="craft.html" class="game-card">
@@ -337,9 +354,16 @@
             </div>
         </div>
 
-        <!-- === FULL-SCREEN LIVE CHAT VIEW === -->
         <div id="chat-view" class="view-section">
             <div class="chat-container">
+                <div id="call-banner">
+                    <span id="call-banner-text">Incoming voice call...</span>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="accept-call-btn" style="background: #2196F3; border: none; color: white; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: inherit;">Accept</button>
+                        <button id="decline-call-btn" style="background: #f44336; border: none; color: white; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-family: inherit;">Decline</button>
+                    </div>
+                </div>
+
                 <div id="auth-overlay">
                     <h2>Classroom Chat</h2>
                     <p>Please sign in with your Google account to chat.</p>
@@ -347,13 +371,11 @@
                 </div>
                 
                 <div class="chat-sidebar">
-                    <!-- Sidebar Tabs -->
                     <div class="sidebar-tabs">
                         <button id="nav-groups-btn" class="sidebar-tab-btn active-tab">💬 Chats</button>
                         <button id="nav-contacts-btn" class="sidebar-tab-btn">👥 Contacts</button>
                     </div>
 
-                    <!-- Chats View (Default) -->
                     <div id="sidebar-chats-view" style="display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;">
                         <div class="sidebar-header">
                             <button id="create-group-btn" class="create-btn">+ New Group</button>
@@ -362,7 +384,6 @@
                         <ul class="group-list" id="sidebar-groups"></ul>
                     </div>
 
-                    <!-- Contacts View (Hidden by default) -->
                     <div id="sidebar-contacts-view" style="display: none; flex-direction: column; flex-grow: 1; overflow: hidden;">
                         <div class="sidebar-header" style="padding: 15px 20px;">
                             <input type="text" id="contact-search" placeholder="Search contacts..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-family: inherit; box-sizing: border-box; outline: none;">
@@ -378,7 +399,6 @@
                             <span id="current-group-title"># Select a Group</span>
                         </div>
                         <div style="display:flex; gap:10px; align-items:center;">
-                            <!-- VOICE CALL ELEMENTS -->
                             <button id="start-call-btn" style="display:none; background:#4CAF50; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Start Voice Call">📞 Call</button>
                             <button id="end-call-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="End Call">📵 End</button>
                             <audio id="local-audio" autoplay muted style="display:none;"></audio>
@@ -399,7 +419,6 @@
             </div>
         </div>
 
-        <!-- === PROFILE VIEW === -->
         <div id="profile-view" class="view-section">
             <div class="page-container">
                 <h2>My Account Profile</h2>
@@ -441,7 +460,6 @@
             </div>
         </div>
 
-        <!-- === SETTINGS VIEW === -->
         <div id="settings-view" class="view-section">
             <div class="page-container">
                 <h2>Customization</h2>
@@ -462,7 +480,6 @@
                     <input type="color" id="color2" class="color-picker" value="#FFCA28">
                 </div>
                 
-                <!-- ADMIN PANEL -->
                 <div id="admin-panel" style="display:none; margin-top: 20px; border-top: 2px solid var(--border-color); padding-top: 20px;">
                     <h2 style="color: #f44336; border-bottom: 2px solid #f44336;">Admin Controls</h2>
                     
@@ -486,7 +503,6 @@
         </div>
     </main>
 
-    <!-- === GROUP OWNER MODAL === -->
     <div id="group-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -504,7 +520,6 @@
         </div>
     </div>
 
-    <!-- === REPORT MODAL === -->
     <div id="report-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-report-modal" style="position:absolute; top:15px; right:15px; background:none; color:var(--text-main); border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
@@ -525,13 +540,9 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- FRONTEND JAVASCRIPT (Navigation & Settings)-->
-    <!-- ========================================== -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             try {
-                // Main Top Navigation
                 const navBtns = document.querySelectorAll('.nav-btn');
                 const viewSections = document.querySelectorAll('.view-section');
 
@@ -554,7 +565,6 @@
                     });
                 });
 
-                // Sidebar Tabs (Chats vs Contacts)
                 const navGroupsBtn = document.getElementById('nav-groups-btn');
                 const navContactsBtn = document.getElementById('nav-contacts-btn');
                 const sidebarChatsView = document.getElementById('sidebar-chats-view');
@@ -574,7 +584,6 @@
                     sidebarChatsView.style.display = 'none';
                 });
 
-                // Mobile Back Button
                 const mobileBackBtn = document.getElementById('mobile-back-btn');
                 const chatContainer = document.querySelector('.chat-container');
                 if (mobileBackBtn && chatContainer) {
@@ -583,7 +592,6 @@
                     });
                 }
 
-                // Settings & Themes
                 const themeToggle = document.getElementById('theme-toggle');
                 const color1Input = document.getElementById('color1');
                 const color2Input = document.getElementById('color2');
@@ -626,9 +634,6 @@
         });
     </script>
 
-    <!-- ========================================== -->
-    <!-- FIREBASE JAVASCRIPT (Backend logic)        -->
-    <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
@@ -668,6 +673,10 @@
         const typingIndicator = document.getElementById('typing-indicator');
         const navGroupsBtn = document.getElementById('nav-groups-btn');
         const chatContainer = document.querySelector('.chat-container');
+        const callBanner = document.getElementById('call-banner');
+        const callBannerText = document.getElementById('call-banner-text');
+        const acceptCallBtn = document.getElementById('accept-call-btn');
+        const declineCallBtn = document.getElementById('decline-call-btn');
         
         // Modal DOM Elements
         const groupSettingsBtn = document.getElementById('group-settings-btn');
@@ -724,6 +733,7 @@
         let localStream = null;
         let remoteStream = null;
         let callDocUnsubscribe = null;
+        let pendingIncomingCallData = null;
         const servers = {
             iceServers: [
                 { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
@@ -937,12 +947,16 @@
             }
         });
 
-        // --- VOICE CALL SYSTEM ---
+        // --- VOICE CALL SYSTEM (WITH STATE GUARDS & IN-APP BANNER) ---
         async function setupAudio() {
-            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-            localAudio.srcObject = localStream;
-            remoteStream = new MediaStream();
-            remoteAudio.srcObject = remoteStream;
+            if (!localStream) {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                localAudio.srcObject = localStream;
+            }
+            if (!remoteStream) {
+                remoteStream = new MediaStream();
+                remoteAudio.srcObject = remoteStream;
+            }
         }
 
         startCallBtn.addEventListener('click', async () => {
@@ -956,6 +970,7 @@
             localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
             peerConnection.ontrack = (event) => {
                 event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
+                remoteAudio.play().catch(err => console.log("Audio play error:", err));
             };
 
             const callDoc = doc(collection(db, "groups", activeGroupId, "calls"), "current_call");
@@ -973,9 +988,9 @@
 
             onSnapshot(callDoc, (snapshot) => {
                 const data = snapshot.data();
-                if (!peerConnection.currentRemoteDescription && data?.answer) {
+                if (peerConnection && peerConnection.signalingState !== 'closed' && !peerConnection.currentRemoteDescription && data?.answer) {
                     const answerDescription = new RTCSessionDescription(data.answer);
-                    peerConnection.setRemoteDescription(answerDescription);
+                    peerConnection.setRemoteDescription(answerDescription).catch(e => console.log("Remote desc error:", e));
                 }
             });
 
@@ -983,13 +998,16 @@
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         const candidate = new RTCIceCandidate(change.doc.data());
-                        peerConnection.addIceCandidate(candidate);
+                        if (peerConnection && peerConnection.signalingState !== 'closed') {
+                            peerConnection.addIceCandidate(candidate).catch(err => console.log("ICE candidate error:", err));
+                        }
                     }
                 });
             });
         });
 
         async function answerCall(callData) {
+            callBanner.style.display = 'none';
             startCallBtn.style.display = 'none';
             endCallBtn.style.display = 'block';
             
@@ -999,6 +1017,7 @@
             localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
             peerConnection.ontrack = (event) => {
                 event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
+                remoteAudio.play().catch(err => console.log("Audio play error:", err));
             };
 
             const callDoc = doc(collection(db, "groups", activeGroupId, "calls"), "current_call");
@@ -1010,10 +1029,14 @@
             };
 
             const offerDescription = callData.offer;
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
+            if (peerConnection && peerConnection.signalingState !== 'closed') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
+            }
 
             const answerDescription = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answerDescription);
+            if (peerConnection && peerConnection.signalingState !== 'closed') {
+                await peerConnection.setLocalDescription(answerDescription);
+            }
 
             await updateDoc(callDoc, { answer: { type: answerDescription.type, sdp: answerDescription.sdp }, status: "connected" });
 
@@ -1021,21 +1044,47 @@
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === "added") {
                         const candidate = new RTCIceCandidate(change.doc.data());
-                        peerConnection.addIceCandidate(candidate);
+                        if (peerConnection && peerConnection.signalingState !== 'closed') {
+                            peerConnection.addIceCandidate(candidate).catch(err => console.log("ICE candidate error:", err));
+                        }
                     }
                 });
             });
         }
 
         endCallBtn.addEventListener('click', async () => {
-            if (peerConnection) peerConnection.close();
-            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
             
-            const callDoc = doc(db, "groups", activeGroupId, "calls", "current_call");
-            await deleteDoc(callDoc);
+            if (activeGroupId) {
+                const callDoc = doc(db, "groups", activeGroupId, "calls", "current_call");
+                await deleteDoc(callDoc).catch(() => {});
+            }
             
             endCallBtn.style.display = 'none';
             startCallBtn.style.display = 'block';
+            callBanner.style.display = 'none';
+        });
+
+        acceptCallBtn.addEventListener('click', () => {
+            if (pendingIncomingCallData) {
+                answerCall(pendingIncomingCallData);
+                pendingIncomingCallData = null;
+            }
+        });
+
+        declineCallBtn.addEventListener('click', async () => {
+            callBanner.style.display = 'none';
+            pendingIncomingCallData = null;
+            if (activeGroupId) {
+                await deleteDoc(doc(db, "groups", activeGroupId, "calls", "current_call")).catch(() => {});
+            }
         });
 
         function loadGroups() {
@@ -1097,6 +1146,7 @@
             activeGroupData = groupData;
             
             if (chatContainer) chatContainer.classList.add('mobile-chat-open');
+            callBanner.style.display = 'none';
 
             if (groupData.isDM) {
                 const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
@@ -1108,18 +1158,25 @@
                 callDocUnsubscribe = onSnapshot(doc(db, "groups", groupId, "calls", "current_call"), (snapshot) => {
                     const data = snapshot.data();
                     if (data && data.offer && !data.answer) {
-                        if (confirm(`Incoming voice call! Answer?`)) {
-                            answerCall(data);
-                        } else {
-                            deleteDoc(doc(db, "groups", groupId, "calls", "current_call"));
+                        // Check if the current user is the one receiving the call
+                        if (!peerConnection && data.offer) {
+                            pendingIncomingCallData = data;
+                            callBannerText.textContent = `Incoming call from ${otherPerson ? otherPerson.name : 'User'}...`;
+                            callBanner.style.display = 'flex';
                         }
                     }
-                    if (!snapshot.exists() && peerConnection) {
-                        peerConnection.close();
-                        if(localStream) localStream.getTracks().forEach(t => t.stop());
+                    if (!snapshot.exists()) {
+                        callBanner.style.display = 'none';
+                        if (peerConnection) {
+                            peerConnection.close();
+                            peerConnection = null;
+                        }
+                        if (localStream) {
+                            localStream.getTracks().forEach(t => t.stop());
+                            localStream = null;
+                        }
                         startCallBtn.style.display = 'block';
                         endCallBtn.style.display = 'none';
-                        alert("Call ended.");
                     }
                 });
             } else {
