@@ -736,12 +736,12 @@
         let callDocUnsubscribe = null;
         let pendingIncomingCallData = null;
         let iceCandidateQueue = [];
-        const servers = {
-            iceServers: [
-                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
-            ],
-            iceCandidatePoolSize: 10,
+
+        let dynamicServers = {
+            iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }],
+            iceCandidatePoolSize: 10
         };
+
         const startCallBtn = document.getElementById('start-call-btn');
         const endCallBtn = document.getElementById('end-call-btn');
         const localAudio = document.getElementById('local-audio');
@@ -1005,6 +1005,23 @@
         });
 
         // --- ROBUST VOICE CALL SYSTEM ---
+        async function fetchIceServers() {
+            try {
+                // Using the Cloudflare Worker URL you provided to get enterprise TURN credentials
+                const response = await fetch("https://quiet-cake-fcbd.christiany1000.workers.dev/", { method: "POST" });
+                const data = await response.json();
+                
+                if (data && data.iceServers) {
+                    dynamicServers.iceServers = [
+                        { urls: ['stun:stun1.l.google.com:19302'] },
+                        ...data.iceServers 
+                    ];
+                }
+            } catch (e) {
+                console.error("TURN Server fetch failed. Using standard STUN.", e);
+            }
+        }
+
         async function setupAudio() {
             if (!localStream) {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -1045,7 +1062,9 @@
             iceCandidateQueue = [];
             
             await setupAudio();
-            peerConnection = new RTCPeerConnection(servers);
+            await fetchIceServers(); // Fetch TURN credentials before connecting
+            
+            peerConnection = new RTCPeerConnection(dynamicServers);
             
             localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
             peerConnection.ontrack = (event) => {
@@ -1091,7 +1110,9 @@
             iceCandidateQueue = [];
             
             await setupAudio();
-            peerConnection = new RTCPeerConnection(servers);
+            await fetchIceServers(); // Fetch TURN credentials before connecting
+            
+            peerConnection = new RTCPeerConnection(dynamicServers);
             
             localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
             peerConnection.ontrack = (event) => {
