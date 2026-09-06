@@ -255,89 +255,47 @@
         /* MOBILE RESPONSIVE MEDIA QUERIES            */
         /* ========================================== */
         @media (max-width: 768px) {
-            header {
-                padding: 10px 15px;
-                flex-direction: column;
-                gap: 8px;
-            }
-            .logo {
-                font-size: 1.5rem;
-            }
-            .logo-icon {
-                height: 30px;
-            }
-            .nav-controls {
-                width: 100%;
-                justify-content: space-between;
-                gap: 5px;
-            }
-            .nav-btn {
-                padding: 8px 6px;
-                font-size: 0.85rem;
-                flex: 1;
-                text-align: center;
-            }
+            header { padding: 10px 15px; flex-direction: column; gap: 8px; }
+            .logo { font-size: 1.5rem; }
+            .logo-icon { height: 30px; }
+            .nav-controls { width: 100%; justify-content: space-between; gap: 5px; }
+            .nav-btn { padding: 8px 6px; font-size: 0.85rem; flex: 1; text-align: center; }
 
             #chat-view.active {
-                top: 92px;
-                height: calc(100vh - 92px);
+                top: 115px; 
+                height: calc(100dvh - 115px); 
             }
 
-            .chat-sidebar {
-                width: 100%;
-            }
-            .chat-main {
-                display: none;
-                width: 100%;
-            }
+            .chat-sidebar { width: 100%; }
+            .chat-main { display: none; width: 100%; }
 
-            /* Toggle view on mobile when opening a message thread */
-            .chat-container.mobile-chat-open .chat-sidebar {
-                display: none;
-            }
-            .chat-container.mobile-chat-open .chat-main {
-                display: flex;
-            }
+            .chat-container.mobile-chat-open .chat-sidebar { display: none; }
+            .chat-container.mobile-chat-open .chat-main { display: flex; }
 
             #mobile-back-btn {
-                display: block;
-                background: none;
-                border: 1px solid var(--accent);
-                color: var(--accent);
-                padding: 5px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-family: inherit;
-                font-size: 0.9rem;
+                display: block; background: none; border: 1px solid var(--accent);
+                color: var(--accent); padding: 5px 10px; border-radius: 4px;
+                cursor: pointer; font-family: inherit; font-size: 0.9rem;
             }
 
             .chat-header {
                 padding: 12px 15px;
                 font-size: 1.1rem;
+                flex-shrink: 0; 
             }
-            .messages-area {
-                padding: 15px;
-            }
-            .message {
-                max-width: 85%;
-                font-size: 0.95rem;
-            }
+            .messages-area { padding: 15px; }
+            .message { max-width: 85%; font-size: 0.95rem; }
+            
             .chat-input {
                 padding: 12px 15px;
                 gap: 10px;
+                flex-shrink: 0; 
+                padding-bottom: max(12px, env(safe-area-inset-bottom)); 
             }
-            .chat-input input {
-                padding: 10px 12px;
-                font-size: 0.95rem;
-            }
-            .chat-input button {
-                padding: 0 18px;
-                font-size: 1rem;
-            }
-            .page-container {
-                padding: 20px 15px;
-                width: 90%;
-            }
+            .chat-input input { padding: 10px 12px; font-size: 0.95rem; }
+            .chat-input button { padding: 0 18px; font-size: 1rem; }
+            
+            .page-container { padding: 20px 15px; width: 90%; }
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -420,6 +378,12 @@
                             <span id="current-group-title"># Select a Group</span>
                         </div>
                         <div style="display:flex; gap:10px; align-items:center;">
+                            <!-- VOICE CALL ELEMENTS -->
+                            <button id="start-call-btn" style="display:none; background:#4CAF50; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Start Voice Call">📞 Call</button>
+                            <button id="end-call-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="End Call">📵 End</button>
+                            <audio id="local-audio" autoplay muted style="display:none;"></audio>
+                            <audio id="remote-audio" autoplay style="display:none;"></audio>
+
                             <button id="delete-dm-btn" style="display:none; background:#f44336; border:none; color:white; padding:5px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:0.9rem;" title="Delete Direct Message">🗑️ Delete DM</button>
                             <button id="group-settings-btn" style="display:none; background:none; border:none; font-size:1.5rem; cursor:pointer;" title="Group Controls">⚙️</button>
                             <button id="logout-btn" style="display:none;">Log Out</button>
@@ -755,6 +719,22 @@
         let pendingReportUid = null;
         let pendingReportName = null;
 
+        // WebRTC Call Variables
+        let peerConnection = null;
+        let localStream = null;
+        let remoteStream = null;
+        let callDocUnsubscribe = null;
+        const servers = {
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+            ],
+            iceCandidatePoolSize: 10,
+        };
+        const startCallBtn = document.getElementById('start-call-btn');
+        const endCallBtn = document.getElementById('end-call-btn');
+        const localAudio = document.getElementById('local-audio');
+        const remoteAudio = document.getElementById('remote-audio');
+
         // --- ONLINE PRESENCE & CONTACTS SYSTEM ---
         const setOnlineStatus = async (isOnline) => {
             if (!currentUser) return;
@@ -764,7 +744,6 @@
         window.addEventListener('blur', () => setOnlineStatus(false));
         window.addEventListener('beforeunload', () => setOnlineStatus(false));
 
-        // Listen for all users: handles Online status AND populates Contacts tab
         onSnapshot(collection(db, "users"), (snapshot) => {
             allContactsList = [];
             sidebarContacts.innerHTML = '';
@@ -792,7 +771,6 @@
             });
         });
 
-        // Contacts Search Filter
         contactSearchInput.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             sidebarContacts.innerHTML = '';
@@ -872,7 +850,6 @@
             }
         });
 
-        // --- DM REQUESTS TOGGLE ---
         if (dmRequestsToggle) {
             dmRequestsToggle.addEventListener('change', async (e) => {
                 if (!currentUser) return;
@@ -880,7 +857,6 @@
             });
         }
 
-        // --- PROFILE PICTURE CONTROLS ---
         useGooglePicBtn.addEventListener('click', async () => {
             if (!currentUser) return;
             activePhotoURL = currentUser.photoURL || ""; profilePreviewImg.src = activePhotoURL || 'assets/sitelogo.png'; customPicUrlInput.value = "";
@@ -895,7 +871,6 @@
             await updateDoc(doc(db, "users", currentUser.uid), { customPhotoURL: newUrl }); alert("Custom profile picture saved!");
         });
 
-        // --- START DM HELPER ---
         async function startDM(targetUid, targetName) {
             if (targetUid === currentUser.uid) { alert("You can't message yourself!"); return; }
             const targetSnap = await getDoc(doc(db, "users", targetUid));
@@ -920,7 +895,6 @@
             }
         }
 
-        // --- REPORT MODAL HANDLERS ---
         closeReportModalBtn.addEventListener('click', () => { reportModal.style.display = 'none'; });
         submitReportBtn.addEventListener('click', async () => {
             const reason = reportReasonSelect.value;
@@ -949,7 +923,6 @@
             } catch (err) { alert("Failed to send report."); }
         });
 
-        // --- DELETE CURRENT DM BUTTON ---
         deleteDmBtn.addEventListener('click', async () => {
             if (!activeGroupId || !activeGroupData || !activeGroupData.isDM) return;
             if (confirm("Are you sure you want to delete this Direct Message?")) {
@@ -964,7 +937,107 @@
             }
         });
 
-        // --- LOAD GROUPS ---
+        // --- VOICE CALL SYSTEM ---
+        async function setupAudio() {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            localAudio.srcObject = localStream;
+            remoteStream = new MediaStream();
+            remoteAudio.srcObject = remoteStream;
+        }
+
+        startCallBtn.addEventListener('click', async () => {
+            if (!activeGroupId || !activeGroupData.isDM) return;
+            startCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'block';
+            
+            await setupAudio();
+            peerConnection = new RTCPeerConnection(servers);
+            
+            localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
+            peerConnection.ontrack = (event) => {
+                event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
+            };
+
+            const callDoc = doc(collection(db, "groups", activeGroupId, "calls"), "current_call");
+            const offerCandidates = collection(callDoc, "offerCandidates");
+            const answerCandidates = collection(callDoc, "answerCandidates");
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) addDoc(offerCandidates, event.candidate.toJSON());
+            };
+
+            const offerDescription = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offerDescription);
+
+            await setDoc(callDoc, { offer: { type: offerDescription.type, sdp: offerDescription.sdp }, status: "ringing" });
+
+            onSnapshot(callDoc, (snapshot) => {
+                const data = snapshot.data();
+                if (!peerConnection.currentRemoteDescription && data?.answer) {
+                    const answerDescription = new RTCSessionDescription(data.answer);
+                    peerConnection.setRemoteDescription(answerDescription);
+                }
+            });
+
+            onSnapshot(answerCandidates, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const candidate = new RTCIceCandidate(change.doc.data());
+                        peerConnection.addIceCandidate(candidate);
+                    }
+                });
+            });
+        });
+
+        async function answerCall(callData) {
+            startCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'block';
+            
+            await setupAudio();
+            peerConnection = new RTCPeerConnection(servers);
+            
+            localStream.getTracks().forEach((track) => peerConnection.addTrack(track, localStream));
+            peerConnection.ontrack = (event) => {
+                event.streams[0].getTracks().forEach((track) => remoteStream.addTrack(track));
+            };
+
+            const callDoc = doc(collection(db, "groups", activeGroupId, "calls"), "current_call");
+            const offerCandidates = collection(callDoc, "offerCandidates");
+            const answerCandidates = collection(callDoc, "answerCandidates");
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
+            };
+
+            const offerDescription = callData.offer;
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
+
+            const answerDescription = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answerDescription);
+
+            await updateDoc(callDoc, { answer: { type: answerDescription.type, sdp: answerDescription.sdp }, status: "connected" });
+
+            onSnapshot(offerCandidates, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const candidate = new RTCIceCandidate(change.doc.data());
+                        peerConnection.addIceCandidate(candidate);
+                    }
+                });
+            });
+        }
+
+        endCallBtn.addEventListener('click', async () => {
+            if (peerConnection) peerConnection.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            
+            const callDoc = doc(db, "groups", activeGroupId, "calls", "current_call");
+            await deleteDoc(callDoc);
+            
+            endCallBtn.style.display = 'none';
+            startCallBtn.style.display = 'block';
+        });
+
         function loadGroups() {
             const q = query(collection(db, "groups"), orderBy("createdAt", "asc"));
             onSnapshot(q, async (snapshot) => {
@@ -1019,21 +1092,42 @@
             });
         }
 
-        // --- SWITCH GROUPS & MESSAGING ---
         function switchGroup(groupId, groupData, isOwnerOrAdmin) {
             activeGroupId = groupId;
             activeGroupData = groupData;
             
-            // Trigger mobile chat view shift on small viewports
             if (chatContainer) chatContainer.classList.add('mobile-chat-open');
 
             if (groupData.isDM) {
                 const otherPerson = groupData.members.find(m => m.uid !== currentUser.uid);
                 currentGroupTitle.textContent = `@ ${otherPerson ? otherPerson.name : 'Unknown'}`;
                 deleteDmBtn.style.display = 'block';
+                startCallBtn.style.display = 'block';
+
+                if(callDocUnsubscribe) callDocUnsubscribe();
+                callDocUnsubscribe = onSnapshot(doc(db, "groups", groupId, "calls", "current_call"), (snapshot) => {
+                    const data = snapshot.data();
+                    if (data && data.offer && !data.answer) {
+                        if (confirm(`Incoming voice call! Answer?`)) {
+                            answerCall(data);
+                        } else {
+                            deleteDoc(doc(db, "groups", groupId, "calls", "current_call"));
+                        }
+                    }
+                    if (!snapshot.exists() && peerConnection) {
+                        peerConnection.close();
+                        if(localStream) localStream.getTracks().forEach(t => t.stop());
+                        startCallBtn.style.display = 'block';
+                        endCallBtn.style.display = 'none';
+                        alert("Call ended.");
+                    }
+                });
             } else {
                 currentGroupTitle.textContent = `# ${groupData.name}`;
                 deleteDmBtn.style.display = 'none';
+                startCallBtn.style.display = 'none';
+                endCallBtn.style.display = 'none';
+                if(callDocUnsubscribe) callDocUnsubscribe();
             }
             
             messageInput.disabled = false; sendBtn.disabled = false;
@@ -1044,7 +1138,6 @@
                 (groupData.members || []).forEach(m => { const li = document.createElement('li'); li.textContent = m.name; memberList.appendChild(li); });
             } else { groupSettingsBtn.style.display = 'none'; }
 
-            // Listen for typing events
             if(unsubscribeGroupDoc) unsubscribeGroupDoc();
             unsubscribeGroupDoc = onSnapshot(doc(db, "groups", groupId), (docSnap) => {
                 const data = docSnap.data();
@@ -1132,7 +1225,6 @@
             });
         }
 
-        // --- TYPING INDICATOR INPUT LISTENER ---
         messageInput.addEventListener('input', () => {
             if (!activeGroupId || !currentUser) return;
             updateDoc(doc(db, "groups", activeGroupId), { [`typing.${currentUser.uid}`]: currentUser.displayName }, { merge: true });
