@@ -73,43 +73,46 @@
             position: sticky; top: 0; z-index: 100;
         }
 
-        .logo-container { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .logo-container { display: flex; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.3s var(--spring); }
+        .logo-container:hover { transform: scale(1.05); }
         .logo-icon { height: 40px; width: auto; }
         .logo { font-size: 2.2rem; letter-spacing: 2px; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         .nav-controls { display: flex; gap: 8px; background: var(--bg-base); padding: 5px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
         .nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 20px; font-family: inherit; font-size: 1.1rem; border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s var(--smooth); position: relative; z-index: 1; }
+        .nav-btn:hover { color: var(--text-main); }
         .nav-btn.active { color: white; }
-        .nav-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--accent-gradient); z-index: -1; opacity: 0; transition: opacity 0.3s; border-radius: var(--radius-md); }
-        .nav-btn.active::before { opacity: 1; }
+        .nav-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--accent-gradient); z-index: -1; opacity: 0; transition: opacity 0.3s var(--smooth), transform 0.3s var(--spring); transform: scale(0.9); border-radius: var(--radius-md); }
+        .nav-btn.active::before { opacity: 1; transform: scale(1); }
 
         .content-area { width: 95%; max-width: 1200px; margin-top: 40px; margin-bottom: 60px; flex-grow: 1; }
-        .view-section { display: none; opacity: 0; transform: translateY(15px); }
+        .view-section { display: none; opacity: 0; transform: translateY(15px) scale(0.98); }
         .view-section.active { display: block; animation: viewIn 0.4s var(--smooth) forwards; }
-        @keyframes viewIn { to { opacity: 1; transform: translateY(0); } }
+        @keyframes viewIn { to { opacity: 1; transform: translateY(0) scale(1); } }
 
         .page-container { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 40px; max-width: 650px; margin: 0 auto; box-shadow: var(--shadow-lg); }
         .page-container h2 { margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; }
         .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); font-size: 1.1rem; }
 
-        .base-input { width: 100%; padding: 12px 16px; margin-bottom: 15px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); font-family: inherit; box-sizing: border-box; outline: none; }
-        .base-input:focus { border-color: var(--accent); }
-        .base-btn { padding: 12px 20px; border-radius: var(--radius-md); border: none; font-family: inherit; font-size: 1.1rem; cursor: pointer; color: white; transition: transform 0.2s; }
-        .base-btn:hover { transform: translateY(-2px); }
+        .base-input { width: 100%; padding: 12px 16px; margin-bottom: 15px; background: var(--bg-base); color: var(--text-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); font-family: inherit; box-sizing: border-box; outline: none; transition: all 0.3s ease; }
+        .base-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.2); }
+        .base-btn { padding: 12px 20px; border-radius: var(--radius-md); border: none; font-family: inherit; font-size: 1.1rem; cursor: pointer; color: white; transition: transform 0.2s var(--spring), opacity 0.2s; }
+        .base-btn:hover { transform: translateY(-2px); opacity: 0.95; }
 
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s var(--smooth); border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .3s var(--smooth); border-radius: 50%; }
         input:checked + .slider { background: var(--accent-gradient); }
         input:checked + .slider:before { transform: translateX(24px); }
 
         /* Games Grid */
         .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; }
-        .game-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); cursor: pointer; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; transition: all 0.3s var(--spring); position: relative; overflow: hidden; }
-        .game-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 15px 30px rgba(255,61,0,0.15); }
+        .game-card { background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); cursor: pointer; text-decoration: none; color: var(--text-main); display: flex; flex-direction: column; transition: all 0.3s var(--spring); position: relative; overflow: hidden; box-shadow: var(--shadow-sm); }
+        .game-card:hover { transform: translateY(-8px) scale(1.02); border-color: var(--accent); box-shadow: 0 15px 30px rgba(255,61,0,0.15); }
         .thumbnail { width: 100%; height: 160px; background: var(--thumb-bg); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .thumbnail img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .game-card:hover .thumbnail img { transform: scale(1.08); }
         .game-title { padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; }
         .play-btn { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--accent-gradient); color: white; text-align: center; padding: 12px 0; transform: translateY(100%); transition: transform 0.3s var(--smooth); }
         .game-card:hover .play-btn { transform: translateY(0); }
@@ -118,18 +121,20 @@
         #chat-view.active { display: flex; position: fixed; top: 73px; left: 0; width: 100vw; height: calc(100vh - 73px); z-index: 50; background: var(--bg-base); }
         .chat-container { display: flex; width: 100%; height: 100%; background: var(--bg-base); position: relative; overflow: hidden; }
         
-        #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.9); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; }
+        #auth-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.9); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .chat-sidebar { width: 320px; background-color: var(--bg-surface); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
         .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-base); padding: 5px; }
-        .sidebar-tab-btn { flex: 1; padding: 12px 0; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-family: inherit; font-size: 1rem; border-radius: 8px; }
+        .sidebar-tab-btn { flex: 1; padding: 12px 0; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-family: inherit; font-size: 1rem; border-radius: 8px; transition: all 0.2s ease; }
+        .sidebar-tab-btn:hover { color: var(--text-main); }
         .sidebar-tab-btn.active-tab { background: var(--bg-surface); color: var(--accent); font-weight: bold; }
         .sidebar-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px; }
         
         .group-list { list-style: none; padding: 10px; margin: 0; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
-        .group-list li { padding: 12px 15px; cursor: pointer; border-radius: var(--radius-md); transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; }
-        .group-list li:hover { background-color: var(--thumb-bg); }
-        .group-list li.active-group { background: var(--accent-gradient); color: white; }
+        .group-list li { padding: 12px 15px; cursor: pointer; border-radius: var(--radius-md); transition: background 0.2s, transform 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .group-list li:hover { background-color: var(--thumb-bg); transform: translateX(2px); }
+        .group-list li.active-group { background: var(--accent-gradient); color: white; font-weight: bold; }
 
         .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #666; margin-right: 8px; }
         .status-online { background-color: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
@@ -149,11 +154,14 @@
         .date-divider::before { content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border-color); z-index: 1; }
         .date-divider span { background: var(--bg-base); padding: 0 15px; position: relative; z-index: 2; }
 
-        .message-row { display: flex; align-items: flex-end; gap: 10px; }
+        .message-row { display: flex; align-items: flex-end; gap: 10px; animation: slideUp 0.3s var(--spring) forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .message-row.own-row { flex-direction: row-reverse; }
-        .chat-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid var(--border-color); }
+        
+        .chat-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid var(--border-color); transition: transform 0.2s; }
+        .chat-avatar:hover { transform: scale(1.1); }
 
-        .message { background-color: var(--bg-surface); padding: 12px 18px; border-radius: 16px 16px 16px 4px; max-width: 65%; border: 1px solid var(--border-color); word-wrap: break-word; font-size: 1rem; position: relative; }
+        .message { background-color: var(--bg-surface); padding: 12px 18px; border-radius: 16px 16px 16px 4px; max-width: 65%; border: 1px solid var(--border-color); word-wrap: break-word; font-size: 1rem; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .message.own-message { background: var(--thumb-bg); border-color: #333; border-radius: 16px 16px 4px 16px; }
         .message.mentioned { border-color: var(--accent); box-shadow: 0 0 12px rgba(255, 87, 34, 0.4); }
         
@@ -165,19 +173,22 @@
 
         .chat-input { padding: 15px 35px; background: var(--bg-surface-glass); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); display: flex; gap: 12px; align-items: center; }
         .chat-input input { flex-grow: 1; padding: 14px 20px; border-radius: 24px; border: 1px solid var(--border-color); background-color: var(--bg-base); color: var(--text-main); font-family: inherit; font-size: 1rem; outline: none; }
-        .chat-input button { padding: 14px 28px; background: var(--accent-gradient); color: white; border: none; border-radius: 24px; font-family: inherit; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .chat-input button { padding: 14px 28px; background: var(--accent-gradient); color: white; border: none; border-radius: 24px; font-family: inherit; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s var(--spring); }
+        .chat-input button:hover { transform: scale(1.05); }
 
         #pip-chat-overlay { display: none; position: fixed; bottom: 20px; right: 20px; width: 320px; height: 400px; background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--radius-lg); z-index: 1000; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; }
 
-        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
-        .modal-content { max-width: 400px; width: 90%; background-color: var(--bg-surface); padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); position: relative; }
+        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .modal-content { max-width: 400px; width: 90%; background-color: var(--bg-surface); padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); position: relative; box-shadow: var(--shadow-lg); animation: popModal 0.3s var(--spring); }
+        @keyframes popModal { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         .avatar-dropdown { position: absolute; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); z-index: 1000; display: none; flex-direction: column; min-width: 150px; overflow: hidden; }
         .dropdown-item { padding: 10px 15px; background: transparent; border: none; color: var(--text-main); text-align: left; cursor: pointer; font-family: inherit; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); }
         .dropdown-item:hover { background: var(--thumb-bg-hover); color: var(--accent); }
 
-        #call-banner { display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 10px 20px; border-radius: 20px; z-index: 150; align-items: center; gap: 15px; font-weight: bold; }
-        .action-icon-btn { background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: var(--radius-md); cursor: pointer; font-family: inherit; font-size: 0.9rem; }
+        #call-banner { display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 10px 20px; border-radius: 20px; z-index: 150; align-items: center; gap: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .action-icon-btn { background: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: var(--radius-md); cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: background 0.2s; }
+        .action-icon-btn:hover { background: var(--thumb-bg-hover); }
     </style>
 </head>
 <body>
@@ -380,15 +391,18 @@
         <div id="pip-messages" style="flex-grow:1; padding:10px; overflow-y:auto; font-size:0.85rem; display:flex; flex-direction:column; gap:8px;"></div>
     </div>
 
-    <!-- Modals -->
+    <!-- Group Settings Modal -->
     <div id="group-modal" class="custom-modal">
         <div class="modal-content">
             <button id="close-modal" style="position:absolute; top:15px; right:15px; background:none; color:white; border:none; cursor:pointer;">&times;</button>
-            <h2>Group Settings</h2>
+            <h2>Group Controls</h2>
             <p style="font-size:0.9rem; color:var(--text-muted);">Set Group Password:</p>
             <input type="text" id="modal-password" class="base-input" placeholder="Password...">
             <button id="save-password-btn" class="base-btn" style="width:100%; background:var(--accent-gradient);">Save Password</button>
-            <button id="clear-chat-btn" class="base-btn" style="width:100%; background:#FF9800; margin-top:10px;">🧹 Purge Messages</button>
+            <h3 style="margin-top:15px; font-size:1rem;">Members:</h3>
+            <ul id="member-list" style="max-height:100px; overflow-y:auto; padding-left:15px; color:var(--text-muted); margin-bottom:15px;"></ul>
+            <button id="clear-chat-btn" class="base-btn" style="width:100%; background:#FF9800; margin-bottom:10px;">🧹 Purge Messages</button>
+            <button id="delete-group-btn" class="base-btn" style="width:100%; background:#f44336;">🗑️ Delete Group</button>
         </div>
     </div>
 
@@ -500,6 +514,27 @@
             alert("Wallpaper updated!");
         });
 
+        // Theme & Gradient Controls
+        const themeToggle = document.getElementById('theme-toggle');
+        const color1Input = document.getElementById('color1');
+        const color2Input = document.getElementById('color2');
+        const root = document.documentElement;
+
+        function applyColors(c1, c2) {
+            root.style.setProperty('--accent', c1);
+            root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${c1}, ${c2})`);
+        }
+        if (themeToggle) {
+            themeToggle.addEventListener('change', (e) => {
+                if (e.target.checked) document.body.classList.remove('light-mode');
+                else document.body.classList.add('light-mode');
+            });
+        }
+        if (color1Input && color2Input) {
+            color1Input.addEventListener('input', (e) => applyColors(e.target.value, color2Input.value));
+            color2Input.addEventListener('input', (e) => applyColors(color1Input.value, e.target.value));
+        }
+
         // Firebase Auth
         document.getElementById('login-btn').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
         document.getElementById('logout-btn').addEventListener('click', () => { setOnlineStatus(false); signOut(auth); });
@@ -530,6 +565,7 @@
                 document.getElementById('logout-btn').style.display = 'block';
                 document.getElementById('page-profile-name').textContent = user.displayName;
                 document.getElementById('page-profile-id').value = currentUserProfileId;
+                document.getElementById('profile-preview-img').src = user.photoURL || 'assets/sitelogo.png';
                 if (ADMIN_EMAILS.includes(user.email)) document.getElementById('admin-panel').style.display = 'block';
                 loadGroups();
                 loadContacts();
@@ -538,6 +574,26 @@
                 document.getElementById('auth-overlay').style.display = 'flex';
                 document.getElementById('logout-btn').style.display = 'none';
             }
+        });
+
+        // Create Group / DM Handlers
+        document.getElementById('create-group-btn').addEventListener('click', async () => {
+            const name = prompt("Enter new group name:");
+            if (!name || !name.trim()) return;
+            await addDoc(collection(db, "groups"), {
+                name: name.trim(), ownerUid: currentUser.uid, password: "", isDM: false,
+                members: [{ uid: currentUser.uid, name: currentUser.displayName }], createdAt: serverTimestamp()
+            });
+        });
+
+        document.getElementById('create-dm-btn').addEventListener('click', async () => {
+            const profileId = prompt("Enter the 8-Digit Profile ID of your friend:");
+            if (!profileId || !profileId.trim()) return;
+            const q = query(collection(db, "users"), where("profileId", "==", profileId.trim()));
+            const snap = await getDocs(q);
+            if (snap.empty) { alert("User not found!"); return; }
+            const targetData = snap.docs[0].data();
+            startDM(targetData.uid, targetData.name);
         });
 
         function loadContacts() {
@@ -569,7 +625,7 @@
             if (targetUid === currentUser.uid) return;
             const dmId = currentUser.uid < targetUid ? `dm_${currentUser.uid}_${targetUid}` : `dm_${targetUid}_${currentUser.uid}`;
             await setDoc(doc(db, "groups", dmId), {
-                name: "Direct Message", ownerUid: "system", password: "", isDM: true,
+                name: targetName, ownerUid: "system", password: "", isDM: true,
                 members: [ { uid: currentUser.uid, name: currentUser.displayName }, { uid: targetUid, name: targetName } ], createdAt: serverTimestamp()
             }, { merge: true });
         }
@@ -606,11 +662,19 @@
         function switchGroup(groupId, groupData) {
             activeGroupId = groupId;
             activeGroupData = groupData;
-            document.getElementById('current-group-title').textContent = groupData.isDM ? groupData.name : `# ${groupData.name}`;
+            document.getElementById('current-group-title').textContent = groupData.isDM ? `@ ${groupData.name}` : `# ${groupData.name}`;
             document.getElementById('message-input').disabled = false;
             document.getElementById('send-btn').disabled = false;
             document.getElementById('start-call-btn').style.display = groupData.isDM ? 'block' : 'none';
             document.getElementById('delete-dm-btn').style.display = groupData.isDM ? 'block' : 'none';
+
+            const isOwnerOrAdmin = groupData.ownerUid === currentUser.uid || ADMIN_EMAILS.includes(currentUser.email);
+            const groupSettingsBtn = document.getElementById('group-settings-btn');
+            if (isOwnerOrAdmin && !groupData.isDM) {
+                groupSettingsBtn.style.display = 'block';
+            } else {
+                groupSettingsBtn.style.display = 'none';
+            }
 
             const pinnedBanner = document.getElementById('pinned-banner');
             if (groupData.pinnedMessage) {
@@ -641,6 +705,11 @@
                     const row = document.createElement('div');
                     row.className = `message-row ${isOwn ? 'own-row' : ''}`;
 
+                    // Avatar Element Restored
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = msg.photoURL || 'assets/sitelogo.png';
+                    avatarImg.className = 'chat-avatar';
+
                     const isMentioned = msg.text.includes(`@${currentUser.displayName}`);
                     const bubble = document.createElement('div');
                     bubble.className = `message ${isOwn ? 'own-message' : ''} ${isMentioned ? 'mentioned' : ''}`;
@@ -664,6 +733,7 @@
                         });
                     }
 
+                    row.appendChild(avatarImg);
                     row.appendChild(bubble);
                     messagesContainer.appendChild(row);
                 });
@@ -676,15 +746,54 @@
             });
         }
 
+        // Group Settings Modal Handlers
+        const groupModal = document.getElementById('group-modal');
+        document.getElementById('group-settings-btn').addEventListener('click', () => {
+            if (!activeGroupData || activeGroupData.isDM) return;
+            groupModal.style.display = 'flex';
+            document.getElementById('modal-password').value = activeGroupData.password || "";
+            const memberList = document.getElementById('member-list');
+            memberList.innerHTML = '';
+            (activeGroupData.members || []).forEach(m => {
+                const li = document.createElement('li');
+                li.textContent = m.name;
+                memberList.appendChild(li);
+            });
+        });
+        document.getElementById('close-modal').addEventListener('click', () => groupModal.style.display = 'none');
+        document.getElementById('save-password-btn').addEventListener('click', async () => {
+            if (!activeGroupId) return;
+            const pwd = document.getElementById('modal-password').value;
+            await updateDoc(doc(db, "groups", activeGroupId), { password: pwd });
+            alert("Password updated!");
+            groupModal.style.display = 'none';
+        });
+        document.getElementById('clear-chat-btn').addEventListener('click', async () => {
+            if (!activeGroupId || !confirm("Purge all messages?")) return;
+            const msgs = await getDocs(collection(db, "groups", activeGroupId, "messages"));
+            msgs.forEach(d => deleteDoc(doc(db, "groups", activeGroupId, "messages", d.id)));
+            groupModal.style.display = 'none';
+        });
+        document.getElementById('delete-group-btn').addEventListener('click', async () => {
+            if (!activeGroupId || !confirm("Delete this group permanently?")) return;
+            await deleteDoc(doc(db, "groups", activeGroupId));
+            groupModal.style.display = 'none';
+            messagesContainer.innerHTML = '';
+            document.getElementById('current-group-title').textContent = '# Select a Chat';
+        });
+
         // Send Message
         const sendMessage = async () => {
             const input = document.getElementById('message-input');
             const text = input.value.trim();
-            if (!text || !activeGroupId) return;
+            if (!text || !activeGroupId || !currentUser) return;
 
             input.value = '';
+            const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+            const photoURL = userSnap.exists() ? (userSnap.data().customPhotoURL || currentUser.photoURL || "") : (currentUser.photoURL || "");
+
             await addDoc(collection(db, "groups", activeGroupId, "messages"), {
-                text: text, uid: currentUser.uid, author: currentUser.displayName, createdAt: serverTimestamp()
+                text: text, uid: currentUser.uid, author: currentUser.displayName, photoURL: photoURL, createdAt: serverTimestamp()
             });
 
             if (document.getElementById('sound-toggle').checked) {
