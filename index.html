@@ -272,7 +272,7 @@
                             <button id="end-call-btn" class="action-icon-btn" style="display:none; background:#f44336; color:white;">📵 End</button>
                             <audio id="local-audio" autoplay muted style="display:none;"></audio>
                             <audio id="remote-audio" autoplay style="display:none;"></audio>
-                            <button id="delete-dm-btn" class="action-icon-btn" style="display:none; color:#f44336;">🗑️</button>
+                            <button id="delete-dm-btn" class="action-icon-btn" style="display:none; color:#f44336;" title="Delete all messages in DM">🗑️</button>
                             <button id="group-settings-btn" class="action-icon-btn" style="display:none;">⚙️</button>
                             <button id="logout-btn" style="display:none;">Log Out</button>
                         </div>
@@ -744,6 +744,14 @@
                 }
             });
         }
+
+        // Delete/Purge DM Messages Button Handler
+        document.getElementById('delete-dm-btn').addEventListener('click', async () => {
+            if (!activeGroupId || !activeGroupData?.isDM) return;
+            if (!confirm("Are you sure you want to delete all messages in this DM?")) return;
+            const msgs = await getDocs(collection(db, "groups", activeGroupId, "messages"));
+            msgs.forEach(d => deleteDoc(doc(db, "groups", activeGroupId, "messages", d.id)));
+        });
 
         // Group Settings Modal Handlers
         const groupModal = document.getElementById('group-modal');
