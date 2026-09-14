@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet title="XSL_formatting" type="text/xsl" href="/apps/shared/rss.xsl"?>
+<rss version="2.0">
+	<channel>
+		<title>Norwin Middle School - Calendar</title>
+		<link>//middleschool.norwinsd.org/apps/events/?id=0&amp;y=2026&amp;m=09</link>
+		<description>Calendar</description>
+		<language>en-us</language>
+		<generator>Edlio CMS</generator>
+				<item>
+					<title><![CDATA[Labor Day- No school for students ]]></title>
+					<link>//middleschool.norwinsd.org/apps/events/2026/8/7/48156288/?REC_ID=48156288&amp;d=2026-8-7</link>
+					<guid isPermaLink="false">//middleschool.norwinsd.org/eventItem48,156,288 2026-09-07</guid>
+					<description><![CDATA[
+						<b>9/7/2026</b>
+					]]></description>
+					<pubDate>Wed, 08 Jul 2026 07:51:59 EDT</pubDate>
+				</item>
+				<item>
+					<title><![CDATA[School Picture Day]]></title>
+					<link>//middleschool.norwinsd.org/apps/events/2026/8/9/53097898/?REC_ID=53097898&amp;d=2026-8-9</link>
+					<guid isPermaLink="false">//middleschool.norwinsd.org/eventItem53,097,898 2026-09-09</guid>
+					<description><![CDATA[
+						<b>9/9/2026</b>
+					]]></description>
+					<pubDate>Tue, 01 Sep 2026 08:00:06 EDT</pubDate>
+				</item>
+				<item>
+					<title><![CDATA[Open House ]]></title>
+					<link>//middleschool.norwinsd.org/apps/events/2026/8/10/53097902/?REC_ID=53097902&amp;d=2026-8-10</link>
+					<guid isPermaLink="false">//middleschool.norwinsd.org/eventItem53,097,902 2026-09-10</guid>
+					<description><![CDATA[
+						<b>9/10/2026</b>
+						<b>6:00 PM &ndash; 8:00 PM</b>
+					]]></description>
+					<pubDate>Tue, 01 Sep 2026 08:01:13 EDT</pubDate>
+				</item>
+   </channel>
+</rss>

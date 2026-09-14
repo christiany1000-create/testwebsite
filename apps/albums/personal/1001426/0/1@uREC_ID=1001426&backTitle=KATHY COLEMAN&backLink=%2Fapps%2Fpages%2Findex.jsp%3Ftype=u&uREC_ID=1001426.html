@@ -1,0 +1,61 @@
+
+
+
+
+
+    <html lang="en">
+    <head>
+
+
+
+<!-- ISUIBETA:  -->
+
+<script type="text/javascript" charset="utf-8" src="../../../../js/jquery/3.7.1/jquery-pack-1789405005963.js"></script>
+<script type="text/javascript" charset="utf-8">
+					var jq37 = jQuery.noConflict();
+				</script>
+
+
+            <title>Album Home</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+
+    <div id="breadcrumbs" class="breadcrumb">
+            <span class="breadcrumb-current" data-qa="AlbumHome"><strong>Album Home</strong></span>
+    </div>
+
+
+
+
+
+
+    <strong class="error-message">There are no photos in our album at this point.  Please check back soon...</strong><br><br>
+
+    <script type="text/javascript" src="../../../../webapps/common/magnific-popup/1.1.0/jquery.magnific-popup-iframe-pack.js"></script>
+      <link rel="stylesheet" href="../../../../webapps/features/albums/css/albums_public_iframe-pack.css">
+    <script>
+        (function($) {
+            $(document).ready(function() {
+                $('#album_thumbnails').each(function() {
+                    $(this).magnificPopup({
+                        delegate: 'a.gallery',
+                        type: 'image',
+                        gallery: {
+                            enabled: true
+                        },
+                        titleSrc: 'title',
+                        closeOnContentClick: true,
+                        closeBtnInside: false,
+                        mainClass: 'mfp-no-margins mfp-with-zoom',
+                        image: {verticalFit: true},
+                        zoom: {
+                            enabled: true,
+                            duration: 300
+                        }
+                    });
+                });
+            });
+        })(jq37);
+    </script>
+
+    </html>

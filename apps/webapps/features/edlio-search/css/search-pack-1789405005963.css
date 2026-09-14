@@ -1,0 +1,146 @@
+#edlio_search_container #search {
+  display: flex;
+  position: relative;
+  width: 100%;
+  height: 40px;
+  justify-content: space-between; }
+  #edlio_search_container #search button {
+    margin-left: 10px;
+    padding: 5px;
+    width: 40px;
+    border: 1px solid black;
+    background-color: lightgrey; }
+    #edlio_search_container #search button svg {
+      width: 20px;
+      height: 20px; }
+    #edlio_search_container #search button:hover {
+      cursor: pointer; }
+
+#edlio_search_container #search_bar {
+  width: 100%;
+  font-size: 1.25em;
+  padding: 5px; }
+
+#edlio_search_container #results {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 300px;
+  background: #ffffff; }
+  #edlio_search_container #results .result {
+    margin-bottom: 10px; }
+  #edlio_search_container #results .no-results {
+    margin: 16px 0;
+    background: #f4f4f4;
+    padding: 5px;
+    border: 1px solid #000000; }
+  #edlio_search_container #results .loading {
+    margin: 16px 0; }
+  #edlio_search_container #results .results-preview, #edlio_search_container #results a {
+    font-family: Arial, sans-serif; }
+
+#edlio_search_container .result-item {
+  padding: 10px 0;
+  font-size: 0.85em; }
+  #edlio_search_container .result-item a {
+    text-decoration: unset; }
+  #edlio_search_container .result-item .result-title a {
+    color: #0000CC;
+    font-size: 1.25em;
+    text-decoration: underline;
+    word-wrap: break-word; }
+    #edlio_search_container .result-item .result-title a mark {
+      color: #0000CC;
+      font-weight: bold;
+      background-color: unset; }
+  #edlio_search_container .result-item .result-link a {
+    color: #008000;
+    word-wrap: break-word; }
+
+#edlio_search_container #pagination_container {
+  margin: 10px auto;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: row;
+  justify-content: center; }
+  #edlio_search_container #pagination_container .pagination-btn {
+    color: #333;
+    /* $secondary-button-text-color */
+    background: #fff;
+    /* $secondary-button-bg-color */
+    font-weight: 400;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: none;
+    padding: 8px 12px !important;
+    transition: background 0.2s, color 0.2s; }
+    #edlio_search_container #pagination_container .pagination-btn:first-child {
+      border-radius: 4px 0 0 4px; }
+    #edlio_search_container #pagination_container .pagination-btn:last-child {
+      border-radius: 0 4px 4px 0; }
+  #edlio_search_container #pagination_container .pagination-btn.active {
+    background: #f5f5f5;
+    /* $secondary-button-selected-bg-color or $grey-1 */
+    color: #222;
+    font-weight: bold;
+    cursor: default; }
+  #edlio_search_container #pagination_container .pagination-btn:disabled,
+  #edlio_search_container #pagination_container .pagination-btn[disabled] {
+    background: #eee;
+    color: #aaa;
+    cursor: default;
+    box-shadow: none; }
+  #edlio_search_container #pagination_container .pagination-btn:hover:not(:disabled):not(.active) {
+    background: #f4f4f4;
+    text-decoration: underline; }
+  #edlio_search_container #pagination_container .pagination-btn.ellipsis {
+    margin: unset;
+    border: 1px solid #ccc;
+    padding: 8px 8px !important;
+    background: transparent;
+    cursor: default; }
+  #edlio_search_container #pagination_container .arrow {
+    font-size: 1.25em;
+    line-height: 0;
+    margin-bottom: .2em; }
+
+#edlio_search_container #clear_button {
+  display: inline-block;
+  position: absolute;
+  right: 50px;
+  margin: 5px;
+  overflow: hidden;
+  width: 30px;
+  height: 30px; }
+  #edlio_search_container #clear_button svg {
+    width: 30px;
+    height: 30px;
+    fill: #A1B9ED; }
+    #edlio_search_container #clear_button svg:hover {
+      cursor: pointer;
+      fill: #7699e5; }
+
+#edlio_search_container .hidden-ada {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px; }
+
+#edlio_search_container .hidden {
+  display: none !important; }
+
+#edlio_search_container #count_container p {
+  color: #676767;
+  font-size: 0.85em; }
+
+#edlio_search_container .opaque {
+  opacity: 0.4; }
+
+#edlio_search_container #search_bar::-ms-clear {
+  display: none; }
+
+/*# sourceMappingURL=../../../maps/features/edlio-search/css/search-pack.css.map */

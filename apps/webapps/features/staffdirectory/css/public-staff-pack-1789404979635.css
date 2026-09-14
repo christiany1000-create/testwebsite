@@ -1,0 +1,417 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i,800,800i");
+@font-face {
+  font-family: 'icomoon-user-pages';
+  src: url("../../../../pics/fonts/user_pages_icons/icomoon-user-pages.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal; }
+
+.staff-directory {
+  /* RESPONSIVE LAYOUT */
+  /* MOBILE CSS */
+  /* THIS REUSES LEGACY CODE FROM PROFILE_PHOTO_PUBLIC.CSS */ }
+  .staff-directory .staff-list.desktop {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column; }
+    .staff-directory .staff-list.desktop .sublist {
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column; }
+    .staff-directory .staff-list.desktop ol {
+      display: block;
+      list-style: none;
+      margin: 0;
+      padding: 0; }
+      .staff-directory .staff-list.desktop ol .staff {
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        margin: 0; }
+        .staff-directory .staff-list.desktop ol .staff .user-profile-pic {
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
+          -ms-flex-pack: center;
+          -webkit-justify-content: center;
+          justify-content: center;
+          border: 2px solid white;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.14);
+          overflow: hidden;
+          margin-right: .899em;
+          max-width: 100%; }
+          .staff-directory .staff-list.desktop ol .staff .user-profile-pic img {
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            width: 100%;
+            height: 100%; }
+        .staff-directory .staff-list.desktop ol .staff .user-info {
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
+          -webkit-flex-direction: column;
+          -ms-flex-direction: column;
+          flex-direction: column;
+          -ms-flex-wrap: wrap;
+          -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+          -webkit-flex: 0 1 100%;
+          -ms-flex: 0 1 100%;
+          flex: 0 1 100%;
+          max-width: 100%; }
+          .staff-directory .staff-list.desktop ol .staff .user-info > * {
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -ms-flex-wrap: wrap;
+            -webkit-flex-wrap: wrap;
+            flex-wrap: wrap; }
+            .staff-directory .staff-list.desktop ol .staff .user-info > * > * {
+              -webkit-flex: 0 1 auto;
+              -ms-flex: 0 1 auto;
+              flex: 0 1 auto; }
+          .staff-directory .staff-list.desktop ol .staff .user-info .user-address {
+            -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -ms-flex-wrap: none;
+            -webkit-flex-wrap: nowrap;
+            flex-wrap: nowrap; }
+          .staff-directory .staff-list.desktop ol .staff .user-info a {
+            text-decoration: none;
+            word-break: break-word; }
+            .staff-directory .staff-list.desktop ol .staff .user-info a:hover {
+              text-decoration: underline; }
+          .staff-directory .staff-list.desktop ol .staff .user-info .name-position .name {
+            font-size: 1.27em;
+            font-weight: 600;
+            margin-right: .3em; }
+          .staff-directory .staff-list.desktop ol .staff .user-info .name-position .user-position {
+            color: #333333; }
+          .staff-directory .staff-list.desktop ol .staff .user-info .user-email, .staff-directory .staff-list.desktop ol .staff .user-info .user-cell {
+            margin-right: 1em; }
+    .staff-directory .staff-list.desktop.template-0 .list .staff .user-info, .staff-directory .staff-list.desktop.template-1 .list .staff .user-info, .staff-directory .staff-list.desktop.template-2 .list .staff .user-info {
+      max-width: calc( 100% - 4.89em); }
+    .staff-directory .staff-list.desktop.template-3 .list .staff .user-info, .staff-directory .staff-list.desktop.template-4 .list .staff .user-info, .staff-directory .staff-list.desktop.template-5 .list .staff .user-info {
+      max-width: calc( 100% - 10em); }
+    .staff-directory .staff-list.desktop.template-0 li {
+      padding: .86em; }
+    .staff-directory .staff-list.desktop.template-0 .staff, .staff-directory .staff-list.desktop.template-1 .staff {
+      -ms-flex-align: start;
+      -webkit-align-items: flex-start;
+      align-items: flex-start; }
+      .staff-directory .staff-list.desktop.template-0 .staff .name-position, .staff-directory .staff-list.desktop.template-1 .staff .name-position {
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center; }
+      .staff-directory .staff-list.desktop.template-0 .staff .user-profile-pic, .staff-directory .staff-list.desktop.template-1 .staff .user-profile-pic {
+        -webkit-flex: 0 0 4.89em;
+        -ms-flex: 0 0 4.89em;
+        flex: 0 0 4.89em;
+        height: 4.89em;
+        border-radius: 100%; }
+        .staff-directory .staff-list.desktop.template-0 .staff .user-profile-pic img, .staff-directory .staff-list.desktop.template-1 .staff .user-profile-pic img {
+          border-radius: 50%; }
+    .staff-directory .staff-list.desktop.template-2 ol, .staff-directory .staff-list.desktop.template-5 ol {
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+      -webkit-flex-wrap: wrap;
+      flex-wrap: wrap;
+      -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+      flex-direction: row; }
+      .staff-directory .staff-list.desktop.template-2 ol .staff, .staff-directory .staff-list.desktop.template-5 ol .staff {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        overflow: hidden;
+        -webkit-flex: 0 0 29.333%;
+        -ms-flex: 0 0 29.333%;
+        flex: 0 0 29.333%;
+        padding: 14px 2%; }
+        .staff-directory .staff-list.desktop.template-2 ol .staff .user-info, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info {
+          -webkit-flex: 1 0 auto;
+          -ms-flex: 1 0 auto;
+          flex: 1 0 auto;
+          padding-top: .618em;
+          min-width: 64%; }
+          .staff-directory .staff-list.desktop.template-2 ol .staff .user-info:first-child, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info:first-child {
+            -ms-flex-item-align: start;
+            -webkit-align-self: flex-start;
+            align-self: flex-start; }
+          .staff-directory .staff-list.desktop.template-2 ol .staff .user-info > *, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info > * {
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column; }
+          .staff-directory .staff-list.desktop.template-2 ol .staff .user-info.ada .user-link:hover, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info.ada .user-link:hover {
+            text-decoration: none; }
+            .staff-directory .staff-list.desktop.template-2 ol .staff .user-info.ada .user-link:hover .name, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info.ada .user-link:hover .name {
+              text-decoration: underline; }
+          .staff-directory .staff-list.desktop.template-2 ol .staff .user-info.ada .name-position, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info.ada .name-position {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin: 0 auto;
+            padding-top: .618em; }
+          .staff-directory .staff-list.desktop.template-2 ol .staff .user-info.ada .other-info, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info.ada .other-info {
+            width: 100%;
+            margin: 0 auto; }
+          .staff-directory .staff-list.desktop.template-2 ol .staff .user-info .user-address, .staff-directory .staff-list.desktop.template-5 ol .staff .user-info .user-address {
+            -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+            flex-direction: row; }
+        .staff-directory .staff-list.desktop.template-2 ol .staff .user-profile-pic, .staff-directory .staff-list.desktop.template-5 ol .staff .user-profile-pic {
+          -webkit-flex: 0 0 auto;
+          -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+          margin: 0 2em; }
+    .staff-directory .staff-list.desktop.template-2 .staff .user-profile-pic {
+      border-radius: 100%; }
+      .staff-directory .staff-list.desktop.template-2 .staff .user-profile-pic img {
+        border-radius: 50%; }
+    .staff-directory .staff-list.desktop.template-3 .staff, .staff-directory .staff-list.desktop.template-4 .staff {
+      padding: .618em; }
+      .staff-directory .staff-list.desktop.template-3 .staff .user-profile-pic, .staff-directory .staff-list.desktop.template-4 .staff .user-profile-pic {
+        -webkit-flex: 0 0 10em;
+        -ms-flex: 0 0 10em;
+        flex: 0 0 10em;
+        height: 10em; }
+      .staff-directory .staff-list.desktop.template-3 .staff .user-info > *, .staff-directory .staff-list.desktop.template-4 .staff .user-info > * {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column; }
+    .staff-directory .staff-list.desktop.template-1 .column, .staff-directory .staff-list.desktop.template-4 .column {
+      flex: 1 1 auto;
+      max-width: 100%; }
+  .staff-directory.responsive .staff-list.desktop {
+    /* THIS STYLING IS FOR SECTION STAFF LISTS WITH SIDE NAV */ }
+    .staff-directory.responsive .staff-list.desktop.template-2 ol .staff, .staff-directory.responsive .staff-list.desktop.template-5 ol .staff {
+      -webkit-flex: 0 0 100%;
+      -ms-flex: 0 0 100%;
+      flex: 0 0 100%;
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      -ms-flex-align: center;
+      -webkit-align-items: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 14px 0; }
+      @media screen and (min-width: 460px) {
+        .staff-directory.responsive .staff-list.desktop.template-2 ol .staff, .staff-directory.responsive .staff-list.desktop.template-5 ol .staff {
+          -webkit-flex: 0 0 44%;
+          -ms-flex: 0 0 44%;
+          flex: 0 0 44%;
+          padding: 14px 3%; } }
+      @media screen and (min-width: 768px) {
+        .staff-directory.responsive .staff-list.desktop.template-2 ol .staff, .staff-directory.responsive .staff-list.desktop.template-5 ol .staff {
+          -webkit-flex: 0 0 29.333%;
+          -ms-flex: 0 0 29.333%;
+          flex: 0 0 29.333%;
+          padding: 14px 2%; } }
+      .staff-directory.responsive .staff-list.desktop.template-2 ol .staff .user-profile-pic, .staff-directory.responsive .staff-list.desktop.template-5 ol .staff .user-profile-pic {
+        -webkit-flex: 0 0 auto;
+        -ms-flex: 0 0 auto;
+        flex: 0 0 auto;
+        margin: 0 4em;
+        min-inline-size: -webkit-fill-available;
+        min-inline-size: -moz-available; }
+        @media screen and (min-width: 460px) {
+          .staff-directory.responsive .staff-list.desktop.template-2 ol .staff .user-profile-pic, .staff-directory.responsive .staff-list.desktop.template-5 ol .staff .user-profile-pic {
+            margin: 0 2em; } }
+    .staff-directory.responsive .staff-list.desktop.template-1 .column ol, .staff-directory.responsive .staff-list.desktop.template-4 .column ol {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      width: 100%; }
+      .staff-directory.responsive .staff-list.desktop.template-1 .column ol li, .staff-directory.responsive .staff-list.desktop.template-4 .column ol li {
+        flex: 1 1 50%;
+        max-width: 100%;
+        padding: 0.5em 0; }
+        @media screen and (max-width: 768px) {
+          .staff-directory.responsive .staff-list.desktop.template-1 .column ol li, .staff-directory.responsive .staff-list.desktop.template-4 .column ol li {
+            flex: 1 0 100%; } }
+    @media screen and (min-width: 768px) {
+      .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-2 ol .staff, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-5 ol .staff {
+        -webkit-flex: 0 0 44%;
+        -ms-flex: 0 0 44%;
+        flex: 0 0 44%;
+        padding: 14px 3%; } }
+    @media screen and (min-width: 1024px) {
+      .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-2 ol .staff, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-5 ol .staff {
+        -webkit-flex: 0 0 29.333%;
+        -ms-flex: 0 0 29.333%;
+        flex: 0 0 29.333%;
+        padding: 14px 2%; } }
+    @media screen and (min-width: 768px) {
+      .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-2 ol .staff .user-profile-pic, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-5 ol .staff .user-profile-pic {
+        margin: 0 2em; } }
+    @media screen and (min-width: 768px) {
+      .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-1, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-4 {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column; }
+        .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-1 .column, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-4 .column {
+          max-width: 100%; }
+          .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-1 .column li, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-4 .column li {
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto; } }
+    @media screen and (min-width: 1024px) {
+      .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-1, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-4 {
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -ms-flex-wrap: wrap;
+        -webkit-flex-wrap: wrap;
+        flex-wrap: wrap; }
+        .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-1 .column li, .pages-left-column-wrapper:not(:last-child) .staff-directory.responsive .staff-list.desktop.template-4 .column li {
+          -webkit-flex: 1 0 50%;
+          -ms-flex: 1 0 50%;
+          flex: 1 0 50%; } }
+  .staff-directory .staff-list .user-email,
+  .staff-directory .staff-list .user-phone,
+  .staff-directory .staff-list .user-website,
+  .staff-directory .staff-list .user-address,
+  .staff-directory .staff-list .user-cell,
+  .staff-directory .staff-list .user-fax {
+    text-decoration: none;
+    color: #444444;
+    line-height: 1.6em;
+    display: inline-block; }
+    .staff-directory .staff-list .user-email:before,
+    .staff-directory .staff-list .user-phone:before,
+    .staff-directory .staff-list .user-website:before,
+    .staff-directory .staff-list .user-address:before,
+    .staff-directory .staff-list .user-cell:before,
+    .staff-directory .staff-list .user-fax:before {
+      font-family: 'icomoon-user-pages';
+      color: #444444;
+      speak: none;
+      font-weight: normal;
+      font-variant: normal;
+      text-transform: none;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      top: .1em;
+      font-size: 1em;
+      padding-right: .26em; }
+    .staff-directory .staff-list .user-email span,
+    .staff-directory .staff-list .user-phone span,
+    .staff-directory .staff-list .user-website span,
+    .staff-directory .staff-list .user-address span,
+    .staff-directory .staff-list .user-cell span,
+    .staff-directory .staff-list .user-fax span {
+      text-decoration: none;
+      color: #444444;
+      line-height: 1.6em;
+      display: inline-block; }
+  .staff-directory .staff-list .user-cell:before {
+    content: "\e900"; }
+  .staff-directory .staff-list .user-email:before {
+    content: "\e901"; }
+  .staff-directory .staff-list .user-fax:before {
+    content: "\e902"; }
+  .staff-directory .staff-list .user-phone:before {
+    content: "\e903"; }
+  .staff-directory .staff-list .user-website:before {
+    content: "\e905"; }
+  .staff-directory .staff-list .user-address:before {
+    content: "\e904"; }
+  .staff-directory .staff-list .user-email {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    white-space: normal; }
+  .staff-directory .group h2 {
+    font-weight: normal;
+    line-height: 2em;
+    border-bottom: 2px solid #aaabad; }
+  .staff-directory .staff-list.mobile ol {
+    list-style: none;
+    margin: 0 0 30px;
+    padding: 0; }
+    .staff-directory .staff-list.mobile ol li {
+      padding: 0;
+      position: relative;
+      border-bottom: 1px solid #cccccc; }
+      .staff-directory .staff-list.mobile ol li .all-info {
+        display: block;
+        font-size: 1em;
+        color: #111;
+        padding: .6em 3.1em .6em .6em;
+        position: relative; }
+        .staff-directory .staff-list.mobile ol li .all-info .user-page-link {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          display: block;
+          top: 0;
+          left: 0;
+          text-indent: -1000px;
+          padding: 0; }
+        .staff-directory .staff-list.mobile ol li .all-info .user-profile-pic {
+          display: block;
+          float: left;
+          border-radius: 26px;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+          margin-right: 10px;
+          height: 48px; }
+          .staff-directory .staff-list.mobile ol li .all-info .user-profile-pic img {
+            width: 48px;
+            height: 48px;
+            border-radius: 26px; }
+        .staff-directory .staff-list.mobile ol li .all-info .user-info {
+          margin-left: 65px; }
+          .staff-directory .staff-list.mobile ol li .all-info .user-info span {
+            display: block; }
+          .staff-directory .staff-list.mobile ol li .all-info .user-info .name {
+            font-weight: 600;
+            text-decoration: none; }
+          .staff-directory .staff-list.mobile ol li .all-info .user-info .user-position {
+            font-style: italic; }
+          .staff-directory .staff-list.mobile ol li .all-info .user-info .website {
+            position: relative;
+            z-index: 1; }
+      .staff-directory .staff-list.mobile ol li .user-email {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 0 .7em;
+        z-index: 9999;
+        width: 1em;
+        height: 2.2em;
+        overflow: hidden;
+        font-size: 1.6em; }
+        .staff-directory .staff-list.mobile ol li .user-email:before {
+          top: 0; }
+        .staff-directory .staff-list.mobile ol li .user-email a {
+          position: absolute;
+          top: 0;
+          font-size: 0;
+          height: 40px;
+          width: 40px; }
+  .staff-directory .staff-list.mobile.template-3 .all-info .user-profile-pic, .staff-directory .staff-list.mobile.template-4 .all-info .user-profile-pic, .staff-directory .staff-list.mobile.template-5 .all-info .user-profile-pic {
+    border-radius: 0; }
+    .staff-directory .staff-list.mobile.template-3 .all-info .user-profile-pic img, .staff-directory .staff-list.mobile.template-4 .all-info .user-profile-pic img, .staff-directory .staff-list.mobile.template-5 .all-info .user-profile-pic img {
+      border-radius: 0; }
+
+/*# sourceMappingURL=../../../maps/features/staffdirectory/css/public-staff-pack.css.map */

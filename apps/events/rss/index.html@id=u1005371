@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<?xml-stylesheet title="XSL_formatting" type="text/xsl" href="/apps/shared/rss.xsl"?>
+<rss version="2.0">
+	<channel>
+		<title>Norwin Middle School - Events</title>
+		<link>//middleschool.norwinsd.org/apps/events/?id=u1005371&amp;y=2026&amp;m=09</link>
+		<description>Events</description>
+		<language>en-us</language>
+		<generator>Edlio CMS</generator>
+   </channel>
+</rss>

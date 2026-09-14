@@ -1,0 +1,306 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i,700,700i,800,800i");
+.edlio.public *,
+.edlio.public *:before,
+.edlio.public *:after {
+  box-sizing: border-box; }
+
+.edlio.public .hidden, .edlio.public.sticky-widget.signup-form label {
+  display: none;
+  visibility: hidden;
+  opacity: 0; }
+
+.edlio.public.sticky-widget {
+  position: relative;
+  z-index: 998;
+  max-width: 320px;
+  border-radius: 1em;
+  font-size: 1em;
+  color: #363636; }
+  .edlio.public.sticky-widget > .bar {
+    display: none; }
+  .edlio.public.sticky-widget > .content {
+    min-width: 100%;
+    width: 100%;
+    max-width: 100%;
+    padding: 24px;
+    background: #fff;
+    border-radius: 1.618rem;
+    box-shadow: inset 0 0 0 2px #787878; }
+  .edlio.public.sticky-widget h1,
+  .edlio.public.sticky-widget h2,
+  .edlio.public.sticky-widget h3,
+  .edlio.public.sticky-widget h4,
+  .edlio.public.sticky-widget h5,
+  .edlio.public.sticky-widget h6 {
+    font-size: 1rem;
+    margin: 0 0 1rem 0; }
+  .edlio.public.sticky-widget h1 {
+    font-size: 1.618rem; }
+  .edlio.public.sticky-widget h2 {
+    font-size: 1.382rem; }
+  .edlio.public.sticky-widget button {
+    border: none;
+    cursor: pointer; }
+  .edlio.public.sticky-widget .notification {
+    width: 100%;
+    margin-bottom: .618rem;
+    background: #FFDDDB;
+    font-size: 0.7rem;
+    font-weight: bold;
+    line-height: 1.618rem;
+    border: 1px solid red;
+    box-shadow: none; }
+  .edlio.public.sticky-widget .notification ~ .form-label {
+    font-weight: bold; }
+  .edlio.public.sticky-widget .field.error input {
+    box-shadow: inset 0 0 0 2px #ed545a; }
+  .edlio.public.sticky-widget label {
+    display: block; }
+  .edlio.public.sticky-widget input {
+    height: 2.382rem;
+    width: 100%;
+    margin-bottom: .618rem;
+    padding: 0 .8rem;
+    font-size: 1rem;
+    line-height: 2.382rem;
+    border: none;
+    outline: none;
+    box-shadow: inset 0 0 0 2px rgba(120, 120, 120, 0.236); }
+  .edlio.public.sticky-widget .button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 2.382rem;
+    margin-bottom: .618rem;
+    padding: 0 .8rem;
+    background: #5c5c5c;
+    border-radius: .236em;
+    font-size: 1rem;
+    line-height: 2.382rem;
+    color: #fff;
+    text-align: center;
+    text-decoration: none; }
+    .edlio.public.sticky-widget .button:hover {
+      background: #707070; }
+    .edlio.public.sticky-widget .button:active {
+      background: #4c4c4c; }
+    .edlio.public.sticky-widget .button.disabled {
+      background: silver;
+      pointer-events: none;
+      cursor: default; }
+  .edlio.public.sticky-widget.simple-link.custom-style { }
+    .edlio.public.sticky-widget.simple-link.custom-style .content {
+      background: var(--backgroundColor);
+      box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
+      border: unset;
+      border-radius: 10px;
+      padding: 9.6px 20.8px;
+      text-align: center; }
+      @media screen and (min-width: 32rem) {
+        .edlio.public.sticky-widget.simple-link.custom-style .content {
+          padding: var(--padding); } }
+      .edlio.public.sticky-widget.simple-link.custom-style .content a {
+        color: var(--fontColor);
+        font-size: 1em; }
+        @media screen and (min-width: 32rem) {
+          .edlio.public.sticky-widget.simple-link.custom-style .content a {
+            font-size: var(--fontSize); } }
+    .edlio.public.sticky-widget.simple-link.custom-style .expand {
+      background: var(--backgroundColor) !important;
+      box-shadow: 1px 1px 18px 1px rgba(0, 0, 0, 0.25) !important; }
+      .edlio.public.sticky-widget.simple-link.custom-style .expand svg {
+        fill: var(--fontColor) !important; }
+  .edlio.public.sticky-widget.simple-link > .content {
+    box-shadow: inset 0 0 0 2px #c8c8c8; }
+  .edlio.public.sticky-widget.simple-link a {
+    font-size: 1.382em;
+    font-weight: bold;
+    color: #363636;
+    text-decoration: none; }
+  .edlio.public.sticky-widget.signup-form.custom-style .content {
+    background: var(--backgroundColor);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    border: unset;
+    padding: 1em; }
+    .edlio.public.sticky-widget.signup-form.custom-style .content .header {
+      border: unset;
+      color: var(--titleFontColor);
+      text-align: center;
+      font-size: 1.3em;
+      margin-bottom: unset; }
+  .edlio.public.sticky-widget.signup-form.custom-style .field > input {
+    border-bottom: var(--fieldBorder);
+    box-shadow: unset; }
+  .edlio.public.sticky-widget.signup-form.custom-style .button {
+    background: var(--buttonBackground);
+    color: var(--buttonFontColor);
+    font-weight: bold;
+    margin-top: 0.85em;
+    border-radius: 10px; }
+  .edlio.public.sticky-widget.signup-form.custom-style .expand {
+    background: var(--backgroundColor) !important;
+    box-shadow: 1px 1px 18px 1px rgba(0, 0, 0, 0.25) !important; }
+    .edlio.public.sticky-widget.signup-form.custom-style .expand svg {
+      fill: var(--titleFontColor) !important; }
+  .edlio.public.sticky-widget.signup-form.custom-style .success-notice {
+    background: var(--backgroundColor) !important;
+    color: var(--titleFontColor) !important; }
+  .edlio.public.sticky-widget.signup-form > .content {
+    padding-top: 0;
+    padding-right: 0;
+    padding-left: 0; }
+    .edlio.public.sticky-widget.signup-form > .content .field {
+      position: relative; }
+    .edlio.public.sticky-widget.signup-form > .content .form-input.required:focus ~ .form-label,
+    .edlio.public.sticky-widget.signup-form > .content .form-input.valid ~ .form-label,
+    .edlio.public.sticky-widget.signup-form > .content .form-input.non-required:focus ~ .form-label {
+      top: 0.6rem;
+      left: 7px;
+      font-size: 10px;
+      font-weight: bold; }
+    .edlio.public.sticky-widget.signup-form > .content .form-input {
+      font-size: 0.9rem;
+      padding-top: 1rem; }
+    .edlio.public.sticky-widget.signup-form > .content .form-input:focus {
+      border: 1px solid blue; }
+    .edlio.public.sticky-widget.signup-form > .content .form-label {
+      position: absolute;
+      top: 0.9rem;
+      left: 0;
+      transition: .5s;
+      font-size: 14px;
+      padding-left: 6px; }
+  .edlio.public.sticky-widget.signup-form .header {
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(120, 120, 120, 0.236);
+    font-size: 1.618em;
+    font-weight: bold;
+    color: #363636; }
+  .edlio.public.sticky-widget.signup-form .form {
+    position: relative; }
+  .edlio.public.sticky-widget.signup-form .form-label {
+    display: inline;
+    visibility: inherit;
+    opacity: inherit; }
+  .edlio.public.sticky-widget.signup-form .success-notice {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 16px;
+    background: #fff; }
+    .edlio.public.sticky-widget.signup-form .success-notice .icon {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 3.82em;
+      width: 3.82em;
+      margin-bottom: 1em;
+      background: #3da36b;
+      border-radius: 50%; }
+      .edlio.public.sticky-widget.signup-form .success-notice .icon svg {
+        height: 2.382em;
+        width: 2.382em;
+        fill: #fff; }
+    .edlio.public.sticky-widget.signup-form .success-notice .message {
+      flex: 0 0 auto;
+      font-size: 1em;
+      text-align: center; }
+  .edlio.public.sticky-widget.collapsible {
+    padding: 9px 16px 0 0; }
+    .edlio.public.sticky-widget.collapsible > .bar {
+      display: block; }
+      .edlio.public.sticky-widget.collapsible > .bar .icon {
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%; }
+        .edlio.public.sticky-widget.collapsible > .bar .icon svg {
+          height: 100%;
+          width: 100%; }
+        .edlio.public.sticky-widget.collapsible > .bar .icon.expand {
+          display: none;
+          height: 240px;
+          width: 240px;
+          padding: 50px;
+          background: #fff;
+          box-shadow: inset 0 0 0 10px silver, 10px 10px 38px 0 rgba(0, 0, 0, 0.382); }
+          .edlio.public.sticky-widget.collapsible > .bar .icon.expand svg {
+            display: none;
+            fill: #363636; }
+        .edlio.public.sticky-widget.collapsible > .bar .icon.minimize {
+          position: absolute;
+          top: -7px;
+          right: 0;
+          display: flex;
+          height: 44px;
+          width: 44px;
+          padding: 6px;
+          background: none; }
+          .edlio.public.sticky-widget.collapsible > .bar .icon.minimize svg {
+            fill: #767676;
+            background: #fff;
+            box-shadow: inset 3px -3px 0px -2px #767676;
+            border-radius: 2em;
+            height: 24px;
+            width: 24px; }
+    .edlio.public.sticky-widget.collapsible > .content {
+      box-shadow: inset 0 0 0 2px #c8c8c8;
+      min-width: 100%;
+      width: 100%;
+      padding: 24px;
+      max-width: 100%;
+      padding: 24px;
+      background: #fff;
+      border-radius: 1.618rem;
+      border-right: 2px solid #787878;
+      border-bottom: 2px solid #787878;
+      border-left: 2px solid #787878; }
+  .edlio.public.sticky-widget.minimized {
+    padding: 0;
+    transform: scale(0.2); }
+    .edlio.public.sticky-widget.minimized > .bar {
+      height: auto;
+      background: transparent; }
+      .edlio.public.sticky-widget.minimized > .bar .icon.minimize {
+        display: none; }
+      .edlio.public.sticky-widget.minimized > .bar .icon.expand {
+        display: flex; }
+    .edlio.public.sticky-widget.minimized > .content {
+      display: none; }
+    .edlio.public.sticky-widget.minimized.right {
+      right: 0 !important; }
+    .edlio.public.sticky-widget.minimized.left {
+      left: 0 !important; }
+  .edlio.public.sticky-widget.right .expand.icon svg.left {
+    display: block; }
+  .edlio.public.sticky-widget.right.top {
+    transform-origin: right top; }
+  .edlio.public.sticky-widget.right.bottom {
+    transform-origin: right bottom; }
+  .edlio.public.sticky-widget.left .expand.icon svg.right {
+    display: block; }
+  .edlio.public.sticky-widget.left.top {
+    transform-origin: left top; }
+  .edlio.public.sticky-widget.left.bottom {
+    transform-origin: left bottom; }
+  .edlio.public.sticky-widget.transition-in {
+    transition: all 0.3s cubic-bezier(0.44, 0.01, 0.37, 0.99);
+    transform: scale(1); }
+  .edlio.public.sticky-widget.transition-out {
+    transition: all 0.3s cubic-bezier(0.44, 0.01, 0.37, 0.99);
+    transform: scale(0.2); }
+    .edlio.public.sticky-widget.transition-out.right {
+      right: 0 !important; }
+    .edlio.public.sticky-widget.transition-out.left {
+      left: 0 !important; }
+
+/*# sourceMappingURL=../../../../maps/features/stickybins/css/public/main-pack.css.map */
