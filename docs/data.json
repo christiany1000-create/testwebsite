@@ -1,7 +1,16 @@
 {
-  "updated_at": null,
+  "updated_at": "2026-11-05T23:04:53+00:00",
   "required_checks": 3,
-  "sources": [],
+  "sources": [
+    {
+      "name": "XCT.live",
+      "url": "https://xct.live/",
+      "ok": false,
+      "titles": 0,
+      "error": "Attempt 3 failed: found 0 titles, expected at least 200. Check the selector.",
+      "checked_at": "2026-11-05T23:04:53+00:00"
+    }
+  ],
   "confirmed": [],
   "pending": []
 }
