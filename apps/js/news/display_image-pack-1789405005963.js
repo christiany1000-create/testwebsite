@@ -1,1 +1,0 @@
-(function(a){a(function(){a(".link-to-bigger-image").magnificPopup({type:"image",closeOnContentClick:true,closeBtnInside:false,mainClass:"mfp-no-margins mfp-with-zoom",image:{verticalFit:true},zoom:{enabled:true,duration:300}})})})(jQuery);
