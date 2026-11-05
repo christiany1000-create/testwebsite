@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-11-05T23:17:38+00:00",
+  "updated_at": "2026-11-05T23:27:29+00:00",
   "required_checks": 3,
   "sources": [
     {
       "name": "XCT.live",
-      "url": "https://xct.livee/",
+      "url": "https://xct.live/disc2digital",
       "ok": false,
       "titles": 0,
-      "error": "Attempt 3 failed: HTTPSConnectionPool(host='xct.livee', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='xct.livee', port=443): Failed to resolve 'xct.livee' ([Errno -2] Name or service not known)\"))",
-      "checked_at": "2026-11-05T23:17:38+00:00"
+      "error": "Attempt 3 failed: found 0 titles, expected at least 200. Check the selector.",
+      "checked_at": "2026-11-05T23:27:29+00:00"
     }
   ],
   "confirmed": [],
