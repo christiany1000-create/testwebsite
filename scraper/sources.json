@@ -1,7 +1,7 @@
 [
   {
     "name": "XCT.live",
-    "url": "https://xct.livee/",
+    "url": "https://xct.live/disc2digital",
     "selector": ".game-title",
     "min_titles": 200,
     "enabled": true,
