@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Disc to Digital, checked</title>
+  <meta name="description" content="Xbox games that work with Disc to Digital, verified across repeated checks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0c120f;
+      --panel: #121b16;
+      --rule: #213029;
+      --rule-strong: #33463c;
+      --text: #e9efea;
+      --muted: #8c9d93;
+      --verified: #86d95f;
+      --pending: #e2aa4f;
+      --bad: #e1826e;
+      --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+      --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    [hidden] { display: none !important; }
+    * { box-sizing: border-box; }
+    html { background: var(--ink); color-scheme: dark; }
+    body {
+      margin: 0;
+      font: 400 16px/1.55 var(--body);
+      color: var(--text);
+      background: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+    :focus-visible { outline: 2px solid var(--verified); outline-offset: 3px; }
+
+    .page { max-width: 1040px; margin: 0 auto; padding: 64px 28px 80px; }
+
+    /* Masthead */
+    .masthead { padding-bottom: 36px; border-bottom: 1px solid var(--rule); }
+    .title {
+      font: 700 clamp(3rem, 8vw, 5.6rem)/0.9 var(--display);
+      letter-spacing: -0.01em;
+      margin: 0 0 24px;
+      max-width: 12ch;
+    }
+    .lede { max-width: 56ch; margin: 0 0 28px; color: var(--muted); font-size: 1.08rem; }
+    .summary { margin: 0 0 16px; font-size: 1.2rem; }
+    .summary strong { font: 700 1.45em/1 var(--display); color: var(--text); letter-spacing: 0.01em; }
+
+    .health {
+      display: flex; flex-wrap: wrap; gap: 8px 24px;
+      margin: 0; padding: 0; list-style: none;
+      color: var(--muted); font-size: 0.93rem;
+    }
+    .source { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); }
+    .dot.ok { background: var(--verified); }
+    .dot.bad { background: var(--bad); }
+    .source-note { opacity: 0.8; }
+
+    /* Controls */
+    .controls {
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      align-items: flex-end; gap: 16px 24px; margin-top: 28px;
+    }
+    .tabs { display: flex; gap: 28px; }
+    .tab {
+      appearance: none; background: none; border: 0; cursor: pointer;
+      padding: 6px 0 12px; font: 600 1.05rem var(--body); color: var(--muted);
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: var(--text); }
+    .tab[aria-pressed="true"] { color: var(--text); border-bottom-color: var(--verified); }
+    .count { margin-left: 6px; font-weight: 500; color: var(--muted); }
+
+    .tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    #search {
+      width: 260px; padding: 9px 2px; border: 0; border-radius: 0;
+      border-bottom: 1px solid var(--rule-strong);
+      background: transparent; color: var(--text); font: inherit;
+    }
+    #search::placeholder { color: var(--muted); }
+    #search:focus { outline: none; border-bottom-color: var(--verified); }
+    #sort {
+      padding: 9px 12px; border: 1px solid var(--rule-strong); border-radius: 8px;
+      background: var(--panel); color: var(--text); font: inherit; cursor: pointer;
+    }
+
+    /* Ledger */
+    .notice {
+      margin-top: 24px; padding: 14px 18px;
+      border-left: 3px solid var(--pending);
+      background: rgba(226, 170, 79, 0.08);
+      color: #f0d6a2; border-radius: 0 10px 10px 0;
+    }
+    .ledger { width: 100%; margin-top: 12px; border-collapse: collapse; }
+    .ledger th {
+      padding: 14px; text-align: left; font-weight: 500; font-size: 0.88rem;
+      color: var(--muted); border-bottom: 1px solid var(--rule-strong);
+    }
+    .ledger td {
+      padding: 16px 14px; vertical-align: middle;
+      border-bottom: 1px solid var(--rule);
+    }
+    .ledger th:first-child, .ledger td:first-child { padding-left: 0; }
+    .ledger tbody tr { transition: background-color 0.15s ease; }
+    .ledger tbody tr:hover { background: var(--panel); }
+
+    .game { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .mono {
+      flex: none; width: 36px; height: 36px; border-radius: 50%;
+      display: grid; place-items: center;
+      font: 700 0.9rem/1 var(--display); letter-spacing: 0.03em;
+    }
+    .game-title { font-weight: 600; font-size: 1.02rem; overflow-wrap: anywhere; }
+
+    .checks { display: flex; align-items: center; white-space: nowrap; }
+    .discs { display: inline-flex; gap: 6px; }
+    .disc { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--rule-strong); }
+    .disc.on {
+      background: var(--verified); border-color: var(--verified);
+      box-shadow: inset 0 0 0 3px var(--ink);
+    }
+    .ledger tbody tr:hover .disc.on { box-shadow: inset 0 0 0 3px var(--panel); }
+    .checks-text { margin-left: 12px; color: var(--muted); font-size: 0.92rem; }
+
+    .sources, .date { color: var(--muted); font-size: 0.93rem; }
+    .date { white-space: nowrap; }
+
+    .empty {
+      margin: 0; padding: 64px 0; max-width: 22ch;
+      font: 600 clamp(1.5rem, 3vw, 2rem)/1.15 var(--display);
+      color: var(--muted);
+    }
+
+    footer {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px;
+      margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--rule);
+      color: var(--muted); font-size: 0.9rem;
+    }
+    footer p { margin: 0; max-width: 60ch; }
+
+    /* Small screens: each ledger row becomes a stacked entry */
+    @media (max-width: 720px) {
+      .page { padding: 40px 18px 60px; }
+      .tools, #search { width: 100%; }
+      #search { flex: 1 1 100%; }
+
+      .ledger thead { display: none; }
+      .ledger, .ledger tbody, .ledger tr, .ledger td { display: block; width: 100%; }
+      .ledger tr { padding: 16px 0; border-bottom: 1px solid var(--rule); }
+      .ledger td {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 16px; padding: 5px 0; border: 0;
+      }
+      .ledger td:first-child { padding-bottom: 10px; }
+      .ledger td[data-label]::before {
+        content: attr(data-label); color: var(--muted); font-size: 0.88rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <h1 class="title">Disc to Digital, checked.</h1>
+      <p class="lede">
+        Xbox games that work with Disc to Digital, gathered from community sources.
+        A game only moves to the confirmed list after it shows up on several separate
+        days, so a single bad scrape can't add it.
+      </p>
+      <p class="summary" id="summary">Loading…</p>
+      <ul class="health" id="health"></ul>
+    </header>
+
+    <section class="controls" aria-label="Filter and sort">
+      <div class="tabs">
+        <button class="tab" type="button" data-tab="confirmed" aria-pressed="true">
+          Confirmed<span class="count" id="n-confirmed"></span>
+        </button>
+        <button class="tab" type="button" data-tab="pending" aria-pressed="false">
+          Pending<span class="count" id="n-pending"></span>
+        </button>
+      </div>
+      <div class="tools">
+        <input id="search" type="search" placeholder="Find a game" aria-label="Find a game" autocomplete="off">
+        <select id="sort" aria-label="Sort games">
+          <option value="az">Title A–Z</option>
+          <option value="newest">Newest first</option>
+          <option value="checks">Most checks</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="notice" id="notice" role="alert" hidden></div>
+
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th scope="col">Game</th>
+          <th scope="col">Checks</th>
+          <th scope="col">Source</th>
+          <th scope="col" id="date-head">Confirmed</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="empty" id="empty" hidden></p>
+
+    <footer>
+      <p>Unofficial. This list comes from community sources and can be wrong or out of date. Microsoft decides what is actually eligible.</p>
+      <p id="updated"></p>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      const state = { data: null, tab: "confirmed", query: "", sort: "az" };
+      const $ = (id) => document.getElementById(id);
+
+      const ui = {
+        summary: $("summary"),
+        health: $("health"),
+        notice: $("notice"),
+        rows: $("rows"),
+        empty: $("empty"),
+        search: $("search"),
+        sort: $("sort"),
+        updated: $("updated"),
+        dateHead: $("date-head"),
+        nConfirmed: $("n-confirmed"),
+        nPending: $("n-pending"),
+        tabs: [...document.querySelectorAll(".tab")],
+      };
+
+      const dayFormat = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
+      // Noon avoids timezone shifts when a bare YYYY-MM-DD is parsed.
+      const fmtDay = (ymd) => (ymd ? dayFormat.format(new Date(`${ymd}T12:00:00`)) : "");
+
+      const timeAgo = (iso) => {
+        const secs = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+        for (const [label, size] of [["day", 86400], ["hour", 3600], ["minute", 60]]) {
+          const n = Math.floor(secs / size);
+          if (n >= 1) return `${n} ${label}${n === 1 ? "" : "s"} ago`;
+        }
+        return "just now";
+      };
+
+      const el = (tag, className, text) => {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      };
+
+      const initials = (title) =>
+        (title.match(/\p{L}[\p{L}\p{N}']*/gu) || [])
+          .slice(0, 2)
+          .map((word) => word[0].toUpperCase())
+          .join("") || "?";
+
+      // Stable hue per title, kept in the green-to-teal range of the palette.
+      const hueFor = (text) => {
+        let h = 0;
+        for (const ch of text) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+        return 80 + (h % 90);
+      };
+
+      const SORTS = {
+        az: (a, b) => a.title.localeCompare(b.title),
+        newest: (a, b) =>
+          (b.confirmed_on || b.last_seen).localeCompare(a.confirmed_on || a.last_seen) ||
+          a.title.localeCompare(b.title),
+        checks: (a, b) => b.checks - a.checks || a.title.localeCompare(b.title),
+      };
+
+      async function load() {
+        try {
+          const res = await fetch("data.json", { cache: "no-store" });
+          if (!res.ok) throw new Error(`server returned ${res.status}`);
+          state.data = await res.json();
+        } catch (err) {
+          state.data = { updated_at: null, required_checks: 3, sources: [], confirmed: [], pending: [] };
+          ui.notice.hidden = false;
+          ui.notice.textContent =
+            `Couldn't load data.json (${err.message}). Run the scraper to create it. ` +
+            "If you opened this file directly, serve the folder instead with: python -m http.server";
+        }
+        renderMasthead();
+        render();
+      }
+
+      function renderMasthead() {
+        const d = state.data;
+        const sources = d.sources || [];
+
+        ui.nConfirmed.textContent = d.confirmed.length;
+        ui.nPending.textContent = d.pending.length;
+
+        if (d.updated_at) {
+          const strong = (n) => el("strong", null, String(n));
+          ui.summary.replaceChildren(
+            strong(d.confirmed.length), " confirmed and ",
+            strong(d.pending.length), " still being checked. Last run ",
+            timeAgo(d.updated_at), "."
+          );
+          ui.updated.textContent = `Last updated ${new Date(d.updated_at).toLocaleString()}`;
+        } else {
+          ui.summary.textContent = "Nothing collected yet.";
+          ui.updated.textContent = "";
+        }
+
+        ui.health.replaceChildren(
+          ...sources.map((s) => {
+            const li = el("li", "source");
+            li.title = s.ok ? s.url : `${s.url}\n${s.error || "Unknown error"}`;
+            li.append(
+              el("span", `dot ${s.ok ? "ok" : "bad"}`),
+              el("span", null, s.name),
+              el("span", "source-note", s.ok ? `${s.titles} titles` : "unavailable")
+            );
+            return li;
+          })
+        );
+      }
+
+      function render() {
+        const d = state.data;
+        const isConfirmed = state.tab === "confirmed";
+        const required = d.required_checks || 3;
+        const q = state.query.trim().toLowerCase();
+
+        const list = isConfirmed ? d.confirmed : d.pending;
+        const rows = list
+          .filter((g) => !q || g.title.toLowerCase().includes(q))
+          .sort(SORTS[state.sort]);
+
+        ui.dateHead.textContent = isConfirmed ? "Confirmed" : "Last seen";
+        ui.rows.replaceChildren(...rows.map((g) => buildRow(g, isConfirmed, required)));
+
+        ui.empty.hidden = rows.length > 0;
+        ui.empty.textContent = emptyMessage(isConfirmed, q, required);
+      }
+
+      function emptyMessage(isConfirmed, q, required) {
+        if (q) return `Nothing matches “${state.query.trim()}”.`;
+        if (!state.data.updated_at) return "No data yet. Run the scraper, then reload this page.";
+        if (isConfirmed) {
+          return `No games are confirmed yet. A game is confirmed after it appears on ${required} different days.`;
+        }
+        return "Nothing is waiting for more checks.";
+      }
+
+      function buildRow(g, isConfirmed, required) {
+        const hue = hueFor(g.title);
+
+        const mono = el("span", "mono", initials(g.title));
+        mono.style.background = `hsl(${hue} 34% 22%)`;
+        mono.style.color = `hsl(${hue} 60% 80%)`;
+        const game = el("div", "game");
+        game.append(mono, el("span", "game-title", g.title));
+
+        const filled = Math.min(g.checks, required);
+        const discs = el("span", "discs");
+        discs.setAttribute("aria-hidden", "true");
+        for (let i = 0; i < required; i++) {
+          discs.append(el("span", i < filled ? "disc on" : "disc"));
+        }
+        const checks = el("div", "checks");
+        checks.append(discs, el("span", "checks-text", `${filled} of ${required} days`));
+
+        const sources = el("span", "sources", g.sources.length ? g.sources.join(", ") : "—");
+        const date = el("span", "date", fmtDay(isConfirmed ? g.confirmed_on : g.last_seen));
+
+        const cell = (node, label) => {
+          const td = document.createElement("td");
+          if (label) td.dataset.label = label;
+          td.append(node);
+          return td;
+        };
+
+        const tr = document.createElement("tr");
+        tr.append(
+          cell(game),
+          cell(checks, "Checks"),
+          cell(sources, "Source"),
+          cell(date, isConfirmed ? "Confirmed" : "Last seen")
+        );
+        return tr;
+      }
+
+      ui.tabs.forEach((btn) =>
+        btn.addEventListener("click", () => {
+          state.tab = btn.dataset.tab;
+          ui.tabs.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+          render();
+        })
+      );
+
+      ui.search.addEventListener("input", () => {
+        state.query = ui.search.value;
+        render();
+      });
+
+      ui.sort.addEventListener("change", () => {
+        state.sort = ui.sort.value;
+        render();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
+        if (e.key === "/" && !typing) {
+          e.preventDefault();
+          ui.search.focus();
+        }
+      });
+
+      load();
+    })();
+  </script>
+</body>
+</html>
