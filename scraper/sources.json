@@ -1,7 +1,7 @@
 [
   {
     "name": "XCT.live",
-    "url": "https://xct.live/",
+    "url": "https://xct.livee/",
     "selector": ".game-title",
     "min_titles": 200,
     "enabled": true,
