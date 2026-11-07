@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-07T04:13:11+00:00",
+  "updated_at": "2026-11-07T12:18:33+00:00",
   "required_checks": 3,
   "sources": [
     {
@@ -8,7 +8,7 @@
       "ok": false,
       "titles": 0,
       "error": "Attempt 3 failed: found 0 titles, expected at least 200. Check the selector.",
-      "checked_at": "2026-11-07T04:13:11+00:00"
+      "checked_at": "2026-11-07T12:18:33+00:00"
     }
   ],
   "confirmed": [],
