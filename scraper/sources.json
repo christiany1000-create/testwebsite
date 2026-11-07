@@ -4,7 +4,7 @@
     "url": "https://xct.live/disc2digital",
     "selector": ".game-title",
     "min_titles": 200,
-    "enabled": true,
+    "enabled": false,
     "notes": "Replace url with the exact Disc to Digital list page. Right-click a game title, choose Inspect, and copy a selector that matches only the title text. Check the site's terms before scraping it."
   }
 ]
